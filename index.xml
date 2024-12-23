@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Tech&#39;n&#39;Take</title>
+<link>https://tech.ycwu.space/</link>
+<atom:link href="https://tech.ycwu.space/index.xml" rel="self" type="application/rss+xml"/>
+<description>This is Jerry Wu&#39;s Tech&#39;n&#39;take.</description>
+<generator>quarto-1.6.39</generator>
+<lastBuildDate>Sun, 22 Dec 2024 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Configuring Resend with django-allauth</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/django-allauth-resend/20241223.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This post demonstrates how to configure <a href="https://resend.com/">Resend</a> to work seamlessly with <a href="https://docs.allauth.org/en/latest/">django-allauth</a>. If you’re looking to use <code>Resend</code> for sending emails via <code>Django</code>, refer to the <a href="https://github.com/resend/resend-django-smtp-example">repo</a> provided by <code>Resend</code>.</p>
+<section id="preparations-for-django" class="level2">
+<h2 class="anchored" data-anchor-id="preparations-for-django">Preparations for Django</h2>
+<section id="create-a-virtual-environment" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-virtual-environment">Create a Virtual Environment</h3>
+<p>Start by creating a virtual environment using <a href="https://github.com/astral-sh/uv">uv</a> and activating it:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">uv</span> venv venv</span>
+<span id="cb1-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">source</span> venv/bin/activate</span></code></pre></div>
+</section>
+<section id="install-required-packages" class="level3">
+<h3 class="anchored" data-anchor-id="install-required-packages">Install Required Packages</h3>
+<p>Create a <code>requirements.txt</code> file and add the necessary dependencies:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">django</span>
+<span id="cb2-2">environs[django]</span>
+<span id="cb2-3">django<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>allauth</span></code></pre></div>
+<p>Install the packages via <code>uv</code>:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">uv</span> pip install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-r</span> requirements.txt</span></code></pre></div>
+</section>
+<section id="set-up-a-django-project" class="level3">
+<h3 class="anchored" data-anchor-id="set-up-a-django-project">Set Up a Django Project</h3>
+<p>Use the <code>django-admin</code> command to create a project named <code>core</code>:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">django-admin</span> startproject core .</span></code></pre></div>
+</section>
+<section id="configure-environment-variables" class="level3">
+<h3 class="anchored" data-anchor-id="configure-environment-variables">Configure Environment Variables</h3>
+<p>Create a <code>.env</code> file with the following content:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">DEFAULT_FROM_EMAIL<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span></span>
+<span id="cb5-2">RESEND_SMTP_HOST<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>smtp.resend.com</span>
+<span id="cb5-3">RESEND_SMTP_USERNAME<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>resend</span>
+<span id="cb5-4">RESEND_API_KEY<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span></span>
+<span id="cb5-5">RESEND_SMTP_PORT<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">587</span></span>
+<span id="cb5-6">RESEND_USE_TLS<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span></code></pre></div>
+<p>The next sections explain how to obtain <code>DEFAULT_FROM_EMAIL</code> and <code>RESEND_API_KEY</code>.</p>
+<hr>
+</section>
+</section>
+<section id="preparations-for-resend" class="level2">
+<h2 class="anchored" data-anchor-id="preparations-for-resend">Preparations for Resend</h2>
+<section id="verify-your-domain" class="level3">
+<h3 class="anchored" data-anchor-id="verify-your-domain">Verify Your Domain</h3>
+<p>Follow the <a href="https://resend.com/docs/dashboard/domains/introduction">Resend documentation</a> to verify your domain. Once verified, you can send emails using an address like <code>user@send.yourdomain.com</code>.</p>
+<ul>
+<li>You control the prefix before <code>@</code>, as ownership of the domain has been confirmed.<br>
+</li>
+<li>Add your chosen email to <code>DEFAULT_FROM_EMAIL</code> in the <code>.env</code> file.</li>
+</ul>
+</section>
+<section id="obtain-an-api-key" class="level3">
+<h3 class="anchored" data-anchor-id="obtain-an-api-key">Obtain an API Key</h3>
+<p>Generate an API key via the <a href="https://resend.com/api-keys">Resend API Keys page</a> and add it to the <code>RESEND_API_KEY</code> field in your <code>.env</code> file.</p>
+</section>
+</section>
+<section id="django-scaffold" class="level2">
+<h2 class="anchored" data-anchor-id="django-scaffold">Django Scaffold</h2>
+<p>Follow the <a href="https://docs.allauth.org/en/latest/installation/quickstart.html">quick start guide</a> from <code>django-allauth</code> to configure the project with minimal setup.</p>
+<section id="modify-coreurls.py" class="level3">
+<h3 class="anchored" data-anchor-id="modify-coreurls.py">Modify <code>core/urls.py</code></h3>
+<p>Include <code>django-allauth</code> routes and define a homepage route:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># core/urls.py</span></span>
+<span id="cb6-2"></span>
+<span id="cb6-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> django.contrib <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> admin</span>
+<span id="cb6-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> django.urls <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> path, include</span>
+<span id="cb6-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> . <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> views</span>
+<span id="cb6-6"></span>
+<span id="cb6-7">urlpatterns <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb6-8">    path(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"admin/"</span>, admin.site.urls),</span>
+<span id="cb6-9">    path(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"accounts/"</span>, include(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"allauth.urls"</span>)),  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># added</span></span>
+<span id="cb6-10">    path(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span>, views.index, name<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"home"</span>),  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># added</span></span>
+<span id="cb6-11">]</span></code></pre></div>
+</section>
+<section id="add-coreviews.py" class="level3">
+<h3 class="anchored" data-anchor-id="add-coreviews.py">Add <code>core/views.py</code></h3>
+<p>Define the homepage with a link to the signup URL provided by <code>django-allauth</code>:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> django.http <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> HttpResponse</span>
+<span id="cb7-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> django.urls <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> reverse</span>
+<span id="cb7-3"></span>
+<span id="cb7-4"></span>
+<span id="cb7-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> index(request):</span>
+<span id="cb7-6">    signup_url <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> reverse(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"account_signup"</span>)</span>
+<span id="cb7-7">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> HttpResponse(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f'&lt;a href="</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>signup_url<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"&gt;Hello, please Sign Up here!&lt;/a&gt;'</span>)</span></code></pre></div>
+</section>
+<section id="modify-coresettings.py" class="level3">
+<h3 class="anchored" data-anchor-id="modify-coresettings.py">Modify <code>core/settings.py</code></h3>
+<section id="read-environment-variables" class="level4">
+<h4 class="anchored" data-anchor-id="read-environment-variables">Read Environment Variables</h4>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># core/settings.py</span></span>
+<span id="cb8-2"></span>
+<span id="cb8-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> environs <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Env</span>
+<span id="cb8-4"></span>
+<span id="cb8-5">env <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Env()</span>
+<span id="cb8-6">env.read_env()</span></code></pre></div>
+</section>
+<section id="update-installed_apps" class="level4">
+<h4 class="anchored" data-anchor-id="update-installed_apps">Update INSTALLED_APPS</h4>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># core/settings.py</span></span>
+<span id="cb9-2"></span>
+<span id="cb9-3">INSTALLED_APPS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb9-4">    ...</span>
+<span id="cb9-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"allauth"</span>,  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># added</span></span>
+<span id="cb9-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"allauth.account"</span>,  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># added</span></span>
+<span id="cb9-7">]</span></code></pre></div>
+</section>
+<section id="update-middleware" class="level4">
+<h4 class="anchored" data-anchor-id="update-middleware">Update MIDDLEWARE</h4>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># core/settings.py</span></span>
+<span id="cb10-2"></span>
+<span id="cb10-3">MIDDLEWARE <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb10-4">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.middleware.security.SecurityMiddleware"</span>,</span>
+<span id="cb10-5">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.contrib.sessions.middleware.SessionMiddleware"</span>,</span>
+<span id="cb10-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.middleware.common.CommonMiddleware"</span>,</span>
+<span id="cb10-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.middleware.csrf.CsrfViewMiddleware"</span>,</span>
+<span id="cb10-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.contrib.auth.middleware.AuthenticationMiddleware"</span>,</span>
+<span id="cb10-9">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.contrib.messages.middleware.MessageMiddleware"</span>,</span>
+<span id="cb10-10">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"allauth.account.middleware.AccountMiddleware"</span>,  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># added</span></span>
+<span id="cb10-11">    ...</span>
+<span id="cb10-12">]</span></code></pre></div>
+</section>
+<section id="configure-email-backend-and-authentication-backends" class="level4">
+<h4 class="anchored" data-anchor-id="configure-email-backend-and-authentication-backends">Configure Email Backend and Authentication Backends</h4>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># core/settings.py</span></span>
+<span id="cb11-2"></span>
+<span id="cb11-3">EMAIL_BACKEND <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.core.mail.backends.smtp.EmailBackend"</span></span>
+<span id="cb11-4"></span>
+<span id="cb11-5">AUTHENTICATION_BACKENDS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb11-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"django.contrib.auth.backends.ModelBackend"</span>,</span>
+<span id="cb11-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"allauth.account.auth_backends.AuthenticationBackend"</span>,</span>
+<span id="cb11-8">]</span></code></pre></div>
+</section>
+<section id="define-login-and-logout-redirect-urls" class="level4">
+<h4 class="anchored" data-anchor-id="define-login-and-logout-redirect-urls">Define Login and Logout Redirect URLs</h4>
+<p>Here, we define only <code>ACCOUNT_LOGOUT_REDIRECT_URL</code> because <code>django-allauth</code> overwrites <code>LOGOUT_REDIRECT_URL</code>.</p>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">LOGIN_REDIRECT_URL <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"home"</span></span>
+<span id="cb12-2">ACCOUNT_LOGOUT_REDIRECT_URL <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"home"</span></span></code></pre></div>
+</section>
+<section id="optional-preference-settings" class="level4">
+<h4 class="anchored" data-anchor-id="optional-preference-settings">Optional Preference Settings</h4>
+<p>Opinionated configurations for a simplified signup and email-based login:</p>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span></span>
+<span id="cb13-2">ACCOUNT_USERNAME_REQUIRED <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span></span>
+<span id="cb13-3">ACCOUNT_AUTHENTICATION_METHOD <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"email"</span></span>
+<span id="cb13-4">ACCOUNT_EMAIL_REQUIRED <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span>
+<span id="cb13-5">ACCOUNT_UNIQUE_EMAIL <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span></code></pre></div>
+</section>
+<section id="define-resend-variables" class="level4">
+<h4 class="anchored" data-anchor-id="define-resend-variables">Define Resend Variables</h4>
+<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">DEFAULT_FROM_EMAIL <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"DEFAULT_FROM_EMAIL"</span>)</span>
+<span id="cb14-2">RESEND_SMTP_HOST <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_SMTP_HOST"</span>)</span>
+<span id="cb14-3">RESEND_SMTP_USERNAME <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_SMTP_USERNAME"</span>)</span>
+<span id="cb14-4">RESEND_API_KEY <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_API_KEY"</span>)</span>
+<span id="cb14-5">RESEND_SMTP_PORT <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_SMTP_PORT"</span>)</span>
+<span id="cb14-6">RESEND_USE_TLS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> env.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">bool</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_USE_TLS"</span>)</span></code></pre></div>
+</section>
+<section id="map-resend-variables-to-django-email-variables" class="level4">
+<h4 class="anchored" data-anchor-id="map-resend-variables-to-django-email-variables">Map Resend Variables to Django Email Variables</h4>
+<p>Delegate Django email settings to Resend environment variables:</p>
+<div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">EMAIL_HOST <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RESEND_SMTP_HOST</span>
+<span id="cb15-2">EMAIL_HOST_USER <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RESEND_SMTP_USERNAME</span>
+<span id="cb15-3">EMAIL_HOST_PASSWORD <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RESEND_API_KEY</span>
+<span id="cb15-4">EMAIL_PORT <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RESEND_SMTP_PORT</span>
+<span id="cb15-5">EMAIL_USE_TLS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> RESEND_USE_TLS</span></code></pre></div>
+</section>
+</section>
+</section>
+<section id="tryout" class="level2">
+<h2 class="anchored" data-anchor-id="tryout">Tryout</h2>
+<p>Migrate the database and run the development server with the following commands:</p>
+<div class="sourceCode" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python</span> manage.py migrate</span>
+<span id="cb16-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python</span> manage.py runserver</span></code></pre></div>
+<p>Now, go to <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a> and click the sign-up link. You should see the signup page. After submitting the form, you will be redirected to the homepage.</p>
+<p>Next, check your inbox for an email with the subject <code>[127.0.0.1:8000] Please Confirm Your Email Address</code>.</p>
+<p>The email will contain a confirmation link. Click the link, then click the confirmation button, and you’re all set for user registration!</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you encounter issues during configuration, the <a href="https://resend.com/logs">Resend logs</a> can be a helpful resource, as they provide the request body, response body, and status code. <img src="https://tech.ycwu.space/posts/django-allauth-resend/resend_logs.png" class="img-fluid" alt="resend_logs.png"></p>
+</div>
+</div>
+</section>
+<section id="final-words" class="level2">
+<h2 class="anchored" data-anchor-id="final-words">Final Words</h2>
+<p>The configuration is straightforward, and it’s great that <code>Resend</code> offers SMTP services. The modern dashboard operates smoothly, and the well-documented resources make it easy for developers to find needed information. So far, the user experience has been positive, and I look forward to using it in real projects.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>python</category>
+  <category>django</category>
+  <category>resend</category>
+  <guid>https://tech.ycwu.space/posts/django-allauth-resend/20241223.html</guid>
+  <pubDate>Sun, 22 Dec 2024 16:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/django-allauth-resend/resend_logs.png" medium="image" type="image/png" height="55" width="144"/>
+</item>
+</channel>
+</rss>
