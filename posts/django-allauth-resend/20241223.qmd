@@ -1,0 +1,205 @@
+---
+title: "Configuring Resend with django-allauth"
+date: "2024-12-23"
+categories: [python, django, resend]
+image: "resend_logs.png"
+---
+
+This post demonstrates how to configure [Resend](https://resend.com/) to work seamlessly with [django-allauth](https://docs.allauth.org/en/latest/). If you're looking to use `Resend` for sending emails via `Django`, refer to the [repo](https://github.com/resend/resend-django-smtp-example) provided by `Resend`.
+
+## Preparations for Django
+
+### Create a Virtual Environment  
+Start by creating a virtual environment using [uv](https://github.com/astral-sh/uv) and activating it:  
+```bash
+uv venv venv
+source venv/bin/activate
+```
+
+### Install Required Packages  
+Create a `requirements.txt` file and add the necessary dependencies:  
+```python
+django
+environs[django]
+django-allauth
+```  
+Install the packages via `uv`:  
+```bash
+uv pip install -r requirements.txt
+```
+
+### Set Up a Django Project  
+Use the `django-admin` command to create a project named `core`:  
+```bash
+django-admin startproject core .
+```
+
+### Configure Environment Variables  
+Create a `.env` file with the following content:  
+```python
+DEFAULT_FROM_EMAIL=
+RESEND_SMTP_HOST=smtp.resend.com
+RESEND_SMTP_USERNAME=resend
+RESEND_API_KEY=
+RESEND_SMTP_PORT=587
+RESEND_USE_TLS=True
+```  
+The next sections explain how to obtain `DEFAULT_FROM_EMAIL` and `RESEND_API_KEY`.
+
+---
+
+## Preparations for Resend
+
+### Verify Your Domain  
+Follow the [Resend documentation](https://resend.com/docs/dashboard/domains/introduction) to verify your domain. Once verified, you can send emails using an address like `user@send.yourdomain.com`.  
+
+* You control the prefix before `@`, as ownership of the domain has been confirmed.  
+* Add your chosen email to `DEFAULT_FROM_EMAIL` in the `.env` file.
+
+### Obtain an API Key  
+Generate an API key via the [Resend API Keys page](https://resend.com/api-keys) and add it to the `RESEND_API_KEY` field in your `.env` file.
+
+
+## Django Scaffold  
+Follow the [quick start guide](https://docs.allauth.org/en/latest/installation/quickstart.html) from `django-allauth` to configure the project with minimal setup.
+
+### Modify `core/urls.py`  
+Include `django-allauth` routes and define a homepage route:  
+```python
+# core/urls.py
+
+from django.contrib import admin
+from django.urls import path, include
+from . import views
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),  # added
+    path("", views.index, name="home"),  # added
+]
+```
+
+### Add `core/views.py`  
+Define the homepage with a link to the signup URL provided by `django-allauth`:  
+```python
+from django.http import HttpResponse
+from django.urls import reverse
+
+
+def index(request):
+    signup_url = reverse("account_signup")
+    return HttpResponse(f'<a href="{signup_url}">Hello, please Sign Up here!</a>')
+```
+
+### Modify `core/settings.py`  
+
+#### Read Environment Variables 
+```python
+# core/settings.py
+
+from environs import Env
+
+env = Env()
+env.read_env()
+```
+
+#### Update INSTALLED_APPS
+```python
+# core/settings.py
+
+INSTALLED_APPS = [
+    ...
+    "allauth",  # added
+    "allauth.account",  # added
+]
+```
+
+#### Update MIDDLEWARE
+```python
+# core/settings.py
+
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # added
+    ...
+]
+```
+
+#### Configure Email Backend and Authentication Backends
+```python
+# core/settings.py
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+```
+
+#### Define Login and Logout Redirect URLs  
+Here, we define only `ACCOUNT_LOGOUT_REDIRECT_URL` because `django-allauth` overwrites `LOGOUT_REDIRECT_URL`.
+```python
+LOGIN_REDIRECT_URL = "home"
+ACCOUNT_LOGOUT_REDIRECT_URL = "home"
+```
+
+#### Optional Preference Settings  
+Opinionated configurations for a simplified signup and email-based login: 
+```python
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+```
+
+#### Define Resend Variables  
+```python
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+RESEND_SMTP_HOST = env("RESEND_SMTP_HOST")
+RESEND_SMTP_USERNAME = env("RESEND_SMTP_USERNAME")
+RESEND_API_KEY = env("RESEND_API_KEY")
+RESEND_SMTP_PORT = env.int("RESEND_SMTP_PORT")
+RESEND_USE_TLS = env.bool("RESEND_USE_TLS")
+```
+
+#### Map Resend Variables to Django Email Variables  
+Delegate Django email settings to Resend environment variables:
+```python
+EMAIL_HOST = RESEND_SMTP_HOST
+EMAIL_HOST_USER = RESEND_SMTP_USERNAME
+EMAIL_HOST_PASSWORD = RESEND_API_KEY
+EMAIL_PORT = RESEND_SMTP_PORT
+EMAIL_USE_TLS = RESEND_USE_TLS
+```
+
+## Tryout
+Migrate the database and run the development server with the following commands:
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+Now, go to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) and click the sign-up link. You should see the signup page. After submitting the form, you will be redirected to the homepage.
+
+Next, check your inbox for an email with the subject `[127.0.0.1:8000] Please Confirm Your Email Address`.
+
+The email will contain a confirmation link. Click the link, then click the confirmation button, and you're all set for user registration!
+
+::: {.callout-tip}
+If you encounter issues during configuration, the [Resend logs](https://resend.com/logs) can be a helpful resource, as they provide the request body, response body, and status code.
+![resend_logs.png](resend_logs.png)
+::: 
+
+## Final Words
+The configuration is straightforward, and it's great that `Resend` offers SMTP services. The modern dashboard operates smoothly, and the well-documented resources make it easy for developers to find needed information. So far, the user experience has been positive, and I look forward to using it in real projects.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
