@@ -4,47 +4,47 @@
     "href": "index.html",
     "title": "Posts",
     "section": "",
-    "text": "Configuring Resend with django-allauth\n\n\n\n\n\n\npython\n\n\ndjango\n\n\nresend\n\n\n\n\n\n\n\n\n\nDec 23, 2024\n\n\nJerry Wu\n\n\n\n\n\n\nNo matching items"
+    "text": "Exploring Resend SMTP Service with Django\n\n\n\n\n\n\npython\n\n\ndjango\n\n\nresend\n\n\n\n\n\n\n\n\n\nDec 23, 2024\n\n\nJerry Wu\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html",
     "href": "posts/django-allauth-resend/20241223.html",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "",
-    "text": "This post demonstrates how to configure Resend to work seamlessly with django-allauth. If you’re looking to use Resend for sending emails via Django, refer to the repo provided by Resend."
+    "text": "This post demonstrates how to seamlessly integrate Resend with django-allauth. If you’re looking to use Resend for sending emails via Django, refer to the repo provided by Resend."
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-django",
     "href": "posts/django-allauth-resend/20241223.html#preparations-for-django",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "Preparations for Django",
     "text": "Preparations for Django\n\nCreate a Virtual Environment\nStart by creating a virtual environment using uv and activating it:\nuv venv venv\nsource venv/bin/activate\n\n\nInstall Required Packages\nCreate a requirements.txt file and add the necessary dependencies:\ndjango\nenvirons[django]\ndjango-allauth\nInstall the packages via uv:\nuv pip install -r requirements.txt\n\n\nSet Up a Django Project\nUse the django-admin command to create a project named core:\ndjango-admin startproject core .\n\n\nConfigure Environment Variables\nCreate a .env file with the following content:\nDEFAULT_FROM_EMAIL=\nRESEND_SMTP_HOST=smtp.resend.com\nRESEND_SMTP_USERNAME=resend\nRESEND_API_KEY=\nRESEND_SMTP_PORT=587\nRESEND_USE_TLS=True\nThe next sections explain how to obtain DEFAULT_FROM_EMAIL and RESEND_API_KEY."
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
     "href": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "Preparations for Resend",
     "text": "Preparations for Resend\n\nVerify Your Domain\nFollow the Resend documentation to verify your domain. Once verified, you can send emails using an address like user@send.yourdomain.com.\n\nYou control the prefix before @, as ownership of the domain has been confirmed.\n\nAdd your chosen email to DEFAULT_FROM_EMAIL in the .env file.\n\n\n\nObtain an API Key\nGenerate an API key via the Resend API Keys page and add it to the RESEND_API_KEY field in your .env file."
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html#django-scaffold",
     "href": "posts/django-allauth-resend/20241223.html#django-scaffold",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "Django Scaffold",
     "text": "Django Scaffold\nFollow the quick start guide from django-allauth to configure the project with minimal setup.\n\nModify core/urls.py\nInclude django-allauth routes and define a homepage route:\n# core/urls.py\n\nfrom django.contrib import admin\nfrom django.urls import path, include\nfrom . import views\n\nurlpatterns = [\n    path(\"admin/\", admin.site.urls),\n    path(\"accounts/\", include(\"allauth.urls\")),  # added\n    path(\"\", views.index, name=\"home\"),  # added\n]\n\n\nAdd core/views.py\nDefine the homepage with a link to the signup URL provided by django-allauth:\nfrom django.http import HttpResponse\nfrom django.urls import reverse\n\n\ndef index(request):\n    signup_url = reverse(\"account_signup\")\n    return HttpResponse(f'&lt;a href=\"{signup_url}\"&gt;Hello, please Sign Up here!&lt;/a&gt;')\n\n\nModify core/settings.py\n\nRead Environment Variables\n# core/settings.py\n\nfrom environs import Env\n\nenv = Env()\nenv.read_env()\n\n\nUpdate INSTALLED_APPS\n# core/settings.py\n\nINSTALLED_APPS = [\n    ...\n    \"allauth\",  # added\n    \"allauth.account\",  # added\n]\n\n\nUpdate MIDDLEWARE\n# core/settings.py\n\nMIDDLEWARE = [\n    \"django.middleware.security.SecurityMiddleware\",\n    \"django.contrib.sessions.middleware.SessionMiddleware\",\n    \"django.middleware.common.CommonMiddleware\",\n    \"django.middleware.csrf.CsrfViewMiddleware\",\n    \"django.contrib.auth.middleware.AuthenticationMiddleware\",\n    \"django.contrib.messages.middleware.MessageMiddleware\",\n    \"allauth.account.middleware.AccountMiddleware\",  # added\n    ...\n]\n\n\nConfigure Email Backend and Authentication Backends\n# core/settings.py\n\nEMAIL_BACKEND = \"django.core.mail.backends.smtp.EmailBackend\"\n\nAUTHENTICATION_BACKENDS = [\n    \"django.contrib.auth.backends.ModelBackend\",\n    \"allauth.account.auth_backends.AuthenticationBackend\",\n]\n\n\nDefine Login and Logout Redirect URLs\nHere, we define only ACCOUNT_LOGOUT_REDIRECT_URL because django-allauth overwrites LOGOUT_REDIRECT_URL.\nLOGIN_REDIRECT_URL = \"home\"\nACCOUNT_LOGOUT_REDIRECT_URL = \"home\"\n\n\nOptional Preference Settings\nOpinionated configurations for a simplified signup and email-based login:\nACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False\nACCOUNT_USERNAME_REQUIRED = False\nACCOUNT_AUTHENTICATION_METHOD = \"email\"\nACCOUNT_EMAIL_REQUIRED = True\nACCOUNT_UNIQUE_EMAIL = True\n\n\nDefine Resend Variables\nDEFAULT_FROM_EMAIL = env(\"DEFAULT_FROM_EMAIL\")\nRESEND_SMTP_HOST = env(\"RESEND_SMTP_HOST\")\nRESEND_SMTP_USERNAME = env(\"RESEND_SMTP_USERNAME\")\nRESEND_API_KEY = env(\"RESEND_API_KEY\")\nRESEND_SMTP_PORT = env.int(\"RESEND_SMTP_PORT\")\nRESEND_USE_TLS = env.bool(\"RESEND_USE_TLS\")\n\n\nMap Resend Variables to Django Email Variables\nDelegate Django email settings to Resend environment variables:\nEMAIL_HOST = RESEND_SMTP_HOST\nEMAIL_HOST_USER = RESEND_SMTP_USERNAME\nEMAIL_HOST_PASSWORD = RESEND_API_KEY\nEMAIL_PORT = RESEND_SMTP_PORT\nEMAIL_USE_TLS = RESEND_USE_TLS"
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html#tryout",
     "href": "posts/django-allauth-resend/20241223.html#tryout",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "Tryout",
     "text": "Tryout\nMigrate the database and run the development server with the following commands:\npython manage.py migrate\npython manage.py runserver\nNow, go to http://127.0.0.1:8000/ and click the sign-up link. You should see the signup page. After submitting the form, you will be redirected to the homepage.\nNext, check your inbox for an email with the subject [127.0.0.1:8000] Please Confirm Your Email Address.\nThe email will contain a confirmation link. Click the link, then click the confirmation button, and you’re all set for user registration!\n\n\n\n\n\n\nTip\n\n\n\nIf you encounter issues during configuration, the Resend logs can be a helpful resource, as they provide the request body, response body, and status code."
   },
   {
     "objectID": "posts/django-allauth-resend/20241223.html#final-words",
     "href": "posts/django-allauth-resend/20241223.html#final-words",
-    "title": "Configuring Resend with django-allauth",
+    "title": "Exploring Resend SMTP Service with Django",
     "section": "Final Words",
     "text": "Final Words\nThe configuration is straightforward, and it’s great that Resend offers SMTP services. The modern dashboard operates smoothly, and the well-documented resources make it easy for developers to find needed information. So far, the user experience has been positive, and I look forward to using it in real projects.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
   }
