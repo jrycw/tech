@@ -1,7 +1,9 @@
 ---
 title: "Three Approaches to Styling the Table Body in Great Tables"
+html-table-processing: none
 date: "2025-01-24"
 categories: [python, gt]
+jupyter: python3
 image: "table_body.png"
 ---
 
@@ -22,7 +24,7 @@ from great_tables import GT, loc, style
 from great_tables.data import gtcars
 from polars import selectors as cs
 
-year_cols = ["2014.0", "2015.0", "2016.0", "2017.0"]
+year_cols = ["2014", "2015", "2016", "2017"]
 df_mini = (
     pl.from_pandas(gtcars)
     .filter(pl.col("mfr").is_in(["Ferrari", "Lamborghini", "BMW"]))
@@ -31,7 +33,7 @@ df_mini = (
     .select(["mfr", "drivetrain", *year_cols])
 )
 
-gt = GT(df_mini, rowname_col="drivetrain", groupname_col="mfr").opt_stylize()
+gt = GT(df_mini).tab_stub(rowname_col="drivetrain", groupname_col="mfr").opt_stylize()
 gt
 ```
 
@@ -71,12 +73,12 @@ A more concise method is to pass a list of `loc.body()` objects to the `location
 ### Leveraging the `mask=` parameter in `loc.body()`: Use Polars expressions for streamlined styling
 The most modern approach (`0.16.0`) is to pass a Polars expression to the `mask=` parameter in `loc.body()`, as illustrated here:
 ```{python}
-# (
-#     gt.tab_style(
-#         style=style.text(color="red"),
-#         locations=loc.body(mask=cs.numeric().gt(650))
-#     )
-# )
+(
+    gt.tab_style(
+        style=style.text(color="red"),
+        locations=loc.body(mask=cs.numeric().gt(650))
+    )
+)
 ```
 
 In this example, `loc.body()` is smart enough to automatically target the rows where the cell value exceeds 650 for each numerical column. In general, you can think of `mask=` as a syntactic sugar that Great Tables provides to save you from having to manually loop through the columns.
