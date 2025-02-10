@@ -15,7 +15,7 @@ This post demonstrates three approaches to styling the table body:
 
 Let’s dive in.
 
-### Preparations
+## Preparations
 We'll use the built-in dataset `gtcars` to create a Polars DataFrame. Next, we'll select the columns `mfr`, `drivetrain`, `year`, and `hp` to create a small pivoted table named `df_mini`. Finally, we'll pass `df_mini` to the `GT` object to create a table named `gt`, using `drivetrain` as the `rowname_col=` and `mfr` as the `groupname_col=`, as shown below:
 ```{python}
 # | code-fold: true
@@ -41,7 +41,7 @@ The numbers in the cells represent the average horsepower for each combination o
 
 In the following section, we'll demonstrate three different ways to highlight the cell text in red if the average horsepower exceeds 650.
 
-### Using a for-loop: Repeatedly call `GT.tab_style()` for each column
+## Using a For-Loop: Repeatedly Call `GT.tab_style()` for Each Column
 The most intuitive way is to call `GT.tab_style()` for each column. Here's how:
 ```{python}
 gt1 = gt # <1>
@@ -55,7 +55,7 @@ gt1
 1. Since we want to keep `gt` intact for later use, we will modify `gt1` in this approach instead.
 
 
-### Utilizing the `locations=` parameter in `GT.tab_style()`: Pass a list of `loc.body()` objects
+## Utilizing the `locations=` Parameter in `GT.tab_style()`: Pass a List of `loc.body()` Objects
 A more concise method is to pass a list of `loc.body()` objects to the `locations=` parameter in `GT.tab_style()`, as shown below:
 ```{python}
 (
@@ -70,7 +70,7 @@ A more concise method is to pass a list of `loc.body()` objects to the `location
 ```
 
 
-### Leveraging the `mask=` parameter in `loc.body()`: Use Polars expressions for streamlined styling
+## Leveraging the `mask=` Parameter in `loc.body()`: Use Polars Expressions for Streamlined Styling
 The most modern approach (`0.16.0`) is to pass a Polars expression to the `mask=` parameter in `loc.body()`, as illustrated here:
 ```{python}
 (
