@@ -1,0 +1,230 @@
+---
+title: "Applying Custom Color Palettes to Table Bodies in Great Tables"
+html-table-processing: none
+date: "2025-02-25"
+categories: [python, pandas, polars, gt]
+jupyter: python3
+image: "table_body_custom_palette.png"
+---
+
+This post provides a concise guide on styling table bodies with custom colors using Pandas and Polars.  
+
+There are two primary methods for applying a color palette: one leverages a pre-existing column containing color values, while the other determines colors dynamically based on conditions. I'll walk you through both approaches. 
+
+Since all the generated tables will have the same appearance, I'll display the final result just once:  
+
+![](table_body_custom_palette.png){fig-align="center" fig-alt="Table Body with a Custom Palette"}
+
+## Preparations
+We'll start by creating a `data` dictionary, which will be used with Pandas or Polars later. Additionally, we'll define a `color_mapping` dictionary to store the palette information for styling.  
+```{python}
+import pandas as pd
+import polars as pl
+from great_tables import GT, from_column, loc, style
+from polars import selectors as cs
+
+data = {
+    "col1": [2, 5, 7, 10, 15],
+    "col2": ["x", "y", "y", "z", "z"],
+    "color": ["lightgrey", "lightblue", "lightblue", "papayawhip", "papayawhip"],
+}
+
+color_mapping = {"x": "lightgrey", "y": "papayawhip", "z": "lightblue"}
+```
+
+## Pandas
+First, we create a Pandas DataFrame called `df_pd` using `data` as the input:
+```{python}
+# | code-fold: True
+df_pd = pd.DataFrame(data)
+print(df_pd)
+```
+
+### Using an Existing Column  
+In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the [from_column()](https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column) function provided by Great Tables to apply colors to the table body:  
+```{python}
+# | eval : False
+(
+    GT(df_pd)
+    .tab_style(style=style.fill(color=from_column("color")), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+### Using Functions  
+In cases where colors need to be determined dynamically based on conditions, the [pd.Series.case_when()](https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when) function can be very useful. The following example categorizes the values of the `col1` column into three different colors:  
+```{python}
+# | eval : False
+def color_selector(df_):
+    return df_["col1"].case_when(
+        [
+            (df_["col1"].lt(3), "lightgray"),  # <3
+            (df_["col1"].lt(10), "papayawhip"),  # <10
+            (df_["col1"].ge(10), "lightblue"),  # >=10
+        ]
+    )
+
+
+(
+    GT(df_pd)
+    .tab_style(style=style.fill(color=color_selector), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+For categorical-like columns (e.g., `col2`), a simple value-to-color mapping may be sufficient. In such cases, a predefined dictionary can be used with [pd.Series.map()](https://pandas.pydata.org/docs/reference/api/pandas.Series.map.html#pandas.Series.map) or [pd.Series.replace()](https://pandas.pydata.org/docs/reference/api/pandas.Series.replace.html#pandas.Series.replace):  
+
+::: {.panel-tabset}
+
+### pd.Series.map()
+```{python}
+# | eval : False
+(
+    GT(df_pd)
+    .tab_style(
+        style=style.fill(color=lambda df_: df_["col2"].map(color_mapping)),
+        locations=loc.body(),
+    )
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+### pd.Series.replace()
+
+```{python}
+# | eval : False
+(
+    GT(df_pd)
+    .tab_style(
+        style=style.fill(color=lambda df_: df_["col2"].replace(color_mapping)),
+        locations=loc.body(),
+    )
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+::: 
+
+Alternatively, if you prefer sticking with the same approach, `pd.Series.case_when()` still works:
+```{python}
+# | eval : False
+def color_selector(df_):
+    return df_["col2"].case_when(
+        [
+            (df_["col2"].eq("x"), "lightgray"),
+            (df_["col2"].eq("y"), "papayawhip"),
+            (df_["col2"].eq("z"), "lightblue"),
+        ]
+    )
+
+
+(
+    GT(df_pd)
+    .tab_style(style=style.fill(color=color_selector), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+
+## Polars  
+Just like before, let's start by creating a Polars DataFrame named `df_pl` using `data` as input:  
+```{python}
+# | code-fold: True
+df_pl= pl.DataFrame(data)
+print(df_pl)
+```
+
+### Using an Existing Column  
+If the DataFrame already contains a column specifying colors, we can apply them directly with `from_column()`:  
+```{python}
+# | eval : False
+(
+    GT(df_pl)
+    .tab_style(style=style.fill(color=from_column("color")), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+As another option, we can reference the `color` column using a Polars expression:  
+```{python}
+# | eval : False
+(
+    GT(df_pl)
+    .tab_style(style=style.fill(color=pl.col("color")), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+
+### Using Conditional Logic with Polars Expressions  
+For cases where colors need to be assigned dynamically, [pl.when()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when) provides a structured way to define conditions. The example below assigns colors based on the values in `col1`:  
+```{python}
+# | eval : False
+color_selector_expr = (
+    pl.when(pl.col("col1").lt(3))  # <3
+    .then(pl.lit("lightgray"))
+    .when(pl.col("col1").lt(10))  # <10
+    .then(pl.lit("papayawhip"))
+    .when(pl.col("col1").ge(10))  # >=10
+    .then(pl.lit("lightblue"))
+)
+
+(
+    GT(df_pl)
+    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+For categorical-like columns (e.g., `col2`), predefined mappings can be applied efficiently using [pl.Expr.replace()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace):  
+
+```{python}
+# | eval : False
+(
+    GT(df_pl)
+    .tab_style(
+        style=style.fill(color=pl.col("col2").replace(color_mapping)),
+        locations=loc.body(),
+    )
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+Alternatively, if you prefer the conditional approach, `pl.when()` can still be used:
+```{python}
+# | eval : False
+color_selector_expr = (
+    pl.when(pl.col("col2").eq(pl.lit("x")))
+    .then(pl.lit("lightgray"))
+    .when(pl.col("col2").eq(pl.lit("y")))
+    .then(pl.lit("papayawhip"))
+    .when(pl.col("col2").eq(pl.lit("z")))
+    .then(pl.lit("lightblue"))
+)
+
+
+(
+    GT(df_pl)
+    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())
+    .cols_align(align="center")
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+## Final Notes  
+In this post, we explored how to use a custom color palette to style table backgrounds with [style.fill()](https://posit-dev.github.io/great-tables/reference/style.fill.html#great_tables.style.fill). The same approach can be applied to customize text color using [style.text()](https://posit-dev.github.io/great-tables/reference/style.text.html#great_tables.style.text) or adjust border color with [style.borders()](https://posit-dev.github.io/great-tables/reference/style.borders.html#great_tables.style.borders).  
+
+Lastly, remember that [loc.body()](https://posit-dev.github.io/great-tables/reference/loc.body.html#great_tables.loc.body) allows you to target specific columns and rows, giving you precise control over table styling.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
