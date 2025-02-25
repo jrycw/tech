@@ -29,7 +29,7 @@ data = {
     "color": ["lightgrey", "lightblue", "lightblue", "papayawhip", "papayawhip"],
 }
 
-color_mapping = {"x": "lightgrey", "y": "papayawhip", "z": "lightblue"}
+color_mapping = {"x": "lightgrey", "y": "lightblue", "z": "papayawhip"}
 ```
 
 ## Pandas
@@ -60,8 +60,8 @@ def color_selector(df_):
     return df_["col1"].case_when(
         [
             (df_["col1"].lt(3), "lightgrey"),  # <3
-            (df_["col1"].lt(10), "papayawhip"),  # <10
-            (df_["col1"].ge(10), "lightblue"),  # >=10
+            (df_["col1"].lt(10), "lightblue"),  # <10
+            (df_["col1"].ge(10), "papayawhip"),  # >=10
         ]
     )
 
@@ -115,8 +115,8 @@ def color_selector(df_):
     return df_["col2"].case_when(
         [
             (df_["col2"].eq("x"), "lightgrey"),
-            (df_["col2"].eq("y"), "papayawhip"),
-            (df_["col2"].eq("z"), "lightblue"),
+            (df_["col2"].eq("y"), "lightblue"),
+            (df_["col2"].eq("z"), "papayawhip"),
         ]
     )
 
@@ -170,9 +170,9 @@ color_selector_expr = (
     pl.when(pl.col("col1").lt(3))  # <3
     .then(pl.lit("lightgrey"))
     .when(pl.col("col1").lt(10))  # <10
-    .then(pl.lit("papayawhip"))
-    .when(pl.col("col1").ge(10))  # >=10
     .then(pl.lit("lightblue"))
+    .when(pl.col("col1").ge(10))  # >=10
+    .then(pl.lit("papayawhip"))
 )
 
 (
@@ -205,9 +205,9 @@ color_selector_expr = (
     pl.when(pl.col("col2").eq(pl.lit("x")))
     .then(pl.lit("lightgrey"))
     .when(pl.col("col2").eq(pl.lit("y")))
-    .then(pl.lit("papayawhip"))
-    .when(pl.col("col2").eq(pl.lit("z")))
     .then(pl.lit("lightblue"))
+    .when(pl.col("col2").eq(pl.lit("z")))
+    .then(pl.lit("papayawhip"))
 )
 
 
