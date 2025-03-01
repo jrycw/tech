@@ -1,10 +1,87 @@
 [
   {
+    "objectID": "posts/table-body-custom-palette/20250225.html",
+    "href": "posts/table-body-custom-palette/20250225.html",
+    "title": "Applying Custom Color Palettes to the Table Body in Great Tables",
+    "section": "",
+    "text": "This post provides a concise guide on styling the table body with custom colors using Pandas and Polars.\nThere are two primary methods for applying a color palette: one leverages a pre-existing column containing color values, while the other determines colors dynamically based on conditions. I’ll walk you through both approaches.\nSince all the generated tables will have the same appearance, I’ll display the final result just once:"
+  },
+  {
+    "objectID": "posts/table-body-custom-palette/20250225.html#preparations",
+    "href": "posts/table-body-custom-palette/20250225.html#preparations",
+    "title": "Applying Custom Color Palettes to the Table Body in Great Tables",
+    "section": "Preparations",
+    "text": "Preparations\nWe’ll start by creating a data dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a color_mapping dictionary to store the palette information for styling.\n\nimport pandas as pd\nimport polars as pl\nfrom great_tables import GT, from_column, loc, style\nfrom polars import selectors as cs\n\ndata = {\n    \"col1\": [2, 5, 7, 10, 15],\n    \"col2\": [\"x\", \"y\", \"y\", \"z\", \"z\"],\n    \"color\": [\"lightgrey\", \"lightblue\", \"lightblue\", \"papayawhip\", \"papayawhip\"],\n}\n\ncolor_mapping = {\"x\": \"lightgrey\", \"y\": \"lightblue\", \"z\": \"papayawhip\"}"
+  },
+  {
+    "objectID": "posts/table-body-custom-palette/20250225.html#pandas",
+    "href": "posts/table-body-custom-palette/20250225.html#pandas",
+    "title": "Applying Custom Color Palettes to the Table Body in Great Tables",
+    "section": "Pandas",
+    "text": "Pandas\nFirst, we create a Pandas DataFrame called df_pd using data as the input:\n\n\nCode\ndf_pd = pd.DataFrame(data)\nprint(df_pd)\n\n\n   col1 col2       color\n0     2    x   lightgrey\n1     5    y   lightblue\n2     7    y   lightblue\n3    10    z  papayawhip\n4    15    z  papayawhip\n\n\n\nUsing an Existing Column\nIn this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the from_column() function provided by Great Tables to apply colors to the table body:\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=from_column(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\nUsing Functions\nIn cases where colors need to be determined dynamically based on conditions, the pd.Series.case_when() function can be very useful. The following example categorizes the values of the col1 column into three different colors:\n\ndef color_selector(df_):\n    return df_[\"col1\"].case_when(\n        [\n            (df_[\"col1\"].lt(3), \"lightgrey\"),  # &lt;3\n            (df_[\"col1\"].lt(10), \"lightblue\"),  # &lt;10\n            (df_[\"col1\"].ge(10), \"papayawhip\"),  # &gt;=10\n        ]\n    )\n\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=color_selector), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nFor categorical-like columns (e.g., col2), a simple value-to-color mapping may be sufficient. In such cases, a predefined dictionary can be used with pd.Series.map() or pd.Series.replace():\n\npd.Series.map()pd.Series.replace()\n\n\n\n(\n    GT(df_pd)\n    .tab_style(\n        style=style.fill(color=lambda df_: df_[\"col2\"].map(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\n\n(\n    GT(df_pd)\n    .tab_style(\n        style=style.fill(color=lambda df_: df_[\"col2\"].replace(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\n\nAlternatively, if you prefer sticking with the same approach, pd.Series.case_when() still works:\n\ndef color_selector(df_):\n    return df_[\"col2\"].case_when(\n        [\n            (df_[\"col2\"].eq(\"x\"), \"lightgrey\"),\n            (df_[\"col2\"].eq(\"y\"), \"lightblue\"),\n            (df_[\"col2\"].eq(\"z\"), \"papayawhip\"),\n        ]\n    )\n\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=color_selector), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)"
+  },
+  {
+    "objectID": "posts/table-body-custom-palette/20250225.html#polars",
+    "href": "posts/table-body-custom-palette/20250225.html#polars",
+    "title": "Applying Custom Color Palettes to the Table Body in Great Tables",
+    "section": "Polars",
+    "text": "Polars\nJust like before, let’s start by creating a Polars DataFrame named df_pl using data as input:\n\n\nCode\ndf_pl= pl.DataFrame(data)\nprint(df_pl)\n\n\nshape: (5, 3)\n┌──────┬──────┬────────────┐\n│ col1 ┆ col2 ┆ color      │\n│ ---  ┆ ---  ┆ ---        │\n│ i64  ┆ str  ┆ str        │\n╞══════╪══════╪════════════╡\n│ 2    ┆ x    ┆ lightgrey  │\n│ 5    ┆ y    ┆ lightblue  │\n│ 7    ┆ y    ┆ lightblue  │\n│ 10   ┆ z    ┆ papayawhip │\n│ 15   ┆ z    ┆ papayawhip │\n└──────┴──────┴────────────┘\n\n\n\nUsing an Existing Column\nIf the DataFrame already contains a column specifying colors, we can apply them directly with from_column():\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=from_column(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nAs another option, we can reference the color column using a Polars expression:\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=pl.col(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\nUsing Conditional Logic with Polars Expressions\nFor cases where colors need to be assigned dynamically, pl.when() provides a structured way to define conditions. The example below assigns colors based on the values in col1:\n\ncolor_selector_expr = (\n    pl.when(pl.col(\"col1\").lt(3))  # &lt;3\n    .then(pl.lit(\"lightgrey\"))\n    .when(pl.col(\"col1\").lt(10))  # &lt;10\n    .then(pl.lit(\"lightblue\"))\n    .when(pl.col(\"col1\").ge(10))  # &gt;=10\n    .then(pl.lit(\"papayawhip\"))\n)\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nFor categorical-like columns (e.g., col2), predefined mappings can be applied efficiently using pl.Expr.replace():\n\n(\n    GT(df_pl)\n    .tab_style(\n        style=style.fill(color=pl.col(\"col2\").replace(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nAlternatively, if you prefer the conditional approach, pl.when() can still be used:\n\ncolor_selector_expr = (\n    pl.when(pl.col(\"col2\").eq(pl.lit(\"x\")))\n    .then(pl.lit(\"lightgrey\"))\n    .when(pl.col(\"col2\").eq(pl.lit(\"y\")))\n    .then(pl.lit(\"lightblue\"))\n    .when(pl.col(\"col2\").eq(pl.lit(\"z\")))\n    .then(pl.lit(\"papayawhip\"))\n)\n\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)"
+  },
+  {
+    "objectID": "posts/table-body-custom-palette/20250225.html#final-notes",
+    "href": "posts/table-body-custom-palette/20250225.html#final-notes",
+    "title": "Applying Custom Color Palettes to the Table Body in Great Tables",
+    "section": "Final Notes",
+    "text": "Final Notes\nIn this post, we explored how to use a custom color palette to style table backgrounds with style.fill(). The same approach can be applied to customize text color using style.text() or adjust border color with style.borders().\nLastly, remember that loc.body() allows you to target specific columns and rows, giving you precise control over table styling.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html",
+    "href": "posts/django-allauth-resend/20241223.html",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "",
+    "text": "This post demonstrates how to integrate Resend with django-allauth seamlessly in a Django project. If you’re looking to use Resend for sending emails via Django, refer to the repo provided by Resend."
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-django",
+    "href": "posts/django-allauth-resend/20241223.html#preparations-for-django",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "Preparations for Django",
+    "text": "Preparations for Django\n\nCreate a Virtual Environment\nStart by creating a virtual environment using uv and activating it:\nuv venv venv\nsource venv/bin/activate\n\n\nInstall Required Packages\nCreate a requirements.txt file and add the necessary dependencies:\ndjango\nenvirons[django]\ndjango-allauth\nInstall the packages via uv:\nuv pip install -r requirements.txt\n\n\nSet Up a Django Project\nUse the django-admin command to create a project named core:\ndjango-admin startproject core .\n\n\nConfigure Environment Variables\nCreate a .env file with the following content:\nDEFAULT_FROM_EMAIL=\nRESEND_SMTP_HOST=smtp.resend.com\nRESEND_SMTP_USERNAME=resend\nRESEND_API_KEY=\nRESEND_SMTP_PORT=587\nRESEND_USE_TLS=True\nThe next sections explain how to obtain DEFAULT_FROM_EMAIL and RESEND_API_KEY."
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
+    "href": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "Preparations for Resend",
+    "text": "Preparations for Resend\n\nVerify Your Domain\nFollow the Resend documentation to verify your domain. Once verified, you can send emails using an address like user@send.yourdomain.com.\n\nYou control the prefix before @, as ownership of the domain has been confirmed.\n\nAdd your chosen email to DEFAULT_FROM_EMAIL in the .env file.\n\n\n\nObtain an API Key\nGenerate an API key via the Resend API Keys page and add it to the RESEND_API_KEY field in your .env file."
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html#django-scaffold",
+    "href": "posts/django-allauth-resend/20241223.html#django-scaffold",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "Django Scaffold",
+    "text": "Django Scaffold\nFollow the quick start guide from django-allauth to configure the project with minimal setup.\n\nModify core/urls.py\nInclude django-allauth routes and define a homepage route:\n# core/urls.py\n\nfrom django.contrib import admin\nfrom django.urls import path, include\nfrom . import views\n\nurlpatterns = [\n    path(\"admin/\", admin.site.urls),\n    path(\"accounts/\", include(\"allauth.urls\")),  # added\n    path(\"\", views.index, name=\"home\"),  # added\n]\n\n\nAdd core/views.py\nDefine the homepage with a link to the signup URL provided by django-allauth:\nfrom django.http import HttpResponse\nfrom django.urls import reverse\n\n\ndef index(request):\n    signup_url = reverse(\"account_signup\")\n    return HttpResponse(f'&lt;a href=\"{signup_url}\"&gt;Hello, please Sign Up here!&lt;/a&gt;')\n\n\nModify core/settings.py\n\nRead Environment Variables\n# core/settings.py\n\nfrom environs import Env\n\nenv = Env()\nenv.read_env()\n\n\nUpdate INSTALLED_APPS\n# core/settings.py\n\nINSTALLED_APPS = [\n    ...\n    \"allauth\",  # added\n    \"allauth.account\",  # added\n]\n\n\nUpdate MIDDLEWARE\n# core/settings.py\n\nMIDDLEWARE = [\n    \"django.middleware.security.SecurityMiddleware\",\n    \"django.contrib.sessions.middleware.SessionMiddleware\",\n    \"django.middleware.common.CommonMiddleware\",\n    \"django.middleware.csrf.CsrfViewMiddleware\",\n    \"django.contrib.auth.middleware.AuthenticationMiddleware\",\n    \"django.contrib.messages.middleware.MessageMiddleware\",\n    \"allauth.account.middleware.AccountMiddleware\",  # added\n    ...\n]\n\n\nConfigure Email Backend and Authentication Backends\n# core/settings.py\n\nEMAIL_BACKEND = \"django.core.mail.backends.smtp.EmailBackend\"\n\nAUTHENTICATION_BACKENDS = [\n    \"django.contrib.auth.backends.ModelBackend\",\n    \"allauth.account.auth_backends.AuthenticationBackend\",\n]\n\n\nDefine Login and Logout Redirect URLs\nHere, we define only ACCOUNT_LOGOUT_REDIRECT_URL because django-allauth overwrites LOGOUT_REDIRECT_URL.\nLOGIN_REDIRECT_URL = \"home\"\nACCOUNT_LOGOUT_REDIRECT_URL = \"home\"\n\n\nOptional Preference Settings\nOpinionated configurations for a simplified signup and email-based login:\nACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False\nACCOUNT_USERNAME_REQUIRED = False\nACCOUNT_AUTHENTICATION_METHOD = \"email\"\nACCOUNT_EMAIL_REQUIRED = True\nACCOUNT_UNIQUE_EMAIL = True\n\n\nDefine Resend Variables\nDEFAULT_FROM_EMAIL = env(\"DEFAULT_FROM_EMAIL\")\nRESEND_SMTP_HOST = env(\"RESEND_SMTP_HOST\")\nRESEND_SMTP_USERNAME = env(\"RESEND_SMTP_USERNAME\")\nRESEND_API_KEY = env(\"RESEND_API_KEY\")\nRESEND_SMTP_PORT = env.int(\"RESEND_SMTP_PORT\")\nRESEND_USE_TLS = env.bool(\"RESEND_USE_TLS\")\n\n\nMap Resend Variables to Django Email Variables\nDelegate Django email settings to Resend environment variables:\nEMAIL_HOST = RESEND_SMTP_HOST\nEMAIL_HOST_USER = RESEND_SMTP_USERNAME\nEMAIL_HOST_PASSWORD = RESEND_API_KEY\nEMAIL_PORT = RESEND_SMTP_PORT\nEMAIL_USE_TLS = RESEND_USE_TLS"
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html#tryout",
+    "href": "posts/django-allauth-resend/20241223.html#tryout",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "Tryout",
+    "text": "Tryout\nMigrate the database and run the development server with the following commands:\npython manage.py migrate\npython manage.py runserver\nNow, go to http://127.0.0.1:8000/ and click the sign-up link. You should see the signup page. After submitting the form, you will be redirected to the homepage.\nNext, check your inbox for an email with the subject [127.0.0.1:8000] Please Confirm Your Email Address.\nThe email will contain a confirmation link. Click the link, then click the confirmation button, and you’re all set for user registration!\n\n\n\n\n\n\nTip\n\n\n\nIf you encounter issues during configuration, the Resend logs can be a helpful resource, as they provide the request body, response body, and status code."
+  },
+  {
+    "objectID": "posts/django-allauth-resend/20241223.html#final-words",
+    "href": "posts/django-allauth-resend/20241223.html#final-words",
+    "title": "Exploring Resend SMTP Service with Django",
+    "section": "Final Words",
+    "text": "Final Words\nThe configuration is straightforward, and it’s great that Resend offers SMTP services. The modern dashboard operates smoothly, and the well-documented resources make it easy for developers to find needed information. So far, the user experience has been positive, and I look forward to using it in real projects.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Posts",
     "section": "",
-    "text": "Applying Custom Color Palettes to Table Bodies in Great Tables\n\n\n\n\n\n\npython\n\n\npandas\n\n\npolars\n\n\ngt\n\n\n\n\n\n\n\n\n\nFeb 25, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nWeekend Challenge - Effective Data Visualization with Polars and Matplotlib\n\n\n\n\n\n\npython\n\n\npandas\n\n\npolars\n\n\nmatplotlib\n\n\n\n\n\n\n\n\n\nFeb 10, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nThree Approaches to Styling the Table Body in Great Tables\n\n\n\n\n\n\npython\n\n\npolars\n\n\ngt\n\n\n\n\n\n\n\n\n\nJan 24, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nExploring Resend SMTP Service with Django\n\n\n\n\n\n\npython\n\n\ndjango\n\n\nresend\n\n\n\n\n\n\n\n\n\nDec 23, 2024\n\n\nJerry Wu\n\n\n\n\n\n\nNo matching items"
+    "text": "Applying Custom Color Palettes to the Table Body in Great Tables\n\n\n\n\n\n\npython\n\n\npandas\n\n\npolars\n\n\ngt\n\n\n\n\n\n\n\n\n\nFeb 25, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nWeekend Challenge - Effective Data Visualization with Polars and Matplotlib\n\n\n\n\n\n\npython\n\n\npandas\n\n\npolars\n\n\nmatplotlib\n\n\n\n\n\n\n\n\n\nFeb 10, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nThree Approaches to Styling the Table Body in Great Tables\n\n\n\n\n\n\npython\n\n\npolars\n\n\ngt\n\n\n\n\n\n\n\n\n\nJan 24, 2025\n\n\nJerry Wu\n\n\n\n\n\n\n\n\n\n\n\n\nExploring Resend SMTP Service with Django\n\n\n\n\n\n\npython\n\n\ndjango\n\n\nresend\n\n\n\n\n\n\n\n\n\nDec 23, 2024\n\n\nJerry Wu\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/effective-dataviz-polars-alta-ski-resort/20250210.html",
@@ -54,83 +131,6 @@
     "title": "Weekend Challenge - Effective Data Visualization with Polars and Matplotlib",
     "section": "Wrapping Up",
     "text": "Wrapping Up\nRecreating this figure with Polars turned out to be more involved than I initially expected. However, the process was incredibly rewarding, as it deepened my understanding of Pandas, Polars, and Matplotlib. Switching between Pandas and Polars required a shift in mindset, but it also reinforced key concepts in both libraries. I look forward to exploring more of these challenges in the future.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
-  },
-  {
-    "objectID": "posts/table-body-custom-palette/20250225.html",
-    "href": "posts/table-body-custom-palette/20250225.html",
-    "title": "Applying Custom Color Palettes to Table Bodies in Great Tables",
-    "section": "",
-    "text": "This post provides a concise guide on styling table bodies with custom colors using Pandas and Polars.\nThere are two primary methods for applying a color palette: one leverages a pre-existing column containing color values, while the other determines colors dynamically based on conditions. I’ll walk you through both approaches.\nSince all the generated tables will have the same appearance, I’ll display the final result just once:"
-  },
-  {
-    "objectID": "posts/table-body-custom-palette/20250225.html#preparations",
-    "href": "posts/table-body-custom-palette/20250225.html#preparations",
-    "title": "Applying Custom Color Palettes to Table Bodies in Great Tables",
-    "section": "Preparations",
-    "text": "Preparations\nWe’ll start by creating a data dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a color_mapping dictionary to store the palette information for styling.\n\nimport pandas as pd\nimport polars as pl\nfrom great_tables import GT, from_column, loc, style\nfrom polars import selectors as cs\n\ndata = {\n    \"col1\": [2, 5, 7, 10, 15],\n    \"col2\": [\"x\", \"y\", \"y\", \"z\", \"z\"],\n    \"color\": [\"lightgrey\", \"lightblue\", \"lightblue\", \"papayawhip\", \"papayawhip\"],\n}\n\ncolor_mapping = {\"x\": \"lightgrey\", \"y\": \"lightblue\", \"z\": \"papayawhip\"}"
-  },
-  {
-    "objectID": "posts/table-body-custom-palette/20250225.html#pandas",
-    "href": "posts/table-body-custom-palette/20250225.html#pandas",
-    "title": "Applying Custom Color Palettes to Table Bodies in Great Tables",
-    "section": "Pandas",
-    "text": "Pandas\nFirst, we create a Pandas DataFrame called df_pd using data as the input:\n\n\nCode\ndf_pd = pd.DataFrame(data)\nprint(df_pd)\n\n\n   col1 col2       color\n0     2    x   lightgrey\n1     5    y   lightblue\n2     7    y   lightblue\n3    10    z  papayawhip\n4    15    z  papayawhip\n\n\n\nUsing an Existing Column\nIn this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the from_column() function provided by Great Tables to apply colors to the table body:\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=from_column(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\nUsing Functions\nIn cases where colors need to be determined dynamically based on conditions, the pd.Series.case_when() function can be very useful. The following example categorizes the values of the col1 column into three different colors:\n\ndef color_selector(df_):\n    return df_[\"col1\"].case_when(\n        [\n            (df_[\"col1\"].lt(3), \"lightgrey\"),  # &lt;3\n            (df_[\"col1\"].lt(10), \"lightblue\"),  # &lt;10\n            (df_[\"col1\"].ge(10), \"papayawhip\"),  # &gt;=10\n        ]\n    )\n\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=color_selector), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nFor categorical-like columns (e.g., col2), a simple value-to-color mapping may be sufficient. In such cases, a predefined dictionary can be used with pd.Series.map() or pd.Series.replace():\n\npd.Series.map()pd.Series.replace()\n\n\n\n(\n    GT(df_pd)\n    .tab_style(\n        style=style.fill(color=lambda df_: df_[\"col2\"].map(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\n\n(\n    GT(df_pd)\n    .tab_style(\n        style=style.fill(color=lambda df_: df_[\"col2\"].replace(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\n\nAlternatively, if you prefer sticking with the same approach, pd.Series.case_when() still works:\n\ndef color_selector(df_):\n    return df_[\"col2\"].case_when(\n        [\n            (df_[\"col2\"].eq(\"x\"), \"lightgrey\"),\n            (df_[\"col2\"].eq(\"y\"), \"lightblue\"),\n            (df_[\"col2\"].eq(\"z\"), \"papayawhip\"),\n        ]\n    )\n\n\n(\n    GT(df_pd)\n    .tab_style(style=style.fill(color=color_selector), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)"
-  },
-  {
-    "objectID": "posts/table-body-custom-palette/20250225.html#polars",
-    "href": "posts/table-body-custom-palette/20250225.html#polars",
-    "title": "Applying Custom Color Palettes to Table Bodies in Great Tables",
-    "section": "Polars",
-    "text": "Polars\nJust like before, let’s start by creating a Polars DataFrame named df_pl using data as input:\n\n\nCode\ndf_pl= pl.DataFrame(data)\nprint(df_pl)\n\n\nshape: (5, 3)\n┌──────┬──────┬────────────┐\n│ col1 ┆ col2 ┆ color      │\n│ ---  ┆ ---  ┆ ---        │\n│ i64  ┆ str  ┆ str        │\n╞══════╪══════╪════════════╡\n│ 2    ┆ x    ┆ lightgrey  │\n│ 5    ┆ y    ┆ lightblue  │\n│ 7    ┆ y    ┆ lightblue  │\n│ 10   ┆ z    ┆ papayawhip │\n│ 15   ┆ z    ┆ papayawhip │\n└──────┴──────┴────────────┘\n\n\n\nUsing an Existing Column\nIf the DataFrame already contains a column specifying colors, we can apply them directly with from_column():\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=from_column(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nAs another option, we can reference the color column using a Polars expression:\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=pl.col(\"color\")), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\n\n\nUsing Conditional Logic with Polars Expressions\nFor cases where colors need to be assigned dynamically, pl.when() provides a structured way to define conditions. The example below assigns colors based on the values in col1:\n\ncolor_selector_expr = (\n    pl.when(pl.col(\"col1\").lt(3))  # &lt;3\n    .then(pl.lit(\"lightgrey\"))\n    .when(pl.col(\"col1\").lt(10))  # &lt;10\n    .then(pl.lit(\"lightblue\"))\n    .when(pl.col(\"col1\").ge(10))  # &gt;=10\n    .then(pl.lit(\"papayawhip\"))\n)\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nFor categorical-like columns (e.g., col2), predefined mappings can be applied efficiently using pl.Expr.replace():\n\n(\n    GT(df_pl)\n    .tab_style(\n        style=style.fill(color=pl.col(\"col2\").replace(color_mapping)),\n        locations=loc.body(),\n    )\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)\n\nAlternatively, if you prefer the conditional approach, pl.when() can still be used:\n\ncolor_selector_expr = (\n    pl.when(pl.col(\"col2\").eq(pl.lit(\"x\")))\n    .then(pl.lit(\"lightgrey\"))\n    .when(pl.col(\"col2\").eq(pl.lit(\"y\")))\n    .then(pl.lit(\"lightblue\"))\n    .when(pl.col(\"col2\").eq(pl.lit(\"z\")))\n    .then(pl.lit(\"papayawhip\"))\n)\n\n\n(\n    GT(df_pl)\n    .tab_style(style=style.fill(color=color_selector_expr), locations=loc.body())\n    .cols_align(align=\"center\")\n    .opt_stylize(style=3, color=\"pink\")\n)"
-  },
-  {
-    "objectID": "posts/table-body-custom-palette/20250225.html#final-notes",
-    "href": "posts/table-body-custom-palette/20250225.html#final-notes",
-    "title": "Applying Custom Color Palettes to Table Bodies in Great Tables",
-    "section": "Final Notes",
-    "text": "Final Notes\nIn this post, we explored how to use a custom color palette to style table backgrounds with style.fill(). The same approach can be applied to customize text color using style.text() or adjust border color with style.borders().\nLastly, remember that loc.body() allows you to target specific columns and rows, giving you precise control over table styling.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html",
-    "href": "posts/django-allauth-resend/20241223.html",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "",
-    "text": "This post demonstrates how to integrate Resend with django-allauth seamlessly in a Django project. If you’re looking to use Resend for sending emails via Django, refer to the repo provided by Resend."
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-django",
-    "href": "posts/django-allauth-resend/20241223.html#preparations-for-django",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "Preparations for Django",
-    "text": "Preparations for Django\n\nCreate a Virtual Environment\nStart by creating a virtual environment using uv and activating it:\nuv venv venv\nsource venv/bin/activate\n\n\nInstall Required Packages\nCreate a requirements.txt file and add the necessary dependencies:\ndjango\nenvirons[django]\ndjango-allauth\nInstall the packages via uv:\nuv pip install -r requirements.txt\n\n\nSet Up a Django Project\nUse the django-admin command to create a project named core:\ndjango-admin startproject core .\n\n\nConfigure Environment Variables\nCreate a .env file with the following content:\nDEFAULT_FROM_EMAIL=\nRESEND_SMTP_HOST=smtp.resend.com\nRESEND_SMTP_USERNAME=resend\nRESEND_API_KEY=\nRESEND_SMTP_PORT=587\nRESEND_USE_TLS=True\nThe next sections explain how to obtain DEFAULT_FROM_EMAIL and RESEND_API_KEY."
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
-    "href": "posts/django-allauth-resend/20241223.html#preparations-for-resend",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "Preparations for Resend",
-    "text": "Preparations for Resend\n\nVerify Your Domain\nFollow the Resend documentation to verify your domain. Once verified, you can send emails using an address like user@send.yourdomain.com.\n\nYou control the prefix before @, as ownership of the domain has been confirmed.\n\nAdd your chosen email to DEFAULT_FROM_EMAIL in the .env file.\n\n\n\nObtain an API Key\nGenerate an API key via the Resend API Keys page and add it to the RESEND_API_KEY field in your .env file."
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html#django-scaffold",
-    "href": "posts/django-allauth-resend/20241223.html#django-scaffold",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "Django Scaffold",
-    "text": "Django Scaffold\nFollow the quick start guide from django-allauth to configure the project with minimal setup.\n\nModify core/urls.py\nInclude django-allauth routes and define a homepage route:\n# core/urls.py\n\nfrom django.contrib import admin\nfrom django.urls import path, include\nfrom . import views\n\nurlpatterns = [\n    path(\"admin/\", admin.site.urls),\n    path(\"accounts/\", include(\"allauth.urls\")),  # added\n    path(\"\", views.index, name=\"home\"),  # added\n]\n\n\nAdd core/views.py\nDefine the homepage with a link to the signup URL provided by django-allauth:\nfrom django.http import HttpResponse\nfrom django.urls import reverse\n\n\ndef index(request):\n    signup_url = reverse(\"account_signup\")\n    return HttpResponse(f'&lt;a href=\"{signup_url}\"&gt;Hello, please Sign Up here!&lt;/a&gt;')\n\n\nModify core/settings.py\n\nRead Environment Variables\n# core/settings.py\n\nfrom environs import Env\n\nenv = Env()\nenv.read_env()\n\n\nUpdate INSTALLED_APPS\n# core/settings.py\n\nINSTALLED_APPS = [\n    ...\n    \"allauth\",  # added\n    \"allauth.account\",  # added\n]\n\n\nUpdate MIDDLEWARE\n# core/settings.py\n\nMIDDLEWARE = [\n    \"django.middleware.security.SecurityMiddleware\",\n    \"django.contrib.sessions.middleware.SessionMiddleware\",\n    \"django.middleware.common.CommonMiddleware\",\n    \"django.middleware.csrf.CsrfViewMiddleware\",\n    \"django.contrib.auth.middleware.AuthenticationMiddleware\",\n    \"django.contrib.messages.middleware.MessageMiddleware\",\n    \"allauth.account.middleware.AccountMiddleware\",  # added\n    ...\n]\n\n\nConfigure Email Backend and Authentication Backends\n# core/settings.py\n\nEMAIL_BACKEND = \"django.core.mail.backends.smtp.EmailBackend\"\n\nAUTHENTICATION_BACKENDS = [\n    \"django.contrib.auth.backends.ModelBackend\",\n    \"allauth.account.auth_backends.AuthenticationBackend\",\n]\n\n\nDefine Login and Logout Redirect URLs\nHere, we define only ACCOUNT_LOGOUT_REDIRECT_URL because django-allauth overwrites LOGOUT_REDIRECT_URL.\nLOGIN_REDIRECT_URL = \"home\"\nACCOUNT_LOGOUT_REDIRECT_URL = \"home\"\n\n\nOptional Preference Settings\nOpinionated configurations for a simplified signup and email-based login:\nACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False\nACCOUNT_USERNAME_REQUIRED = False\nACCOUNT_AUTHENTICATION_METHOD = \"email\"\nACCOUNT_EMAIL_REQUIRED = True\nACCOUNT_UNIQUE_EMAIL = True\n\n\nDefine Resend Variables\nDEFAULT_FROM_EMAIL = env(\"DEFAULT_FROM_EMAIL\")\nRESEND_SMTP_HOST = env(\"RESEND_SMTP_HOST\")\nRESEND_SMTP_USERNAME = env(\"RESEND_SMTP_USERNAME\")\nRESEND_API_KEY = env(\"RESEND_API_KEY\")\nRESEND_SMTP_PORT = env.int(\"RESEND_SMTP_PORT\")\nRESEND_USE_TLS = env.bool(\"RESEND_USE_TLS\")\n\n\nMap Resend Variables to Django Email Variables\nDelegate Django email settings to Resend environment variables:\nEMAIL_HOST = RESEND_SMTP_HOST\nEMAIL_HOST_USER = RESEND_SMTP_USERNAME\nEMAIL_HOST_PASSWORD = RESEND_API_KEY\nEMAIL_PORT = RESEND_SMTP_PORT\nEMAIL_USE_TLS = RESEND_USE_TLS"
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html#tryout",
-    "href": "posts/django-allauth-resend/20241223.html#tryout",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "Tryout",
-    "text": "Tryout\nMigrate the database and run the development server with the following commands:\npython manage.py migrate\npython manage.py runserver\nNow, go to http://127.0.0.1:8000/ and click the sign-up link. You should see the signup page. After submitting the form, you will be redirected to the homepage.\nNext, check your inbox for an email with the subject [127.0.0.1:8000] Please Confirm Your Email Address.\nThe email will contain a confirmation link. Click the link, then click the confirmation button, and you’re all set for user registration!\n\n\n\n\n\n\nTip\n\n\n\nIf you encounter issues during configuration, the Resend logs can be a helpful resource, as they provide the request body, response body, and status code."
-  },
-  {
-    "objectID": "posts/django-allauth-resend/20241223.html#final-words",
-    "href": "posts/django-allauth-resend/20241223.html#final-words",
-    "title": "Exploring Resend SMTP Service with Django",
-    "section": "Final Words",
-    "text": "Final Words\nThe configuration is straightforward, and it’s great that Resend offers SMTP services. The modern dashboard operates smoothly, and the well-documented resources make it easy for developers to find needed information. So far, the user experience has been positive, and I look forward to using it in real projects.\n\n\n\n\n\n\nDisclaimer\n\n\n\nThis post was drafted by me, with AI assistance to refine the content."
   },
   {
     "objectID": "posts/style-table-body/20250124.html",
