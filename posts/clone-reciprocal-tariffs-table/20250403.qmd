@@ -1,0 +1,312 @@
+---
+title: "Clone the Reciprocal Tariffs Table Using Great Tables"
+html-table-processing: none
+date: "2025-04-03"
+categories: [python, polars, gt]
+jupyter: python3
+image: "reciprocal_tariffs.png"
+---
+
+This post demonstrates how to clone the Reciprocal Tariffs table that President Donald Trump announced on April 2 on [Truth Social](https://truthsocial.com/@realDonaldTrump/114270398531479278).
+
+Since the code is largely self-explanatory, I will highlight some tricks and caveats I encountered while building the table:
+
+1. The `reciprocal_tariffs` dictionary was extracted with the help of AI.
+2. The border radius was one of the trickiest aspects of the table—it took some time to figure out how to fill the gap between the rounded corners and the rectangle. Fortunately, I drew inspiration from the Great Tables example, [Highest Paid Athletes in 2023](https://posit-dev.github.io/great-tables/examples/). The solution was to use two `<div>` tags, which allowed me to assign distinct colors to the inside and outside of the border.
+3. I created four empty columns—`["0", "1", "2", "3"]`—to serve as borders. This allowed for easier adjustment of border properties such as color and width.
+4. I added a "mod" column to help distinguish whether a row’s index is odd or even. This made it possible to combine [pl.when().then().otherwise()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html) with [pl.Expr.map_elements()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html). Although `pl.Expr.map_elements()` is generally considered an anti-pattern in Polars, I believe it fits my use case well.
+5. The `column_labels_border_bottom_style=` parameter in [GT.tab_options()](https://posit-dev.github.io/great-tables/reference/GT.tab_options.html#great_tables.GT.tab_options) is key to hiding the line between the column labels and the table body.
+6. Logo embedding might seem a bit tricky if you're new to Great Tables; I suggest reading the [blog post](https://posit-dev.github.io/great-tables/blog/rendering-images/) that details how to render images anywhere in Great Tables.
+7. The original table featured two rings, but I was only able to implement the inner ring.
+8. While the color codes and font properties could be further enhanced, Great Tables successfully replicates the table's structure and style with only minor differences.
+
+![](reciprocal_tariffs.png){fig-align="center" fig-alt="Cloned Reciprocal Tariffs Table"}
+
+```{python}
+# | code-fold: true
+# | eval: false
+# | code-summary: Show full code
+import polars as pl
+from great_tables import GT, google_font, html, loc, style, vals
+
+# source: https://truthsocial.com/@realDonaldTrump/114270398531479278
+logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Seal_of_the_President_of_the_United_States.svg/800px-Seal_of_the_President_of_the_United_States.svg.png"
+logo = vals.fmt_image(logo_url, height=150)[0]
+
+reciprocal_tariffs = {
+    "country": [
+        "China",
+        "European Union",
+        "Vietnam",
+        "Taiwan",
+        "Japan",
+        "India",
+        "South Korea",
+        "Thailand",
+        "Switzerland",
+        "Indonesia",
+        "Malaysia",
+        "Cambodia",
+        "United Kingdom",
+        "South Africa",
+        "Brazil",
+        "Bangladesh",
+        "Singapore",
+        "Israel",
+        "Philippines",
+        "Chile",
+        "Australia",
+        "Pakistan",
+        "Turkey",
+        "Sri Lanka",
+        "Colombia",
+    ],
+    "tariffs_charged": [
+        "67%",
+        "39%",
+        "90%",
+        "64%",
+        "46%",
+        "52%",
+        "50%",
+        "72%",
+        "61%",
+        "64%",
+        "47%",
+        "97%",
+        "10%",
+        "60%",
+        "10%",
+        "74%",
+        "10%",
+        "33%",
+        "34%",
+        "10%",
+        "10%",
+        "58%",
+        "10%",
+        "88%",
+        "10%",
+    ],
+    "reciprocal_tariffs": [
+        "34%",
+        "20%",
+        "46%",
+        "32%",
+        "24%",
+        "26%",
+        "25%",
+        "36%",
+        "31%",
+        "32%",
+        "24%",
+        "49%",
+        "10%",
+        "30%",
+        "10%",
+        "37%",
+        "10%",
+        "17%",
+        "17%",
+        "10%",
+        "10%",
+        "29%",
+        "10%",
+        "44%",
+        "10%",
+    ],
+}
+
+dark_navy_blue = "#0B162A"  # background
+light_blue = "#B5D3E7"  # row
+yellow = "#F6D588"  # reciprocal_tariffs
+gold = "#FFF8DE"  # logo
+white = "#FFFFFF"
+
+def change_border_radius(
+    x, border_radius: int, background_color1: str, background_color2: str
+) -> str:
+    return f"""\
+    <div style="background-color: {background_color1};border: None">\
+        <div style="border-radius: {border_radius};background-color:{background_color2};">&nbsp;{x}</div>\
+    </div>\
+    """
+
+
+df = (
+    pl.DataFrame(reciprocal_tariffs)
+    .with_row_index("mod")
+    .with_columns(pl.col("mod").mod(2))
+    .with_columns([pl.lit("").alias(str(i)) for i in range(4)])
+    .with_columns(
+        pl.when(pl.col("mod").eq(0))
+        .then(
+            pl.col("country").map_elements(
+                lambda x: change_border_radius(x, "5px", dark_navy_blue, light_blue),
+                return_dtype=pl.String,
+            )
+        )
+        .otherwise(
+            pl.col("country").map_elements(
+                lambda x: change_border_radius(x, "5px", dark_navy_blue, white),
+                return_dtype=pl.String,
+            )
+        ),
+        pl.when(pl.col("mod").eq(0))
+        .then(
+            pl.col("tariffs_charged").map_elements(
+                lambda x: change_border_radius(x, "5px", dark_navy_blue, light_blue),
+                return_dtype=pl.String,
+            )
+        )
+        .otherwise(
+            pl.col("tariffs_charged").map_elements(
+                lambda x: change_border_radius(x, "5px", dark_navy_blue, white),
+                return_dtype=pl.String,
+            )
+        ),
+        pl.col("reciprocal_tariffs").map_elements(
+            lambda x: change_border_radius(x, "5px", dark_navy_blue, yellow),
+            return_dtype=pl.String,
+        ),
+    )
+    .select(["0", "country", "1", "tariffs_charged", "2", "reciprocal_tariffs", "3"])
+    .pipe(
+        lambda df_: pl.concat(
+            [df_, pl.DataFrame({col: "" for col in df_.columns})], how="vertical"
+        )
+    )
+)
+
+inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px"
+
+(
+    GT(df)
+    .cols_align("center", columns=["tariffs_charged", "reciprocal_tariffs"])
+    .cols_label(
+        {
+            "country": html(
+                f'<br><div style="text-align: left;">{logo} <span style="color: {gold}; font-size: 40px;">&nbsp&nbsp;Reciprocal Tariffs</span></div><br><b>Country</b>'
+            ),
+            "tariffs_charged": html(
+                '<b>Tariffs Charged<br>to the U.S.A.</b><br><span style="font-size: 12px;">Including<br>Currency Manipulation<br>and Trade Barrierst</span>'
+            ),
+            "reciprocal_tariffs": html(
+                "<b>U.S.A. Discountedd<br>Reciprocal Tariffs</b>"
+            ),
+            "0": "",
+            "1": "",
+            "2": "",
+            "3": "",
+        }
+    )
+    .cols_width(
+        {
+            "country": "50%",
+            "0": "3%",
+            "1": "7%",
+            "2": "7%",
+            "3": "3%",
+            "tariffs_charged": "18%",
+            "reciprocal_tariffs": "18%",
+        }
+    )
+    # set the background color of the labels and body to `dark_navy_blue`
+    .tab_style(
+        style=style.fill(color=dark_navy_blue),
+        locations=[loc.column_labels(), loc.body()],
+    )
+    # set the border color of the body to `dark_navy_blue`
+    .tab_style(
+        style=style.borders(sides="all", color=dark_navy_blue),
+        locations=loc.body(),
+    )
+    # set the font for the body text
+    .tab_style(
+        style=style.text(
+            font=google_font(name="Trajan Pro"), weight="bold", size="xx-large"
+        ),
+        locations=loc.body(),
+    )
+    # set the font for the labels
+    .tab_style(
+        style=style.text(font=google_font(name="Georgia"), weight="bold", size="large"),
+        locations=loc.column_labels(),
+    )
+    # set the text color of the labels to `white`
+    .tab_style(style=style.text(color=white), locations=loc.column_labels())
+    # center-align the labels
+    .tab_style(style=style.css("text-align: center;"), locations=loc.column_labels())
+    # hide the bottom line of the label section
+    .tab_options(column_labels_border_bottom_style="hidden")
+    #
+    # =========================
+    # inner ring
+    # =========================
+    #
+    # set the body background color to `dark_navy_blue` for the last row
+    .tab_style(style=style.fill(color=dark_navy_blue), locations=loc.body(rows=[-1]))
+    .tab_style(
+        style=style.borders(
+            sides="bottom",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.body(rows=[-1]),
+    )
+    .tab_style(
+        style=style.borders(
+            sides="left",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.body(columns=["0"]),
+    )
+    .tab_style(
+        style=style.borders(
+            sides="right",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.body(columns=["3"]),
+    )
+    .tab_style(
+        style=style.borders(
+            sides="top",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.column_labels(),
+    )
+    .tab_style(
+        style=style.borders(
+            sides="left",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.column_labels(columns=["0"]),
+    )
+    .tab_style(
+        style=style.borders(
+            sides="right",
+            color=inner_ring_color,
+            style=inner_ring_style,
+            weight=inner_ring_weight,
+        ),
+        locations=loc.column_labels(columns=["3"]),
+    )
+    # need to adjust `window_size` to obtain a higher-quality figure
+    # .save("gt.png", web_driver="firefox", window_size=(1200, 1000))
+)
+```
+
+::: {.callout-warning}
+# Disclaimer
+1. This table is intended as a self-practice project, and the data in the table may not be 100% accurate. Please refer to the [original source](https://truthsocial.com/@realDonaldTrump/114270398531479278) if you require verified data.
+2. This post was drafted by me, with AI assistance to refine the content.
+::: 
