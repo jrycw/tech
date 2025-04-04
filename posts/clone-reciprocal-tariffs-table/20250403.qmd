@@ -4,7 +4,7 @@ html-table-processing: none
 date: "2025-04-03"
 categories: [python, polars, gt]
 jupyter: python3
-image: "reciprocal_tariffs.png"
+image: "reciprocal_tariffs_gt.png"
 ---
 
 This post demonstrates how to clone the Reciprocal Tariffs table that President Donald Trump announced on April 2 on [Truth Social](https://truthsocial.com/@realDonaldTrump/114270398531479278).
@@ -13,11 +13,11 @@ Since the code is largely self-explanatory, I will highlight some tricks and cav
 
 1. The `reciprocal_tariffs` dictionary was extracted with the help of AI.
 2. The border radius was one of the trickiest aspects of the table—it took some time to figure out how to fill the gap between the rounded corners and the rectangle. Fortunately, I drew inspiration from the Great Tables example, [Highest Paid Athletes in 2023](https://posit-dev.github.io/great-tables/examples/). The solution was to use two `<div>` tags, which allowed me to assign distinct colors to the inside and outside of the border.
-3. I created four empty columns—`["0", "1", "2", "3"]`—to serve as borders. This allowed for easier adjustment of border properties such as color and width.
+3. I created four empty columns—`["0", "1", "2", "3"]`—to serve as borders. This allowed for easier adjustment of border properties such as color and width. An interesting feature of [GT.cols_width()](https://posit-dev.github.io/great-tables/reference/GT.cols_width.html#great_tables.GT.cols_width) is that you can set column widths using percentages, and the total doesn’t need to add up to exactly 100%—it just works. This is especially handy when experimenting with different table designs, as it lets you estimate widths without worrying about precise calculations.
 4. I added a "mod" column to help distinguish whether a row’s index is odd or even. This made it possible to combine [pl.when().then().otherwise()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html) with [pl.Expr.map_elements()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html). Although `pl.Expr.map_elements()` is generally considered an anti-pattern in Polars, I believe it fits my use case well.
 5. The `column_labels_border_bottom_style=` parameter in [GT.tab_options()](https://posit-dev.github.io/great-tables/reference/GT.tab_options.html#great_tables.GT.tab_options) is key to hiding the line between the column labels and the table body.
 6. Logo embedding might seem a bit tricky if you're new to Great Tables; I suggest reading the [blog post](https://posit-dev.github.io/great-tables/blog/rendering-images/) that details how to render images anywhere in Great Tables.
-7. The original table featured two rings, but I was only able to implement the inner ring.
+7. The original table featured two rings, but I was only able to implement the inner one. To enhance the overall visual effect while adding the ring, I also inserted a row at the end of the table and filled it with the same background color.
 8. While the color codes and font properties could be further enhanced, Great Tables successfully replicates the table's structure and style with only minor differences.
 
 ![](reciprocal_tariffs.png){fig-align="center" fig-alt="Cloned Reciprocal Tariffs Table"}
@@ -29,9 +29,12 @@ Since the code is largely self-explanatory, I will highlight some tricks and cav
 import polars as pl
 from great_tables import GT, google_font, html, loc, style, vals
 
-# source: https://truthsocial.com/@realDonaldTrump/114270398531479278
-logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Seal_of_the_President_of_the_United_States.svg/800px-Seal_of_the_President_of_the_United_States.svg.png"
-logo = vals.fmt_image(logo_url, height=150)[0]
+# source1: https://truthsocial.com/@realDonaldTrump/114270398531479278
+# source2:
+# "https://upload.wikimedia.org/wikipedia/commons/
+# thumb/3/36/Seal_of_the_President_of_the_United_States.svg/
+# 800px-Seal_of_the_President_of_the_United_States.svg.png"
+logo = vals.fmt_image("logo.png", height=150)[0]
 
 reciprocal_tariffs = {
     "country": [
@@ -121,14 +124,18 @@ dark_navy_blue = "#0B162A"  # background
 light_blue = "#B5D3E7"  # row
 yellow = "#F6D588"  # reciprocal_tariffs
 gold = "#FFF8DE"  # logo
-white = "#FFFFFF"
+white = "#FFFFFF"  # row
+
 
 def change_border_radius(
     x, border_radius: int, background_color1: str, background_color2: str
 ) -> str:
     return f"""\
     <div style="background-color: {background_color1};border: None">\
-        <div style="border-radius: {border_radius};background-color:{background_color2};">&nbsp;{x}</div>\
+        <div style="border-radius: {border_radius};\
+                    background-color:{background_color2};">\
+            &nbsp;{x}\
+        </div>\
     </div>\
     """
 
@@ -136,8 +143,7 @@ def change_border_radius(
 df = (
     pl.DataFrame(reciprocal_tariffs)
     .with_row_index("mod")
-    .with_columns(pl.col("mod").mod(2))
-    .with_columns([pl.lit("").alias(str(i)) for i in range(4)])
+    .with_columns(pl.col("mod").mod(2), *[pl.lit("").alias(str(i)) for i in range(4)])
     .with_columns(
         pl.when(pl.col("mod").eq(0))
         .then(
@@ -171,6 +177,7 @@ df = (
         ),
     )
     .select(["0", "country", "1", "tariffs_charged", "2", "reciprocal_tariffs", "3"])
+    # add a row at the end of the table
     .pipe(
         lambda df_: pl.concat(
             [df_, pl.DataFrame({col: "" for col in df_.columns})], how="vertical"
@@ -186,10 +193,26 @@ inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px
     .cols_label(
         {
             "country": html(
-                f'<br><div style="text-align: left;">{logo} <span style="color: {gold}; font-size: 40px;">&nbsp&nbsp;Reciprocal Tariffs</span></div><br><b>Country</b>'
+                f"""\
+                <br>\
+                <div style="text-align: left;">\
+                    {logo}&nbsp;\
+                    <span style="color: {gold}; font-size: 40px;">\
+                        &nbsp&nbsp;Reciprocal Tariffs\
+                    </span>\
+                </div>\
+                <br>\
+                <b>Country</b>\
+                """
             ),
             "tariffs_charged": html(
-                '<b>Tariffs Charged<br>to the U.S.A.</b><br><span style="font-size: 12px;">Including<br>Currency Manipulation<br>and Trade Barrierst</span>'
+                """\
+                <b>Tariffs Charged<br>to the U.S.A.</b>\
+                <br>\
+                <span style="font-size: 12px;">\
+                    Including<br>Currency Manipulation<br>and Trade Barrierst\
+                </span>\
+                """
             ),
             "reciprocal_tariffs": html(
                 "<b>U.S.A. Discountedd<br>Reciprocal Tariffs</b>"
@@ -301,7 +324,7 @@ inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px
         locations=loc.column_labels(columns=["3"]),
     )
     # need to adjust `window_size` to obtain a higher-quality figure
-    # .save("gt.png", web_driver="firefox", window_size=(1200, 1000))
+    # .save("reciprocal_tariffs_gt.png", web_driver="firefox", window_size=(1200, 1000))
 )
 ```
 
