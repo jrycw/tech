@@ -123,9 +123,9 @@ reciprocal_tariffs = {
 
 dark_navy_blue = "#0B162A"  # background
 light_blue = "#B5D3E7"  # row
-yellow = "#F6D588"  # reciprocal_tariffs
-gold = "#FFF8DE"  # logo
 white = "#FFFFFF"  # row
+yellow = "#F6D588"  # "reciprocal_tariffs" column
+gold = "#FFF8DE"  # logo
 
 
 def change_border_radius(
@@ -141,40 +141,49 @@ def change_border_radius(
     """
 
 
+def change_border_radius_expr(
+    cols: pl.Expr,
+    return_dtype: pl.DataType,
+    border_radius: int,
+    background_color1: str,
+    background_color2: str,
+) -> pl.Expr:
+    return cols.map_elements(
+        lambda x: change_border_radius(
+            x, border_radius, background_color1, background_color2
+        ),
+        return_dtype=return_dtype,
+    )
+
+
 df = (
     pl.DataFrame(reciprocal_tariffs)
     .with_row_index("mod")
     .with_columns(pl.col("mod").mod(2), *[pl.lit("").alias(str(i)) for i in range(4)])
     .with_columns(
+        # "country" and "tariffs_charged" columns
         pl.when(pl.col("mod").eq(0))
         .then(
-            pl.col("country").map_elements(
-                lambda x: change_border_radius(x, "5px", dark_navy_blue, light_blue),
-                return_dtype=pl.String,
+            change_border_radius_expr(
+                pl.col("country", "tariffs_charged"),
+                pl.String,
+                "5px",
+                dark_navy_blue,
+                light_blue,
             )
         )
         .otherwise(
-            pl.col("country").map_elements(
-                lambda x: change_border_radius(x, "5px", dark_navy_blue, white),
-                return_dtype=pl.String,
+            change_border_radius_expr(
+                pl.col("country", "tariffs_charged"),
+                pl.String,
+                "5px",
+                dark_navy_blue,
+                white,
             )
         ),
-        pl.when(pl.col("mod").eq(0))
-        .then(
-            pl.col("tariffs_charged").map_elements(
-                lambda x: change_border_radius(x, "5px", dark_navy_blue, light_blue),
-                return_dtype=pl.String,
-            )
-        )
-        .otherwise(
-            pl.col("tariffs_charged").map_elements(
-                lambda x: change_border_radius(x, "5px", dark_navy_blue, white),
-                return_dtype=pl.String,
-            )
-        ),
-        pl.col("reciprocal_tariffs").map_elements(
-            lambda x: change_border_radius(x, "5px", dark_navy_blue, yellow),
-            return_dtype=pl.String,
+        # "reciprocal_tariffs" column
+        change_border_radius_expr(
+            pl.col("reciprocal_tariffs"), pl.String, "5px", dark_navy_blue, yellow
         ),
     )
     .select(["0", "country", "1", "tariffs_charged", "2", "reciprocal_tariffs", "3"])
