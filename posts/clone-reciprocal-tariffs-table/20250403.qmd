@@ -17,8 +17,9 @@ Since the code is largely self-explanatory, I will highlight some tricks and cav
 4. I added a "mod" column to help distinguish whether a row’s index is odd or even. This made it possible to combine [pl.when().then().otherwise()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html) with [pl.Expr.map_elements()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html). Although `pl.Expr.map_elements()` is generally considered an anti-pattern in Polars, I believe it fits my use case well.
 5. The `column_labels_border_bottom_style=` parameter in [GT.tab_options()](https://posit-dev.github.io/great-tables/reference/GT.tab_options.html#great_tables.GT.tab_options) is key to hiding the line between the column labels and the table body.
 6. Logo embedding might seem a bit tricky if you're new to Great Tables; I suggest reading the [blog post](https://posit-dev.github.io/great-tables/blog/rendering-images/) that details how to render images anywhere in Great Tables.
-7. The original table featured two rings, but I was only able to implement the inner one. To enhance the overall visual effect while adding the ring, I also inserted a row at the end of the table and filled it with the same background color.
-8. While the color codes and font properties could be further enhanced, Great Tables successfully replicates the table's structure and style with only minor differences.
+7. To enhance the overall visual effect, I added a row at the end of the table and filled it with the same background color.
+8. The original table featured two rings, but I was only able to implement the inner one. Ultimately, I chose to present the table without it. If you're interested in how I implemented the ring, the code is available in the comments below.
+9. While the color codes and font properties could be further enhanced, Great Tables successfully replicates the table's structure and style with only minor differences.
 
 ![](reciprocal_tariffs_gt.png){fig-align="center" fig-alt="Cloned Reciprocal Tariffs Table"}
 
@@ -185,7 +186,7 @@ df = (
     )
 )
 
-inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px"
+# inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px"
 
 (
     GT(df)
@@ -262,67 +263,67 @@ inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px
     .tab_style(style=style.css("text-align: center;"), locations=loc.column_labels())
     # hide the bottom line of the label section
     .tab_options(column_labels_border_bottom_style="hidden")
+    .tab_style(style=style.fill(color=dark_navy_blue), locations=loc.body(rows=[-1]))
     #
     # =========================
     # inner ring
     # =========================
     #
     # set the body background color to `dark_navy_blue` for the last row
-    .tab_style(style=style.fill(color=dark_navy_blue), locations=loc.body(rows=[-1]))
-    .tab_style(
-        style=style.borders(
-            sides="bottom",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.body(rows=[-1]),
-    )
-    .tab_style(
-        style=style.borders(
-            sides="left",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.body(columns=["0"]),
-    )
-    .tab_style(
-        style=style.borders(
-            sides="right",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.body(columns=["3"]),
-    )
-    .tab_style(
-        style=style.borders(
-            sides="top",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.column_labels(),
-    )
-    .tab_style(
-        style=style.borders(
-            sides="left",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.column_labels(columns=["0"]),
-    )
-    .tab_style(
-        style=style.borders(
-            sides="right",
-            color=inner_ring_color,
-            style=inner_ring_style,
-            weight=inner_ring_weight,
-        ),
-        locations=loc.column_labels(columns=["3"]),
-    )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="bottom",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.body(rows=[-1]),
+    # )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="left",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.body(columns=["0"]),
+    # )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="right",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.body(columns=["3"]),
+    # )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="top",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.column_labels(),
+    # )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="left",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.column_labels(columns=["0"]),
+    # )
+    # .tab_style(
+    #     style=style.borders(
+    #         sides="right",
+    #         color=inner_ring_color,
+    #         style=inner_ring_style,
+    #         weight=inner_ring_weight,
+    #     ),
+    #     locations=loc.column_labels(columns=["3"]),
+    # )
     # need to adjust `window_size` to obtain a higher-quality figure
     # .save("reciprocal_tariffs_gt.png", web_driver="firefox", window_size=(1200, 1000))
 )
