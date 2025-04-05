@@ -39,7 +39,7 @@
 <p><img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table/reciprocal_tariffs_gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Cloned Reciprocal Tariffs Table"></p>
 </figure>
 </div>
-<div id="6d274b68" class="cell" data-execution_count="1">
+<div id="fe633bf9" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -336,27 +336,27 @@ background-color: null;
 font-style: inherit;">"#B5D3E7"</span>  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># row</span></span>
-<span id="cb1-97">yellow <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#F6D588"</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># reciprocal_tariffs</span></span>
-<span id="cb1-98">gold <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"#FFF8DE"</span>  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># logo</span></span>
-<span id="cb1-99">white <span class="op" style="color: #5E5E5E;
+<span id="cb1-97">white <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"#FFFFFF"</span>  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># row</span></span>
+<span id="cb1-98">yellow <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#F6D588"</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># "reciprocal_tariffs" column</span></span>
+<span id="cb1-99">gold <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#FFF8DE"</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># logo</span></span>
 <span id="cb1-100"></span>
 <span id="cb1-101"></span>
 <span id="cb1-102"><span class="kw" style="color: #003B4F;
@@ -440,14 +440,48 @@ background-color: null;
 font-style: inherit;">    """</span></span>
 <span id="cb1-113"></span>
 <span id="cb1-114"></span>
-<span id="cb1-115">df <span class="op" style="color: #5E5E5E;
+<span id="cb1-115"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> change_border_radius_expr(</span>
+<span id="cb1-116">    cols: pl.Expr,</span>
+<span id="cb1-117">    return_dtype: pl.DataType,</span>
+<span id="cb1-118">    border_radius: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>,</span>
+<span id="cb1-119">    background_color1: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>,</span>
+<span id="cb1-120">    background_color2: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>,</span>
+<span id="cb1-121">) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb1-122">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> cols.map_elements(</span>
+<span id="cb1-123">        <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">lambda</span> x: change_border_radius(</span>
+<span id="cb1-124">            x, border_radius, background_color1, background_color2</span>
+<span id="cb1-125">        ),</span>
+<span id="cb1-126">        return_dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>return_dtype,</span>
+<span id="cb1-127">    )</span>
+<span id="cb1-128"></span>
+<span id="cb1-129"></span>
+<span id="cb1-130">df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
-<span id="cb1-116">    pl.DataFrame(reciprocal_tariffs)</span>
-<span id="cb1-117">    .with_row_index(<span class="st" style="color: #20794D;
+<span id="cb1-131">    pl.DataFrame(reciprocal_tariffs)</span>
+<span id="cb1-132">    .with_row_index(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"mod"</span>)</span>
-<span id="cb1-118">    .with_columns(pl.col(<span class="st" style="color: #20794D;
+<span id="cb1-133">    .with_columns(pl.col(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"mod"</span>).mod(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -468,92 +502,57 @@ background-color: null;
 font-style: inherit;">range</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>)])</span>
-<span id="cb1-119">    .with_columns(</span>
-<span id="cb1-120">        pl.when(pl.col(<span class="st" style="color: #20794D;
+<span id="cb1-134">    .with_columns(</span>
+<span id="cb1-135">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># "country" and "tariffs_charged" columns</span></span>
+<span id="cb1-136">        pl.when(pl.col(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"mod"</span>).eq(<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>))</span>
-<span id="cb1-121">        .then(</span>
-<span id="cb1-122">            pl.col(<span class="st" style="color: #20794D;
+<span id="cb1-137">        .then(</span>
+<span id="cb1-138">            change_border_radius_expr(</span>
+<span id="cb1-139">                pl.col(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"country"</span>).map_elements(</span>
-<span id="cb1-123">                <span class="kw" style="color: #003B4F;
+font-style: inherit;">"country"</span>, <span class="st" style="color: #20794D;
 background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: change_border_radius(x, <span class="st" style="color: #20794D;
+font-style: inherit;">"tariffs_charged"</span>),</span>
+<span id="cb1-140">                pl.String,</span>
+<span id="cb1-141">                <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"5px"</span>, dark_navy_blue, light_blue),</span>
-<span id="cb1-124">                return_dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.String,</span>
-<span id="cb1-125">            )</span>
-<span id="cb1-126">        )</span>
-<span id="cb1-127">        .otherwise(</span>
-<span id="cb1-128">            pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"country"</span>).map_elements(</span>
-<span id="cb1-129">                <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: change_border_radius(x, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"5px"</span>, dark_navy_blue, white),</span>
-<span id="cb1-130">                return_dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.String,</span>
-<span id="cb1-131">            )</span>
-<span id="cb1-132">        ),</span>
-<span id="cb1-133">        pl.when(pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"mod"</span>).eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb1-134">        .then(</span>
-<span id="cb1-135">            pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"tariffs_charged"</span>).map_elements(</span>
-<span id="cb1-136">                <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: change_border_radius(x, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"5px"</span>, dark_navy_blue, light_blue),</span>
-<span id="cb1-137">                return_dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.String,</span>
-<span id="cb1-138">            )</span>
-<span id="cb1-139">        )</span>
-<span id="cb1-140">        .otherwise(</span>
-<span id="cb1-141">            pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"tariffs_charged"</span>).map_elements(</span>
-<span id="cb1-142">                <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: change_border_radius(x, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"5px"</span>, dark_navy_blue, white),</span>
-<span id="cb1-143">                return_dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.String,</span>
+font-style: inherit;">"5px"</span>,</span>
+<span id="cb1-142">                dark_navy_blue,</span>
+<span id="cb1-143">                light_blue,</span>
 <span id="cb1-144">            )</span>
-<span id="cb1-145">        ),</span>
-<span id="cb1-146">        pl.col(<span class="st" style="color: #20794D;
+<span id="cb1-145">        )</span>
+<span id="cb1-146">        .otherwise(</span>
+<span id="cb1-147">            change_border_radius_expr(</span>
+<span id="cb1-148">                pl.col(<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"reciprocal_tariffs"</span>).map_elements(</span>
-<span id="cb1-147">            <span class="kw" style="color: #003B4F;
+font-style: inherit;">"country"</span>, <span class="st" style="color: #20794D;
 background-color: null;
-font-weight: bold;
-font-style: inherit;">lambda</span> x: change_border_radius(x, <span class="st" style="color: #20794D;
+font-style: inherit;">"tariffs_charged"</span>),</span>
+<span id="cb1-149">                pl.String,</span>
+<span id="cb1-150">                <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"5px"</span>, dark_navy_blue, yellow),</span>
-<span id="cb1-148">            return_dtype<span class="op" style="color: #5E5E5E;
+font-style: inherit;">"5px"</span>,</span>
+<span id="cb1-151">                dark_navy_blue,</span>
+<span id="cb1-152">                white,</span>
+<span id="cb1-153">            )</span>
+<span id="cb1-154">        ),</span>
+<span id="cb1-155">        <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>pl.String,</span>
-<span id="cb1-149">        ),</span>
-<span id="cb1-150">    )</span>
-<span id="cb1-151">    .select([<span class="st" style="color: #20794D;
+font-style: inherit;"># "reciprocal_tariffs" column</span></span>
+<span id="cb1-156">        change_border_radius_expr(</span>
+<span id="cb1-157">            pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reciprocal_tariffs"</span>), pl.String, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"5px"</span>, dark_navy_blue, yellow</span>
+<span id="cb1-158">        ),</span>
+<span id="cb1-159">    )</span>
+<span id="cb1-160">    .select([<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"0"</span>, <span class="st" style="color: #20794D;
 background-color: null;
@@ -568,15 +567,15 @@ background-color: null;
 font-style: inherit;">"reciprocal_tariffs"</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"3"</span>])</span>
-<span id="cb1-152">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-161">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># add a row at the end of the table</span></span>
-<span id="cb1-153">    .pipe(</span>
-<span id="cb1-154">        <span class="kw" style="color: #003B4F;
+<span id="cb1-162">    .pipe(</span>
+<span id="cb1-163">        <span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">lambda</span> df_: pl.concat(</span>
-<span id="cb1-155">            [df_, pl.DataFrame({col: <span class="st" style="color: #20794D;
+<span id="cb1-164">            [df_, pl.DataFrame({col: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">""</span> <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -589,17 +588,17 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"vertical"</span></span>
-<span id="cb1-156">        )</span>
-<span id="cb1-157">    )</span>
-<span id="cb1-158">)</span>
-<span id="cb1-159"></span>
-<span id="cb1-160"><span class="co" style="color: #5E5E5E;
+<span id="cb1-165">        )</span>
+<span id="cb1-166">    )</span>
+<span id="cb1-167">)</span>
+<span id="cb1-168"></span>
+<span id="cb1-169"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px"</span></span>
-<span id="cb1-161"></span>
-<span id="cb1-162">(</span>
-<span id="cb1-163">    GT(df)</span>
-<span id="cb1-164">    .cols_align(<span class="st" style="color: #20794D;
+<span id="cb1-170"></span>
+<span id="cb1-171">(</span>
+<span id="cb1-172">    GT(df)</span>
+<span id="cb1-173">    .cols_align(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"center"</span>, columns<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -608,27 +607,27 @@ background-color: null;
 font-style: inherit;">"tariffs_charged"</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"reciprocal_tariffs"</span>])</span>
-<span id="cb1-165">    .cols_label(</span>
-<span id="cb1-166">        {</span>
-<span id="cb1-167">            <span class="st" style="color: #20794D;
+<span id="cb1-174">    .cols_label(</span>
+<span id="cb1-175">        {</span>
+<span id="cb1-176">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"country"</span>: html(</span>
-<span id="cb1-168">                <span class="ss" style="color: #20794D;
+<span id="cb1-177">                <span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">f"""</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-169"><span class="ss" style="color: #20794D;
+<span id="cb1-178"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-170"><span class="ss" style="color: #20794D;
+<span id="cb1-179"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                &lt;div style="text-align: left;"&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-171"><span class="ss" style="color: #20794D;
+<span id="cb1-180"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                    </span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -639,7 +638,7 @@ background-color: null;
 font-style: inherit;">&amp;nbsp;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-172"><span class="ss" style="color: #20794D;
+<span id="cb1-181"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                    &lt;span style="color: </span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -650,158 +649,158 @@ background-color: null;
 font-style: inherit;">; font-size: 40px;"&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-173"><span class="ss" style="color: #20794D;
+<span id="cb1-182"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                        &amp;nbsp&amp;nbsp;Reciprocal Tariffs</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-174"><span class="ss" style="color: #20794D;
+<span id="cb1-183"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                    &lt;/span&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-175"><span class="ss" style="color: #20794D;
+<span id="cb1-184"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                &lt;/div&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-176"><span class="ss" style="color: #20794D;
+<span id="cb1-185"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-177"><span class="ss" style="color: #20794D;
+<span id="cb1-186"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                &lt;b&gt;Country&lt;/b&gt;</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\</span></span>
-<span id="cb1-178"><span class="ss" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                """</span></span>
-<span id="cb1-179">            ),</span>
-<span id="cb1-180">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"tariffs_charged"</span>: html(</span>
-<span id="cb1-181">                <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"""</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-182"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                &lt;b&gt;Tariffs Charged&lt;br&gt;to the U.S.A.&lt;/b&gt;</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-183"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-184"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                &lt;span style="font-size: 12px;"&gt;</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-185"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                    Including&lt;br&gt;Currency Manipulation&lt;br&gt;and Trade Barriers</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-186"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">                &lt;/span&gt;</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\</span></span>
-<span id="cb1-187"><span class="st" style="color: #20794D;
+<span id="cb1-187"><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">                """</span></span>
 <span id="cb1-188">            ),</span>
 <span id="cb1-189">            <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"reciprocal_tariffs"</span>: html(</span>
+font-style: inherit;">"tariffs_charged"</span>: html(</span>
 <span id="cb1-190">                <span class="st" style="color: #20794D;
 background-color: null;
+font-style: inherit;">"""</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-191"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                &lt;b&gt;Tariffs Charged&lt;br&gt;to the U.S.A.&lt;/b&gt;</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-192"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-193"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                &lt;span style="font-size: 12px;"&gt;</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-194"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                    Including&lt;br&gt;Currency Manipulation&lt;br&gt;and Trade Barriers</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-195"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                &lt;/span&gt;</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\</span></span>
+<span id="cb1-196"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">                """</span></span>
+<span id="cb1-197">            ),</span>
+<span id="cb1-198">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"reciprocal_tariffs"</span>: html(</span>
+<span id="cb1-199">                <span class="st" style="color: #20794D;
+background-color: null;
 font-style: inherit;">"&lt;b&gt;U.S.A. Discounted&lt;br&gt;Reciprocal Tariffs&lt;/b&gt;"</span></span>
-<span id="cb1-191">            ),</span>
-<span id="cb1-192">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"0"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>,</span>
-<span id="cb1-193">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"1"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>,</span>
-<span id="cb1-194">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"2"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>,</span>
-<span id="cb1-195">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"3"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>,</span>
-<span id="cb1-196">        }</span>
-<span id="cb1-197">    )</span>
-<span id="cb1-198">    .cols_width(</span>
-<span id="cb1-199">        {</span>
-<span id="cb1-200">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"country"</span>: <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"50%"</span>,</span>
+<span id="cb1-200">            ),</span>
 <span id="cb1-201">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"0"</span>: <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"3%"</span>,</span>
+font-style: inherit;">""</span>,</span>
 <span id="cb1-202">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"1"</span>: <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"7%"</span>,</span>
+font-style: inherit;">""</span>,</span>
 <span id="cb1-203">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"2"</span>: <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"7%"</span>,</span>
+font-style: inherit;">""</span>,</span>
 <span id="cb1-204">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"3"</span>: <span class="st" style="color: #20794D;
 background-color: null;
+font-style: inherit;">""</span>,</span>
+<span id="cb1-205">        }</span>
+<span id="cb1-206">    )</span>
+<span id="cb1-207">    .cols_width(</span>
+<span id="cb1-208">        {</span>
+<span id="cb1-209">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"country"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"50%"</span>,</span>
+<span id="cb1-210">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"0"</span>: <span class="st" style="color: #20794D;
+background-color: null;
 font-style: inherit;">"3%"</span>,</span>
-<span id="cb1-205">            <span class="st" style="color: #20794D;
+<span id="cb1-211">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"1"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"7%"</span>,</span>
+<span id="cb1-212">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"7%"</span>,</span>
+<span id="cb1-213">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"3"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"3%"</span>,</span>
+<span id="cb1-214">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"tariffs_charged"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"18%"</span>,</span>
-<span id="cb1-206">            <span class="st" style="color: #20794D;
+<span id="cb1-215">            <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"reciprocal_tariffs"</span>: <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"18%"</span>,</span>
-<span id="cb1-207">        }</span>
-<span id="cb1-208">    )</span>
-<span id="cb1-209">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-216">        }</span>
+<span id="cb1-217">    )</span>
+<span id="cb1-218">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the background color of the labels and body to `dark_navy_blue`</span></span>
-<span id="cb1-210">    .tab_style(</span>
-<span id="cb1-211">        style<span class="op" style="color: #5E5E5E;
+<span id="cb1-219">    .tab_style(</span>
+<span id="cb1-220">        style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.fill(color<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>dark_navy_blue),</span>
-<span id="cb1-212">        locations<span class="op" style="color: #5E5E5E;
+<span id="cb1-221">        locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>[loc.column_labels(), loc.body()],</span>
-<span id="cb1-213">    )</span>
-<span id="cb1-214">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-222">    )</span>
+<span id="cb1-223">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the border color of the body to `dark_navy_blue`</span></span>
-<span id="cb1-215">    .tab_style(</span>
-<span id="cb1-216">        style<span class="op" style="color: #5E5E5E;
+<span id="cb1-224">    .tab_style(</span>
+<span id="cb1-225">        style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.borders(sides<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -810,18 +809,18 @@ background-color: null;
 font-style: inherit;">"all"</span>, color<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>dark_navy_blue),</span>
-<span id="cb1-217">        locations<span class="op" style="color: #5E5E5E;
+<span id="cb1-226">        locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>loc.body(),</span>
-<span id="cb1-218">    )</span>
-<span id="cb1-219">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-227">    )</span>
+<span id="cb1-228">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the font for the body text</span></span>
-<span id="cb1-220">    .tab_style(</span>
-<span id="cb1-221">        style<span class="op" style="color: #5E5E5E;
+<span id="cb1-229">    .tab_style(</span>
+<span id="cb1-230">        style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.text(</span>
-<span id="cb1-222">            font<span class="op" style="color: #5E5E5E;
+<span id="cb1-231">            font<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>google_font(name<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -836,16 +835,16 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"xx-large"</span></span>
-<span id="cb1-223">        ),</span>
-<span id="cb1-224">        locations<span class="op" style="color: #5E5E5E;
+<span id="cb1-232">        ),</span>
+<span id="cb1-233">        locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>loc.body(),</span>
-<span id="cb1-225">    )</span>
-<span id="cb1-226">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-234">    )</span>
+<span id="cb1-235">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the font for the labels</span></span>
-<span id="cb1-227">    .tab_style(</span>
-<span id="cb1-228">        style<span class="op" style="color: #5E5E5E;
+<span id="cb1-236">    .tab_style(</span>
+<span id="cb1-237">        style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.text(font<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -862,42 +861,42 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"large"</span>),</span>
-<span id="cb1-229">        locations<span class="op" style="color: #5E5E5E;
+<span id="cb1-238">        locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>loc.column_labels(),</span>
-<span id="cb1-230">    )</span>
-<span id="cb1-231">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-239">    )</span>
+<span id="cb1-240">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the text color of the labels to `white`</span></span>
-<span id="cb1-232">    .tab_style(style<span class="op" style="color: #5E5E5E;
+<span id="cb1-241">    .tab_style(style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.text(color<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>white), locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>loc.column_labels())</span>
-<span id="cb1-233">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-242">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># center-align the labels</span></span>
-<span id="cb1-234">    .tab_style(style<span class="op" style="color: #5E5E5E;
+<span id="cb1-243">    .tab_style(style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.css(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"text-align: center;"</span>), locations<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>loc.column_labels())</span>
-<span id="cb1-235">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-244">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># hide the bottom line of the label section</span></span>
-<span id="cb1-236">    .tab_options(column_labels_border_bottom_style<span class="op" style="color: #5E5E5E;
+<span id="cb1-245">    .tab_options(column_labels_border_bottom_style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"hidden"</span>)</span>
-<span id="cb1-237">    <span class="co" style="color: #5E5E5E;
+<span id="cb1-246">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># set the body background color to `dark_navy_blue` for the last row</span></span>
-<span id="cb1-238">    .tab_style(style<span class="op" style="color: #5E5E5E;
+<span id="cb1-247">    .tab_style(style<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>style.fill(color<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -910,54 +909,27 @@ background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>]))</span>
-<span id="cb1-239">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># need to adjust `window_size` to obtain a higher-quality figure</span></span>
-<span id="cb1-240">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># .save("reciprocal_tariffs_gt.png", web_driver="firefox", window_size=(1200, 1000))</span></span>
-<span id="cb1-241">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#</span></span>
-<span id="cb1-242">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># =========================</span></span>
-<span id="cb1-243">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># inner ring</span></span>
-<span id="cb1-244">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># =========================</span></span>
-<span id="cb1-245">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#</span></span>
-<span id="cb1-246">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># .tab_style(</span></span>
-<span id="cb1-247">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-248">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="bottom",</span></span>
+font-style: inherit;"># need to adjust `window_size` to obtain a higher-quality figure</span></span>
 <span id="cb1-249">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         color=inner_ring_color,</span></span>
+font-style: inherit;"># .save("reciprocal_tariffs_gt.png", web_driver="firefox", window_size=(1200, 1000))</span></span>
 <span id="cb1-250">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         style=inner_ring_style,</span></span>
+font-style: inherit;">#</span></span>
 <span id="cb1-251">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         weight=inner_ring_weight,</span></span>
+font-style: inherit;"># =========================</span></span>
 <span id="cb1-252">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     ),</span></span>
+font-style: inherit;"># inner ring</span></span>
 <span id="cb1-253">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.body(rows=[-1]),</span></span>
+font-style: inherit;"># =========================</span></span>
 <span id="cb1-254">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># )</span></span>
+font-style: inherit;">#</span></span>
 <span id="cb1-255">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># .tab_style(</span></span>
@@ -966,7 +938,7 @@ background-color: null;
 font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-257">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="left",</span></span>
+font-style: inherit;">#         sides="bottom",</span></span>
 <span id="cb1-258">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         color=inner_ring_color,</span></span>
@@ -981,7 +953,7 @@ background-color: null;
 font-style: inherit;">#     ),</span></span>
 <span id="cb1-262">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.body(columns=["0"]),</span></span>
+font-style: inherit;">#     locations=loc.body(rows=[-1]),</span></span>
 <span id="cb1-263">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># )</span></span>
@@ -993,7 +965,7 @@ background-color: null;
 font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-266">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="right",</span></span>
+font-style: inherit;">#         sides="left",</span></span>
 <span id="cb1-267">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         color=inner_ring_color,</span></span>
@@ -1008,7 +980,7 @@ background-color: null;
 font-style: inherit;">#     ),</span></span>
 <span id="cb1-271">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.body(columns=["3"]),</span></span>
+font-style: inherit;">#     locations=loc.body(columns=["0"]),</span></span>
 <span id="cb1-272">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># )</span></span>
@@ -1020,7 +992,7 @@ background-color: null;
 font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-275">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="top",</span></span>
+font-style: inherit;">#         sides="right",</span></span>
 <span id="cb1-276">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         color=inner_ring_color,</span></span>
@@ -1035,7 +1007,7 @@ background-color: null;
 font-style: inherit;">#     ),</span></span>
 <span id="cb1-280">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.column_labels(),</span></span>
+font-style: inherit;">#     locations=loc.body(columns=["3"]),</span></span>
 <span id="cb1-281">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># )</span></span>
@@ -1047,7 +1019,7 @@ background-color: null;
 font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-284">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="left",</span></span>
+font-style: inherit;">#         sides="top",</span></span>
 <span id="cb1-285">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         color=inner_ring_color,</span></span>
@@ -1062,7 +1034,7 @@ background-color: null;
 font-style: inherit;">#     ),</span></span>
 <span id="cb1-289">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.column_labels(columns=["0"]),</span></span>
+font-style: inherit;">#     locations=loc.column_labels(),</span></span>
 <span id="cb1-290">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># )</span></span>
@@ -1074,7 +1046,7 @@ background-color: null;
 font-style: inherit;">#     style=style.borders(</span></span>
 <span id="cb1-293">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#         sides="right",</span></span>
+font-style: inherit;">#         sides="left",</span></span>
 <span id="cb1-294">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#         color=inner_ring_color,</span></span>
@@ -1089,11 +1061,38 @@ background-color: null;
 font-style: inherit;">#     ),</span></span>
 <span id="cb1-298">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     locations=loc.column_labels(columns=["3"]),</span></span>
+font-style: inherit;">#     locations=loc.column_labels(columns=["0"]),</span></span>
 <span id="cb1-299">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># )</span></span>
-<span id="cb1-300">)</span></code></pre></div>
+<span id="cb1-300">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># .tab_style(</span></span>
+<span id="cb1-301">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     style=style.borders(</span></span>
+<span id="cb1-302">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         sides="right",</span></span>
+<span id="cb1-303">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         color=inner_ring_color,</span></span>
+<span id="cb1-304">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         style=inner_ring_style,</span></span>
+<span id="cb1-305">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#         weight=inner_ring_weight,</span></span>
+<span id="cb1-306">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     ),</span></span>
+<span id="cb1-307">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     locations=loc.column_labels(columns=["3"]),</span></span>
+<span id="cb1-308">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># )</span></span>
+<span id="cb1-309">)</span></code></pre></div>
 </details>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
@@ -1144,7 +1143,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll start by creating a <code>data</code> dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a <code>color_mapping</code> dictionary to store the palette information for styling.</p>
-<div id="7a88b818" class="cell" data-execution_count="1">
+<div id="a6e627b3" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
@@ -1232,7 +1231,7 @@ font-style: inherit;">"papayawhip"</span>}</span></code></pre></div>
 <section id="pandas" class="level2">
 <h2 class="anchored" data-anchor-id="pandas">Pandas</h2>
 <p>First, we create a Pandas DataFrame called <code>df_pd</code> using <code>data</code> as the input:</p>
-<div id="1d1cc1be" class="cell" data-execution_count="2">
+<div id="7e2cbefe" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">df_pd <span class="op" style="color: #5E5E5E;
@@ -1254,7 +1253,7 @@ font-style: inherit;">print</span>(df_pd)</span></code></pre></div>
 <section id="using-an-existing-column" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column">Using an Existing Column</h3>
 <p>In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the <a href="https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column">from_column()</a> function provided by Great Tables to apply colors to the table body:</p>
-<div id="b40c97fa" class="cell" data-execution_count="3">
+<div id="9cc55b14" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df_pd)</span>
 <span id="cb4-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -1286,7 +1285,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-functions" class="level3">
 <h3 class="anchored" data-anchor-id="using-functions">Using Functions</h3>
 <p>In cases where colors need to be determined dynamically based on conditions, the <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when">pd.Series.case_when()</a> function can be very useful. The following example categorizes the values of the <code>col1</code> column into three different colors:</p>
-<div id="d5039928" class="cell" data-execution_count="4">
+<div id="914a40b0" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -1359,7 +1358,7 @@ font-style: inherit;">"pink"</span>)</span>
 <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" aria-controls="tabset-1-1" aria-selected="true">pd.Series.map()</a></li><li class="nav-item"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" aria-controls="tabset-1-2" aria-selected="false">pd.Series.replace()</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" aria-labelledby="tabset-1-1-tab">
-<div id="ddc71393" class="cell" data-execution_count="5">
+<div id="319b1b82" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">(</span>
 <span id="cb6-2">    GT(df_pd)</span>
 <span id="cb6-3">    .tab_style(</span>
@@ -1397,7 +1396,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" aria-labelledby="tabset-1-2-tab">
-<div id="7e7ed887" class="cell" data-execution_count="6">
+<div id="094bdb33" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">(</span>
 <span id="cb7-2">    GT(df_pd)</span>
 <span id="cb7-3">    .tab_style(</span>
@@ -1435,7 +1434,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <p>Alternatively, if you prefer sticking with the same approach, <code>pd.Series.case_when()</code> still works:</p>
-<div id="4402d586" class="cell" data-execution_count="7">
+<div id="f357a79f" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -1502,7 +1501,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="polars" class="level2">
 <h2 class="anchored" data-anchor-id="polars">Polars</h2>
 <p>Just like before, let’s start by creating a Polars DataFrame named <code>df_pl</code> using <code>data</code> as input:</p>
-<div id="9434e496" class="cell" data-execution_count="8">
+<div id="5c948909" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">df_pl<span class="op" style="color: #5E5E5E;
@@ -1530,7 +1529,7 @@ font-style: inherit;">print</span>(df_pl)</span></code></pre></div>
 <section id="using-an-existing-column-1" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column-1">Using an Existing Column</h3>
 <p>If the DataFrame already contains a column specifying colors, we can apply them directly with <code>from_column()</code>:</p>
-<div id="d6e2755f" class="cell" data-execution_count="9">
+<div id="4d5ab36e" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">(</span>
 <span id="cb11-2">    GT(df_pl)</span>
 <span id="cb11-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -1559,7 +1558,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb11-6">)</span></code></pre></div>
 </div>
 <p>As another option, we can reference the <code>color</code> column using a Polars expression:</p>
-<div id="6117843f" class="cell" data-execution_count="10">
+<div id="f3ec3784" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">(</span>
 <span id="cb12-2">    GT(df_pl)</span>
 <span id="cb12-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -1591,7 +1590,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-conditional-logic-with-polars-expressions" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-logic-with-polars-expressions">Using Conditional Logic with Polars Expressions</h3>
 <p>For cases where colors need to be assigned dynamically, <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when()</a> provides a structured way to define conditions. The example below assigns colors based on the values in <code>col1</code>:</p>
-<div id="8751129e" class="cell" data-execution_count="11">
+<div id="b38a0c4b" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -1653,7 +1652,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb13-15">)</span></code></pre></div>
 </div>
 <p>For categorical-like columns (e.g., <code>col2</code>), predefined mappings can be applied efficiently using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace">pl.Expr.replace()</a>:</p>
-<div id="1d305318" class="cell" data-execution_count="12">
+<div id="88082b75" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">(</span>
 <span id="cb14-2">    GT(df_pl)</span>
 <span id="cb14-3">    .tab_style(</span>
@@ -1685,7 +1684,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb14-9">)</span></code></pre></div>
 </div>
 <p>Alternatively, if you prefer the conditional approach, <code>pl.when()</code> can still be used:</p>
-<div id="36ef95eb" class="cell" data-execution_count="13">
+<div id="8708ccb2" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -1786,7 +1785,7 @@ Disclaimer
 <p>It was an honor to be one of the reviewers for Matt Harrison’s new book, <a href="https://store.metasnake.com/effective-viz"><em>Effective Visualization</em></a>. If you’re looking to deepen your understanding of how to use Pandas and Matplotlib to craft compelling data stories, this book is a must-read.</p>
 <p>Last weekend, I decided to convert some of the Pandas code from the book into Polars just for fun, and I’d like to share an example in this post. You can find the original Pandas code in the <a href="link">repo</a> (empty link for now).</p>
 <p>The final figure, shown below, visualizes temperature trends for the ski season in Alta over the past few decades.</p>
-<div id="7aa30f19" class="cell" data-execution_count="1">
+<div id="35c62c0d" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -2708,7 +2707,7 @@ font-style: inherit;">=</span>idx_colname))</span>
 <li><strong><code>DATE</code></strong>: The dates.</li>
 <li><strong><code>TOBS</code></strong>: The recorded temperature in Fahrenheit.</li>
 </ul>
-<div id="a08696ff" class="cell" data-execution_count="2">
+<div id="19dcc7c3" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -3878,7 +3877,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll use the built-in dataset <code>gtcars</code> to create a Polars DataFrame. First, we’ll select the columns <code>mfr</code>, <code>drivetrain</code>, <code>year</code>, and <code>hp</code> to create a small pivoted table named <code>df_mini</code>. Then, we’ll pass <code>df_mini</code> to the <code>GT</code> object and use <code>GT.tab_stub()</code>, setting <code>drivetrain</code> as <code>rowname_col=</code> and <code>mfr</code> as <code>groupname_col=</code> to create the table <code>gt</code>, as shown below:</p>
-<div id="e3f1b88b" class="cell" data-execution_count="1">
+<div id="269bb5c2" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -3975,52 +3974,52 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <span id="cb1-16">gt</span></code></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<div id="wbstpfcpjp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="hqnycnnxjw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#wbstpfcpjp table {
+#hqnycnnxjw table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#wbstpfcpjp thead, tbody, tfoot, tr, td, th { border-style: none; }
+#hqnycnnxjw thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#wbstpfcpjp p { margin: 0; padding: 0; }
- #wbstpfcpjp .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #wbstpfcpjp .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #wbstpfcpjp .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #wbstpfcpjp .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #wbstpfcpjp .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #wbstpfcpjp .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #wbstpfcpjp .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #wbstpfcpjp .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #wbstpfcpjp .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #wbstpfcpjp .gt_column_spanner_outer:first-child { padding-left: 0; }
- #wbstpfcpjp .gt_column_spanner_outer:last-child { padding-right: 0; }
- #wbstpfcpjp .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #wbstpfcpjp .gt_spanner_row { border-bottom-style: hidden; }
- #wbstpfcpjp .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #wbstpfcpjp .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #wbstpfcpjp .gt_from_md> :first-child { margin-top: 0; }
- #wbstpfcpjp .gt_from_md> :last-child { margin-bottom: 0; }
- #wbstpfcpjp .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #wbstpfcpjp .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #wbstpfcpjp .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #wbstpfcpjp .gt_row_group_first td { border-top-width: 2px; }
- #wbstpfcpjp .gt_row_group_first th { border-top-width: 2px; }
- #wbstpfcpjp .gt_striped { background-color: #F4F4F4; }
- #wbstpfcpjp .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #wbstpfcpjp .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #wbstpfcpjp .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #wbstpfcpjp .gt_left { text-align: left; }
- #wbstpfcpjp .gt_center { text-align: center; }
- #wbstpfcpjp .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #wbstpfcpjp .gt_font_normal { font-weight: normal; }
- #wbstpfcpjp .gt_font_bold { font-weight: bold; }
- #wbstpfcpjp .gt_font_italic { font-style: italic; }
- #wbstpfcpjp .gt_super { font-size: 65%; }
- #wbstpfcpjp .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #wbstpfcpjp .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#hqnycnnxjw p { margin: 0; padding: 0; }
+ #hqnycnnxjw .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #hqnycnnxjw .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #hqnycnnxjw .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #hqnycnnxjw .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #hqnycnnxjw .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #hqnycnnxjw .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #hqnycnnxjw .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #hqnycnnxjw .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #hqnycnnxjw .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #hqnycnnxjw .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #hqnycnnxjw .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #hqnycnnxjw .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #hqnycnnxjw .gt_spanner_row { border-bottom-style: hidden; }
+ #hqnycnnxjw .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #hqnycnnxjw .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #hqnycnnxjw .gt_from_md> :first-child { margin-top: 0; }
+ #hqnycnnxjw .gt_from_md> :last-child { margin-bottom: 0; }
+ #hqnycnnxjw .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #hqnycnnxjw .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #hqnycnnxjw .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #hqnycnnxjw .gt_row_group_first td { border-top-width: 2px; }
+ #hqnycnnxjw .gt_row_group_first th { border-top-width: 2px; }
+ #hqnycnnxjw .gt_striped { background-color: #F4F4F4; }
+ #hqnycnnxjw .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #hqnycnnxjw .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #hqnycnnxjw .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #hqnycnnxjw .gt_left { text-align: left; }
+ #hqnycnnxjw .gt_center { text-align: center; }
+ #hqnycnnxjw .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #hqnycnnxjw .gt_font_normal { font-weight: normal; }
+ #hqnycnnxjw .gt_font_bold { font-weight: bold; }
+ #hqnycnnxjw .gt_font_italic { font-style: italic; }
+ #hqnycnnxjw .gt_super { font-size: 65%; }
+ #hqnycnnxjw .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #hqnycnnxjw .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -4101,7 +4100,7 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <section id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column" class="level2">
 <h2 class="anchored" data-anchor-id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column">Using a For-Loop: Repeatedly Call <code>GT.tab_style()</code> for Each Column</h2>
 <p>The most intuitive way is to call <code>GT.tab_style()</code> for each column. Here’s how:</p>
-<div id="22084564" class="cell" data-execution_count="2">
+<div id="b8a7aae9" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="annotated-cell-2" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target">gt1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> gt</span>
@@ -4142,52 +4141,52 @@ font-style: inherit;">650</span>))</span>
 </dl>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="hrpoxiylst" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="mpawqtcegm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#hrpoxiylst table {
+#mpawqtcegm table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#hrpoxiylst thead, tbody, tfoot, tr, td, th { border-style: none; }
+#mpawqtcegm thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#hrpoxiylst p { margin: 0; padding: 0; }
- #hrpoxiylst .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #hrpoxiylst .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #hrpoxiylst .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #hrpoxiylst .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #hrpoxiylst .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #hrpoxiylst .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #hrpoxiylst .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #hrpoxiylst .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #hrpoxiylst .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #hrpoxiylst .gt_column_spanner_outer:first-child { padding-left: 0; }
- #hrpoxiylst .gt_column_spanner_outer:last-child { padding-right: 0; }
- #hrpoxiylst .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #hrpoxiylst .gt_spanner_row { border-bottom-style: hidden; }
- #hrpoxiylst .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #hrpoxiylst .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #hrpoxiylst .gt_from_md> :first-child { margin-top: 0; }
- #hrpoxiylst .gt_from_md> :last-child { margin-bottom: 0; }
- #hrpoxiylst .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #hrpoxiylst .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #hrpoxiylst .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #hrpoxiylst .gt_row_group_first td { border-top-width: 2px; }
- #hrpoxiylst .gt_row_group_first th { border-top-width: 2px; }
- #hrpoxiylst .gt_striped { background-color: #F4F4F4; }
- #hrpoxiylst .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #hrpoxiylst .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #hrpoxiylst .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #hrpoxiylst .gt_left { text-align: left; }
- #hrpoxiylst .gt_center { text-align: center; }
- #hrpoxiylst .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #hrpoxiylst .gt_font_normal { font-weight: normal; }
- #hrpoxiylst .gt_font_bold { font-weight: bold; }
- #hrpoxiylst .gt_font_italic { font-style: italic; }
- #hrpoxiylst .gt_super { font-size: 65%; }
- #hrpoxiylst .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #hrpoxiylst .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#mpawqtcegm p { margin: 0; padding: 0; }
+ #mpawqtcegm .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #mpawqtcegm .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #mpawqtcegm .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #mpawqtcegm .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #mpawqtcegm .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #mpawqtcegm .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #mpawqtcegm .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #mpawqtcegm .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #mpawqtcegm .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #mpawqtcegm .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #mpawqtcegm .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #mpawqtcegm .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #mpawqtcegm .gt_spanner_row { border-bottom-style: hidden; }
+ #mpawqtcegm .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #mpawqtcegm .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #mpawqtcegm .gt_from_md> :first-child { margin-top: 0; }
+ #mpawqtcegm .gt_from_md> :last-child { margin-bottom: 0; }
+ #mpawqtcegm .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #mpawqtcegm .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #mpawqtcegm .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #mpawqtcegm .gt_row_group_first td { border-top-width: 2px; }
+ #mpawqtcegm .gt_row_group_first th { border-top-width: 2px; }
+ #mpawqtcegm .gt_striped { background-color: #F4F4F4; }
+ #mpawqtcegm .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #mpawqtcegm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #mpawqtcegm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #mpawqtcegm .gt_left { text-align: left; }
+ #mpawqtcegm .gt_center { text-align: center; }
+ #mpawqtcegm .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #mpawqtcegm .gt_font_normal { font-weight: normal; }
+ #mpawqtcegm .gt_font_bold { font-weight: bold; }
+ #mpawqtcegm .gt_font_italic { font-style: italic; }
+ #mpawqtcegm .gt_super { font-size: 65%; }
+ #mpawqtcegm .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #mpawqtcegm .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -4266,7 +4265,7 @@ font-style: inherit;">650</span>))</span>
 <section id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects" class="level2">
 <h2 class="anchored" data-anchor-id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects">Utilizing the <code>locations=</code> Parameter in <code>GT.tab_style()</code>: Pass a List of <code>loc.body()</code> Objects</h2>
 <p>A more concise method is to pass a list of <code>loc.body()</code> objects to the <code>locations=</code> parameter in <code>GT.tab_style()</code>, as shown below:</p>
-<div id="30116f39" class="cell" data-execution_count="3">
+<div id="28af2de8" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">(</span>
 <span id="cb2-2">    gt.tab_style(</span>
 <span id="cb2-3">        style<span class="op" style="color: #5E5E5E;
@@ -4297,52 +4296,52 @@ font-style: inherit;">in</span> year_cols</span>
 <span id="cb2-8">    )</span>
 <span id="cb2-9">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<div id="hwjbpbmran" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="skfsganaey" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#hwjbpbmran table {
+#skfsganaey table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#hwjbpbmran thead, tbody, tfoot, tr, td, th { border-style: none; }
+#skfsganaey thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#hwjbpbmran p { margin: 0; padding: 0; }
- #hwjbpbmran .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #hwjbpbmran .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #hwjbpbmran .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #hwjbpbmran .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #hwjbpbmran .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #hwjbpbmran .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #hwjbpbmran .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #hwjbpbmran .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #hwjbpbmran .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #hwjbpbmran .gt_column_spanner_outer:first-child { padding-left: 0; }
- #hwjbpbmran .gt_column_spanner_outer:last-child { padding-right: 0; }
- #hwjbpbmran .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #hwjbpbmran .gt_spanner_row { border-bottom-style: hidden; }
- #hwjbpbmran .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #hwjbpbmran .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #hwjbpbmran .gt_from_md> :first-child { margin-top: 0; }
- #hwjbpbmran .gt_from_md> :last-child { margin-bottom: 0; }
- #hwjbpbmran .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #hwjbpbmran .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #hwjbpbmran .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #hwjbpbmran .gt_row_group_first td { border-top-width: 2px; }
- #hwjbpbmran .gt_row_group_first th { border-top-width: 2px; }
- #hwjbpbmran .gt_striped { background-color: #F4F4F4; }
- #hwjbpbmran .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #hwjbpbmran .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #hwjbpbmran .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #hwjbpbmran .gt_left { text-align: left; }
- #hwjbpbmran .gt_center { text-align: center; }
- #hwjbpbmran .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #hwjbpbmran .gt_font_normal { font-weight: normal; }
- #hwjbpbmran .gt_font_bold { font-weight: bold; }
- #hwjbpbmran .gt_font_italic { font-style: italic; }
- #hwjbpbmran .gt_super { font-size: 65%; }
- #hwjbpbmran .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #hwjbpbmran .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#skfsganaey p { margin: 0; padding: 0; }
+ #skfsganaey .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #skfsganaey .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #skfsganaey .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #skfsganaey .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #skfsganaey .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #skfsganaey .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #skfsganaey .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #skfsganaey .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #skfsganaey .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #skfsganaey .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #skfsganaey .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #skfsganaey .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #skfsganaey .gt_spanner_row { border-bottom-style: hidden; }
+ #skfsganaey .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #skfsganaey .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #skfsganaey .gt_from_md> :first-child { margin-top: 0; }
+ #skfsganaey .gt_from_md> :last-child { margin-bottom: 0; }
+ #skfsganaey .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #skfsganaey .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #skfsganaey .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #skfsganaey .gt_row_group_first td { border-top-width: 2px; }
+ #skfsganaey .gt_row_group_first th { border-top-width: 2px; }
+ #skfsganaey .gt_striped { background-color: #F4F4F4; }
+ #skfsganaey .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #skfsganaey .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #skfsganaey .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #skfsganaey .gt_left { text-align: left; }
+ #skfsganaey .gt_center { text-align: center; }
+ #skfsganaey .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #skfsganaey .gt_font_normal { font-weight: normal; }
+ #skfsganaey .gt_font_bold { font-weight: bold; }
+ #skfsganaey .gt_font_italic { font-style: italic; }
+ #skfsganaey .gt_super { font-size: 65%; }
+ #skfsganaey .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #skfsganaey .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -4421,7 +4420,7 @@ font-style: inherit;">in</span> year_cols</span>
 <section id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling" class="level2">
 <h2 class="anchored" data-anchor-id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling">Leveraging the <code>mask=</code> Parameter in <code>loc.body()</code>: Use Polars Expressions for Streamlined Styling</h2>
 <p>The most modern approach (<code>0.16.0</code>) is to pass a Polars expression to the <code>mask=</code> parameter in <code>loc.body()</code>, as illustrated here:</p>
-<div id="9c80d4eb" class="cell" data-execution_count="4">
+<div id="66500415" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    gt.tab_style(</span>
 <span id="cb3-3">        style<span class="op" style="color: #5E5E5E;
@@ -4441,52 +4440,52 @@ font-style: inherit;">650</span>))</span>
 <span id="cb3-5">    )</span>
 <span id="cb3-6">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-<div id="gycwkukeyh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="dwfjmxhhtj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#gycwkukeyh table {
+#dwfjmxhhtj table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#gycwkukeyh thead, tbody, tfoot, tr, td, th { border-style: none; }
+#dwfjmxhhtj thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#gycwkukeyh p { margin: 0; padding: 0; }
- #gycwkukeyh .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #gycwkukeyh .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #gycwkukeyh .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #gycwkukeyh .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #gycwkukeyh .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #gycwkukeyh .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #gycwkukeyh .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #gycwkukeyh .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #gycwkukeyh .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #gycwkukeyh .gt_column_spanner_outer:first-child { padding-left: 0; }
- #gycwkukeyh .gt_column_spanner_outer:last-child { padding-right: 0; }
- #gycwkukeyh .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #gycwkukeyh .gt_spanner_row { border-bottom-style: hidden; }
- #gycwkukeyh .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #gycwkukeyh .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #gycwkukeyh .gt_from_md> :first-child { margin-top: 0; }
- #gycwkukeyh .gt_from_md> :last-child { margin-bottom: 0; }
- #gycwkukeyh .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #gycwkukeyh .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #gycwkukeyh .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #gycwkukeyh .gt_row_group_first td { border-top-width: 2px; }
- #gycwkukeyh .gt_row_group_first th { border-top-width: 2px; }
- #gycwkukeyh .gt_striped { background-color: #F4F4F4; }
- #gycwkukeyh .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #gycwkukeyh .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #gycwkukeyh .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #gycwkukeyh .gt_left { text-align: left; }
- #gycwkukeyh .gt_center { text-align: center; }
- #gycwkukeyh .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #gycwkukeyh .gt_font_normal { font-weight: normal; }
- #gycwkukeyh .gt_font_bold { font-weight: bold; }
- #gycwkukeyh .gt_font_italic { font-style: italic; }
- #gycwkukeyh .gt_super { font-size: 65%; }
- #gycwkukeyh .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #gycwkukeyh .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#dwfjmxhhtj p { margin: 0; padding: 0; }
+ #dwfjmxhhtj .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #dwfjmxhhtj .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #dwfjmxhhtj .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #dwfjmxhhtj .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #dwfjmxhhtj .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #dwfjmxhhtj .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #dwfjmxhhtj .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #dwfjmxhhtj .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #dwfjmxhhtj .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #dwfjmxhhtj .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #dwfjmxhhtj .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #dwfjmxhhtj .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #dwfjmxhhtj .gt_spanner_row { border-bottom-style: hidden; }
+ #dwfjmxhhtj .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #dwfjmxhhtj .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #dwfjmxhhtj .gt_from_md> :first-child { margin-top: 0; }
+ #dwfjmxhhtj .gt_from_md> :last-child { margin-bottom: 0; }
+ #dwfjmxhhtj .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #dwfjmxhhtj .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #dwfjmxhhtj .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #dwfjmxhhtj .gt_row_group_first td { border-top-width: 2px; }
+ #dwfjmxhhtj .gt_row_group_first th { border-top-width: 2px; }
+ #dwfjmxhhtj .gt_striped { background-color: #F4F4F4; }
+ #dwfjmxhhtj .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #dwfjmxhhtj .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #dwfjmxhhtj .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #dwfjmxhhtj .gt_left { text-align: left; }
+ #dwfjmxhhtj .gt_center { text-align: center; }
+ #dwfjmxhhtj .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #dwfjmxhhtj .gt_font_normal { font-weight: normal; }
+ #dwfjmxhhtj .gt_font_bold { font-weight: bold; }
+ #dwfjmxhhtj .gt_font_italic { font-style: italic; }
+ #dwfjmxhhtj .gt_super { font-size: 65%; }
+ #dwfjmxhhtj .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #dwfjmxhhtj .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
