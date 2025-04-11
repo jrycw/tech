@@ -1,0 +1,46 @@
+---
+title: "How to Access the Axes in Plotnine"
+html-table-processing: none
+date: "2025-04-11"
+categories: [python, plotnine]
+jupyter: python3
+image: "p9_ht_ax_text.png"
+---
+
+This is a short post documenting my experience trying to retrieve the `Axes` from [plotnine](https://plotnine.org/).
+
+The idea was inspired by [this code](https://github.com/nrennie/2024-plotnine-contest) and [this video](https://www.youtube.com/watch?v=NBGJuaBF2rc) I came across, but the original solution didn’t quite work for me. Fortunately, I found that we can access the list of `Axes` directly using either [`fig.axes`](https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.axes.html) or [`fig.get_axes()`](https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.get_axes.html#matplotlib.figure.Figure.get_axes).
+
+In the example below, I adapt a snippet from the [plotnine documentation](https://plotnine.org/reference/geom_smooth.html#examples) to demonstrate how to highlight text in color using [HighlightText](https://github.com/znstrider/highlight_text).
+
+
+```{python}
+# | code-fold: false
+# | eval: false
+# | code-summary: Show full code
+import highlight_text as ht
+from plotnine import aes, geom_point, ggplot, labs, theme_matplotlib, theme_set
+from plotnine.data import mpg
+
+theme_set(theme_matplotlib())
+
+p = (
+    ggplot(mpg, aes(x="displ", y="hwy"))
+    + geom_point()
+    + labs(x="displacement", y="horsepower")
+)
+
+fig = p.draw()
+ax = fig.axes[0]  # or via fig.get_axes()[0]
+ht_ax_text = 'Color highlighted by <HighlightText::{"color": "#E58606"}>'
+ht.ax_text(4, 40, ht_ax_text, vsep=3, fontsize=9, va="top", ax=ax)
+fig
+```
+
+![](p9_ht_ax_text.png){fig-align="center" fig-alt="plotnine used in combination with HighlightText"}
+
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
