@@ -7,29 +7,30 @@ jupyter: python3
 image: "alta_ski_resort.png"
 ---
 
-This post is a placeholder for a visualization recreation challenge using Polars and plotnine, inspired by [my previous work](../effective-dataviz-polars-alta-ski-resort/20250210.qmd).
+This post is part of a visualization recreation challenge using Polars and plotnine, inspired by [my earlier work](../effective-dataviz-polars-alta-ski-resort/20250210.qmd).
 
-It’s my first serious attempt at using plotnine—an impressive library, but one with a bit of a learning curve. After a few hours of tinkering, I’m still wrapping my head around the best ways to leverage it effectively. The plot itself could definitely be improved with more refinement and insight.
+It marks my first serious dive into plotnine—an impressive library with a bit of a learning curve.  
+I’ll walk through the journey I took to recreate the visualization. Some parts may overlap with the earlier post, but I believe that’s acceptable to keep this one self-contained.
 
-For now, I’m giving myself a break. I’ll just park the current code here and revisit the full write-up once my thoughts are clearer and ideas more distilled.
-
+The final figure, shown below, visualizes temperature trends for the ski season in Alta over the past few decades. 
 ![](alta_ski_resort.png){fig-align="center" fig-alt="Alta ski resort"}
 
 ```{python}
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
-from functools import partial
-
 import polars as pl
 import polars.selectors as cs
 from highlight_text import ax_text
+import matplotlib.pyplot as plt
+
 from plotnine import (
     aes,
     element_blank,
     element_text,
-    geom_segment,
     geom_line,
+    geom_point,
+    geom_segment,
     geom_text,
     ggplot,
     labs,
@@ -41,6 +42,11 @@ from plotnine import (
 )
 
 
+# https://github.com/mattharrison/datasets/raw/refs/heads/master/data/alta-noaa-1980-2019.csv
+data_path = "alta-noaa-1980-2019.csv"
+columns = ["DATE", "TOBS"]
+idx_colname = "DAY_OF_SEASON"
+
 heading_fontsize = 9.5
 heading_fontweight = "bold"
 subheading_fontsize = 8
@@ -49,15 +55,11 @@ source_fontsize = 6.5
 source_fontweight = "light"
 axis_fontsize = 7
 axis_fontweight = "normal"
+sub_props = {"fontsize": subheading_fontsize, "fontweight": subheading_fontweight}
 
 grey = "#aaaaaa"
 red = "#e3120b"
 blue = "#0000ff"
-
-# https://github.com/mattharrison/datasets/raw/refs/heads/master/data/alta-noaa-1980-2019.csv
-data_path = "alta-noaa-1980-2019.csv"
-columns = ["DATE", "TOBS"]
-df = pl.scan_csv(data_path).select(columns).collect()
 
 
 def get_season_expr(col: str = "DATE", alias: str = "SEASON") -> pl.expr:
@@ -84,29 +86,48 @@ def add_day_of_season_expr(
     )
 
 
-def plot_temps_p9(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+def tweak_df(
+    data_path: str, columns: list[str], idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
+    return (
+        pl.scan_csv(data_path)
+        .select(columns)
+        .with_columns(
+            pl.col("DATE").str.to_datetime(),
+            pl.col("TOBS").interpolate(),
+        )
+        .sort("DATE")
+        .with_columns(
+            # Caveat: Cannot be placed in the previous `with_columns()`
+            # due to different statuses of `TOBS`.
+            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"),
+            get_season_expr(col="DATE", alias="SEASON"),
+        )
+        .with_columns(
+            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname)
+        )
+        .collect()
+    )
+
+
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
     season_temps = df_.filter(pl.col("SEASON").str.contains("Ski")).pivot(
         "SEASON", index=idx_colname, values="TMEAN", aggregate_function="first"
     )
 
-    columns = season_temps.columns
-    columns.remove(idx_colname)
-    columns.remove("Ski 2019")
-
-    df0 = season_temps.unpivot(
+    # main
+    df_main = season_temps.unpivot(
         (cs.starts_with("Ski") - cs.by_name("Ski 2019")),
         index=idx_colname,
         variable_name="year",
         value_name="temp",
     ).select(idx_colname, "temp", pl.col("year").str.slice(-4).cast(pl.Int32))
 
-    # # ---- Decade Averages ----
+    # decades
     decades = [1980, 1990, 2000, 2010]
     blues = ["#0055EE", "#0033CC", "#0011AA", "#3377FF"]
 
-    df_decades = [
+    df_decade_sep = [
         pl.concat(
             [
                 season_temps.select(idx_colname),
@@ -115,136 +136,641 @@ def plot_temps_p9(
                 ).select("temp"),
                 season_temps.with_columns(
                     pl.lit(int(str(decade)[:-1])).alias("DECADE")
-                ).select(
-                    "DECADE",
-                ),
-                season_temps.with_columns(pl.lit(b).alias("color")).select(
-                    "color",
-                ),
+                ).select("DECADE"),
+                season_temps.with_columns(pl.lit(b).alias("color")).select("color"),
             ],
             how="horizontal",
         )
         for b, decade in zip(blues, decades)
     ]
 
-    df0_decade = pl.concat(df_decades, how="vertical")
+    df_decade = pl.concat(df_decade_sep, how="vertical")
 
-    max_ys = [one_df.select(pl.col("temp").max()).item() for one_df in df_decades]
-    max_ys_df = pl.DataFrame(
+    #  decade annotations
+    decade_annts = [
+        one_df.select(pl.col("temp").last()).item() for one_df in df_decade_sep
+    ]
+    df_decade_annt = pl.DataFrame(
         {
-            "x": [192] * len(max_ys),
-            "y": [max_ys[0] - 1, max_ys[1], max_ys[2] - 0.5, max_ys[3] + 1],
+            "x": [185] * len(decade_annts),
+            # adjust y position for better appearance
+            "y": [
+                decade_annts[0],
+                decade_annts[1] + 0.5,
+                decade_annts[2] - 3,
+                decade_annts[3],
+            ],
             "color": blues,
             "label": decades,
         }
     )
 
+    # ski_2019
     ski_2019 = (
         season_temps.select(idx_colname, pl.col("Ski 2019").alias("temp"))
-        # .drop_nulls()
+        .drop_nulls()  # "DAY_OF_SEASON"=181, "temp"=null
         .with_columns(pl.lit(2019).alias("year"))
     )
 
-    fig = (
-        ggplot()
+    # start and end points
+    decade_pts = [
+        pl.concat([one_df.head(1), one_df.tail(1)], how="vertical").select(
+            "DAY_OF_SEASON", "temp", "color"
+        )
+        for one_df in df_decade_sep
+    ]
+
+    df_decade_pts = pl.concat(decade_pts, how="vertical")
+    df_ski_2019_pts = (
+        pl.concat([ski_2019.head(1), ski_2019.tail(1)])
+        .select("DAY_OF_SEASON", "temp")
+        .with_columns(pl.lit(red).alias("color"))
+    )
+
+    # ggplot
+    return (
+        ggplot(mapping=aes(x=idx_colname, y="temp"))
+        # multiple grey lines
         + geom_line(
-            df0, aes(x=idx_colname, y="temp", color="factor(year)"), alpha=0.2, size=1
+            df_main,
+            aes(color="factor(year)"),
+            alpha=0.2,
+            size=0.5,
         )
         + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
+        # 4 blue lines
         + geom_line(
-            data=df0_decade,
-            mapping=aes(x=idx_colname, y="temp", fill="factor(DECADE)"),
-            color=df0_decade["color"],
-            size=1,
+            df_decade,
+            aes(fill="factor(DECADE)"),
+            color=df_decade["color"],
+            size=0.5,
+            lineend="round",
         )
+        # 2019 red line
         + geom_line(
-            data=ski_2019, mapping=aes(x=idx_colname, y="temp"), color=red, size=1
+            ski_2019,
+            color=red,
+            size=0.8,
+            lineend="round",
         )
+        # 1 black dashed line for temp=32F
         + geom_segment(
-            aes(x=0, xend=183, y=32, yend=32),
+            aes(x=0, xend=200, y=32, yend=32),
             color="black",
-            size=1,
+            size=0.5,
             linetype="dashed",
+        )
+        # start and end dots for 4 blue lines
+        + geom_point(
+            df_decade_pts,
+            aes(x="DAY_OF_SEASON", y="temp"),
+            color=df_decade_pts["color"],
+            size=0.2,
+        )
+        # start and end dots for 2019 red line
+        + geom_point(
+            df_ski_2019_pts,
+            aes(x="DAY_OF_SEASON", y="temp"),
+            color=df_ski_2019_pts["color"],
+            size=1,
         )
         + labs(x="Day of season", y="")
         + scale_x_continuous(
-            breaks=[0, 50, 100, 150], limits=(0, 200), expand=(0, 10, 0, 5)
+            breaks=[0, 50, 100, 150], limits=(0, 200), expand=(0, 10, 0, 15)
         )
-        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 55), expand=(0, 0))
+        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
+        # annotations for 4 blue lines
         + geom_text(
-            data=max_ys_df,
-            mapping=aes(x="x", y="y", label="label"),
-            color=max_ys_df["color"],
-            size=16,
-            ha="center",
+            df_decade_annt,
+            aes(x="x", y="y", label="label"),
+            color=df_decade_annt["color"],
+            size=axis_fontsize,
+            fontweight=axis_fontweight,
+            ha="left",
+            va="center",
         )
+    )
+
+
+def points_to_inches(points):
+    return points / 72
+
+
+def themify(p: ggplot) -> plt.Figure:
+    figsize = (160, 165)  # pts
+    figsize_inches = [points_to_inches(dim) for dim in figsize]
+
+    return (
+        p
         + theme_classic()
         + theme(
             axis_line_y=element_blank(),
-            axis_text_x=element_text(weight="bold"),
-            axis_text_y=element_text(weight="bold"),
+            axis_title_x=element_text(weight=axis_fontweight, size=axis_fontsize),
+            axis_title_y=element_text(weight=axis_fontweight, size=axis_fontsize),
+            axis_text_x=element_text(color="black"),
+            axis_text_y=element_text(color="black"),
+            dpi=300,
+            figure_size=figsize_inches,
+            aspect_ratio=2 / 3,
+            text=element_text("Roboto"),
         )
     ).draw(show=False)
 
-    return fig
 
-idx_colname = "DAY_OF_SEASON"
-
-fig = (
-    df.with_columns(
-        pl.col("DATE").str.to_datetime(),
-        pl.col("TOBS").interpolate(),
+def add_ax_text(ax):
+    ax_text(
+        s="<Alta Ski Resort>\n<Temperature trends by >\n<decade>< and ><2019>",
+        x=-5,
+        y=55,
+        fontsize=heading_fontsize,
+        ax=ax,
+        va="bottom",
+        ha="left",
+        zorder=5,
+        highlight_textprops=[
+            {"fontsize": heading_fontsize, "fontweight": heading_fontweight},
+            sub_props,
+            {"color": blue, **sub_props},
+            sub_props,
+            {"color": red, **sub_props},
+        ],
     )
-    .sort("DATE")
-    .with_columns(
-        # Caveat: Cannot be placed in the previous `with_columns()`
-        # due to different statuses of `TOBS`.
-        pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"),
-        get_season_expr(col="DATE", alias="SEASON"),
+
+    ax.text(
+        0,
+        -10,
+        "Source: NOAA",
+        fontsize=source_fontsize,
+        fontweight=source_fontweight,
+        color=grey,
     )
-    .with_columns(
-        add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname)
-    )
-    .pipe(partial(plot_temps_p9, idx_colname=idx_colname))
-)
+    return ax
 
 
-fig.set_size_inches(6, 5, forward=True)
-fig.set_dpi(300)
+df = tweak_df(data_path, columns, idx_colname)
+p = plot_temps(df, idx_colname)
+fig = themify(p)
 ax = fig.axes[0]
-
-sub_props = {"fontsize": subheading_fontsize, "fontweight": subheading_fontweight}
-
-ax_text(
-    s="<Alta Ski Resort>\n<Temperature trends by >\n<decade>< and ><2019>",
-    x=-5,
-    y=52,
-    fontsize=heading_fontsize,
-    ax=ax,
-    va="bottom",
-    ha="left",
-    zorder=5,
-    highlight_textprops=[
-        {"fontsize": heading_fontsize, "fontweight": heading_fontweight},
-        sub_props,
-        {"color": blue, **sub_props},
-        sub_props,
-        {"color": red, **sub_props},
-    ],
-)
-
-ax.text(
-    0,
-    5,
-    "Source: NOAA",
-    fontsize=source_fontsize,
-    fontweight=source_fontweight,
-    color=grey,
-)
-
+ax = add_ax_text(ax)
 fig
 ```
 
+
+## Data Processing Pipeline
+Below is the data pipeline used to generate the DataFrame for the upcoming visualization stage: 
+```python
+def tweak_df(data_path: str, columns: list[str], idx_colname: str = "DAY_OF_SEASON"):
+    return (
+        pl.scan_csv(data_path)
+        .select(columns)
+        .with_columns(
+            pl.col("DATE").str.to_datetime(), # <1>
+            pl.col("TOBS").interpolate(), # <2>
+        )
+        .sort("DATE")
+        .with_columns(
+            # Caveat: Cannot be placed in the previous `with_columns()`
+            # due to different statuses of `TOBS`.
+            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"), # <3>
+            get_season_expr(col="DATE", alias="SEASON"), # <4>
+        )
+        .with_columns(
+            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname) # <5>
+        )
+        .collect()
+    )
+```
+1. Convert the `DATE` column to a datetime format.  
+2. Perform interpolation on the `TOBS` column.  
+3. Compute a 28-day rolling average for `TOBS`.  
+4. Use `get_season_expr()` to categorize each date into a `SEASON`.  
+5. Apply `add_day_of_season_expr()` to calculate `DAY_OF_SEASON`, representing days elapsed since the start of the season.  
+
+
+The first three steps involve straightforward Polars expressions. In the following two sub-sections, we’ll dive deeper into steps 4 and 5.  
+
+
+### Categorizing Dates into `Summer` and `Ski` Seasons  
+To analyze seasonal trends, we classify dates into two categories:  
+
+* **`Summer`**: Covers May through October.  
+* **`Ski`**: Covers November through April.  
+
+If a date falls in November or December, it is assigned to the following year's season. For example, `2015-10-31` is categorized as `Summer 2015`, while `2015-11-01` belongs to `Ski 2016`.  
+
+To implement this logic, we define `get_season_expr()`, which leverages Polars' [when-then-otherwise](https://docs.pola.rs/api/python/dev/reference/expressions/api/polars.when.html) expressions to determine the season and year.  
+
+```python
+def get_season_expr(col: str = "DATE", alias: str = "SEASON") -> pl.expr:
+    return (
+        (
+            pl.when((pl.col(col).dt.month().is_between(5, 10, closed="both")))
+            .then(pl.lit("Summer "))
+            .otherwise(pl.lit("Ski "))
+        )
+        .add(
+            pl.when(pl.col(col).dt.month() < 11)
+            .then(pl.col(col).dt.year().cast(pl.String))
+            .otherwise(pl.col(col).dt.year().add(1).cast(pl.String))
+        )
+        .alias(alias)
+    )
+```
+In this function:
+
+* If the month is between May and October, the function assigns `"Summer "`. Otherwise, it assigns `"Ski "` (with a trailing space for concatenation).  
+* The year is determined based on the month: dates from January to October retain their current year, while those in November and December are shifted to the next year.  
+
+By applying this function, we can add a `SEASON` column to a DataFrame, ensuring each date is categorized correctly.
+
+### Calculating the Total Days for Each Season
+Once we have the seasonal categories, we calculate `DAY_OF_SEASON`, which tracks the number of days elapsed within each season. This is achieved using the [pl.expr.over()](https://docs.pola.rs/api/python/dev/reference/expressions/api/polars.Expr.over.html) expression, which operates similarly to Pandas' `groupby().transform()`, applying transformations within groups.  
+
+```python
+def add_day_of_season_expr(
+    col: str = "DATE", group_col: str = "SEASON", alias: str = "DAY_OF_SEASON"
+) -> pl.expr:
+    return (
+        (pl.col(col) - pl.col(col).min()).dt.total_days().over(group_col).alias(alias)
+    )
+```
+
+## Visualizing Temperature Trends with Plotnine
+With the data prepared, we now turn to visualization. Since the `plot_temps()` function is quite long, we’ll break it down into several parts for clarity. In the end, we’ll construct multiple separate DataFrames and use them to build a `ggplot` object, which we’ll return.
+
+### Reshaping the Main DataFrame
+We begin by filtering the dataset to include only rows corresponding to `Ski` seasons. Then, using [`pl.DataFrame.pivot()`](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html) and [`pl.DataFrame.unpivot()`](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html), we reshape the main DataFrame.
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    season_temps = df_.filter(pl.col("SEASON").str.contains("Ski")).pivot(
+        "SEASON", index=idx_colname, values="TMEAN", aggregate_function="first"
+    )
+
+    df_main = season_temps.unpivot(
+        (cs.starts_with("Ski") - cs.by_name("Ski 2019")),
+        index=idx_colname,
+        variable_name="year",
+        value_name="temp",
+    ).select(idx_colname, "temp", pl.col("year").str.slice(-4).cast(pl.Int32))
+```
+Note: We intentionally exclude `Ski 2019` here, as it will be handled separately later.
+
+Preview of `df_main`:
+```python
+shape: (7_098, 3)
+┌───────────────┬───────────┬──────┐
+│ DAY_OF_SEASON ┆ temp      ┆ year │
+│ ---           ┆ ---       ┆ ---  │
+│ i64           ┆ f64       ┆ i32  │
+╞═══════════════╪═══════════╪══════╡
+│ 0             ┆ null      ┆ 1980 │
+│ 1             ┆ null      ┆ 1980 │
+│ 2             ┆ null      ┆ 1980 │
+│ 3             ┆ null      ┆ 1980 │
+│ 4             ┆ null      ┆ 1980 │
+│ …             ┆ …         ┆ …    │
+│ 177           ┆ 44.0      ┆ 2018 │
+│ 178           ┆ 44.464286 ┆ 2018 │
+│ 179           ┆ 44.607143 ┆ 2018 │
+│ 180           ┆ 44.142857 ┆ 2018 │
+│ 181           ┆ null      ┆ 2018 │
+└───────────────┴───────────┴──────┘
+``` 
+
+### Creating a DataFrame for Decade Averages
+To show long-term patterns, we create a DataFrame with four lines, each representing the average seasonal temperature trend by decade.
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    ...
+    decades = [1980, 1990, 2000, 2010]
+    blues = ["#0055EE", "#0033CC", "#0011AA", "#3377FF"]
+
+    df_decade_sep = [
+        pl.concat(
+            [
+                season_temps.select(idx_colname),
+                season_temps.with_columns(
+                    pl.mean_horizontal(cs.contains(str(decade)[:-1])).alias("temp")
+                ).select("temp"),
+                season_temps.with_columns(
+                    pl.lit(int(str(decade)[:-1])).alias("DECADE")
+                ).select("DECADE"),
+                season_temps.with_columns(pl.lit(b).alias("color")).select("color"),
+            ],
+            how="horizontal",
+        )
+        for b, decade in zip(blues, decades)
+    ]
+
+    df_decade = pl.concat(df_decade_sep, how="vertical")
+```
+
+
+Preview of `df_decade`:
+```python
+shape: (728, 4)
+┌───────────────┬───────────┬────────┬─────────┐
+│ DAY_OF_SEASON ┆ temp      ┆ DECADE ┆ color   │
+│ ---           ┆ ---       ┆ ---    ┆ ---     │
+│ i64           ┆ f64       ┆ i32    ┆ str     │
+╞═══════════════╪═══════════╪════════╪═════════╡
+│ 0             ┆ 32.704365 ┆ 198    ┆ #0055EE │
+│ 1             ┆ 32.156746 ┆ 198    ┆ #0055EE │
+│ 2             ┆ 31.875    ┆ 198    ┆ #0055EE │
+│ 3             ┆ 31.561508 ┆ 198    ┆ #0055EE │
+│ 4             ┆ 31.041667 ┆ 198    ┆ #0055EE │
+│ …             ┆ …         ┆ …      ┆ …       │
+│ 177           ┆ 39.275    ┆ 201    ┆ #3377FF │
+│ 178           ┆ 39.639286 ┆ 201    ┆ #3377FF │
+│ 179           ┆ 40.092857 ┆ 201    ┆ #3377FF │
+│ 180           ┆ 40.653571 ┆ 201    ┆ #3377FF │
+│ 181           ┆ 41.428571 ┆ 201    ┆ #3377FF │
+└───────────────┴───────────┴────────┴─────────┘
+```
+
+### Creating a DataFrame for Decade Annotations
+We annotate the four decade lines with their respective labels for clarity.
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    ...
+    decade_annts = [
+        one_df.select(pl.col("temp").last()).item() for one_df in df_decade_sep
+    ]
+    df_decade_annt = pl.DataFrame(
+        {
+            "x": [185] * len(decade_annts),
+            # adjust y position for better appearance
+            "y": [
+                decade_annts[0],
+                decade_annts[1] + 0.5,
+                decade_annts[2] - 3,
+                decade_annts[3],
+            ],
+            "label": decades,
+        }
+    )
+
+```
+
+Preview of `df_decade_annt`:
+```python
+shape: (4, 4)
+┌─────┬───────────┬─────────┬───────┐
+│ x   ┆ y         ┆ color   ┆ label │
+│ --- ┆ ---       ┆ ---     ┆ ---   │
+│ i64 ┆ f64       ┆ str     ┆ i64   │
+╞═════╪═══════════╪═════════╪═══════╡
+│ 185 ┆ 34.357143 ┆ #0055EE ┆ 1980  │
+│ 185 ┆ 45.035714 ┆ #0033CC ┆ 1990  │
+│ 185 ┆ 37.77381  ┆ #0011AA ┆ 2000  │
+│ 185 ┆ 41.428571 ┆ #3377FF ┆ 2010  │
+└─────┴───────────┴─────────┴───────┘
+```
+
+### Isolating the 2019 Ski Season
+We separate the 2019 `Ski` season so we can control its appearance independently in the final plot.
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    ...
+    ski_2019 = (
+        season_temps.select(idx_colname, pl.col("Ski 2019").alias("temp"))
+        .drop_nulls()  # "DAY_OF_SEASON"=181, "temp"=null
+        .with_columns(pl.lit(2019).alias("year"))
+    )
+
+```
+Preview of `ski_2019`:
+```python
+shape: (181, 3)
+┌───────────────┬───────────┬──────┐
+│ DAY_OF_SEASON ┆ temp      ┆ year │
+│ ---           ┆ ---       ┆ ---  │
+│ i64           ┆ f64       ┆ i32  │
+╞═══════════════╪═══════════╪══════╡
+│ 0             ┆ 33.214286 ┆ 2019 │
+│ 1             ┆ 32.892857 ┆ 2019 │
+│ 2             ┆ 32.25     ┆ 2019 │
+│ 3             ┆ 31.142857 ┆ 2019 │
+│ 4             ┆ 30.357143 ┆ 2019 │
+│ …             ┆ …         ┆ …    │
+│ 176           ┆ 38.607143 ┆ 2019 │
+│ 177           ┆ 39.285714 ┆ 2019 │
+│ 178           ┆ 39.964286 ┆ 2019 │
+│ 179           ┆ 40.464286 ┆ 2019 │
+│ 180           ┆ 41.25     ┆ 2019 │
+└───────────────┴───────────┴──────┘
+```
+
+### Creating Start and End Point DataFrames
+To highlight the season boundaries, we add markers at the start and end points of each decade line as well as the 2019 `Ski` season.
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    ...
+    decade_pts = [
+        pl.concat([one_df.head(1), one_df.tail(1)], how="vertical").select(
+            "DAY_OF_SEASON", "temp", "color"
+        )
+        for one_df in df_decade_sep
+    ]
+
+    df_decade_pts = pl.concat(decade_pts, how="vertical")
+    df_ski_2019_pts = (
+        pl.concat([ski_2019.head(1), ski_2019.tail(1)])
+        .select("DAY_OF_SEASON", "temp")
+        .with_columns(pl.lit(red).alias("color"))
+    )
+```
+Preview of `df_decade_pts`:
+```python
+shape: (8, 3)
+┌───────────────┬───────────┬─────────┐
+│ DAY_OF_SEASON ┆ temp      ┆ color   │
+│ ---           ┆ ---       ┆ ---     │
+│ i64           ┆ f64       ┆ str     │
+╞═══════════════╪═══════════╪═════════╡
+│ 0             ┆ 32.704365 ┆ #0055EE │
+│ 181           ┆ 34.357143 ┆ #0055EE │
+│ 0             ┆ 34.851786 ┆ #0033CC │
+│ 181           ┆ 44.535714 ┆ #0033CC │
+│ 0             ┆ 35.719643 ┆ #0011AA │
+│ 181           ┆ 40.77381  ┆ #0011AA │
+│ 0             ┆ 35.380357 ┆ #3377FF │
+│ 181           ┆ 41.428571 ┆ #3377FF │
+└───────────────┴───────────┴─────────┘
+```
+
+Preview of `df_ski_2019_pts`:
+```python
+shape: (2, 3)
+┌───────────────┬───────────┬─────────┐
+│ DAY_OF_SEASON ┆ temp      ┆ color   │
+│ ---           ┆ ---       ┆ ---     │
+│ i64           ┆ f64       ┆ str     │
+╞═══════════════╪═══════════╪═════════╡
+│ 0             ┆ 33.214286 ┆ #e3120b │
+│ 180           ┆ 41.25     ┆ #e3120b │
+└───────────────┴───────────┴─────────┘
+```
+
+### Creating the ggplot Object
+We now bring everything together into a single `ggplot` object:
+```python
+def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
+    ...
+    return (
+        ggplot(mapping=aes(x=idx_colname, y="temp")) # <1>
+        # multiple grey lines
+        + geom_line( 
+            df_main,
+            aes(color="factor(year)"), # <2>
+            alpha=0.2,
+            size=0.5,
+        )
+        + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
+        # 4 blue lines
+        + geom_line(
+            df_decade,
+            aes(fill="factor(DECADE)"), # <3>
+            color=df_decade["color"],
+            size=0.5,
+            lineend="round", # <4>
+        )
+        # 2019 red line
+        + geom_line(
+            ski_2019,
+            color=red,
+            size=0.8,
+            lineend="round",
+        )
+        # 1 black dashed line for temp=32F
+        + geom_segment( # <5>
+            aes(x=0, xend=200, y=32, yend=32),
+            color="black",
+            size=0.5,
+            linetype="dashed",
+        )
+        # start and end dots for 4 blue lines
+        + geom_point(
+            df_decade_pts,
+            aes(x="DAY_OF_SEASON", y="temp"),
+            color=df_decade_pts["color"],
+            size=0.2,
+        )
+        # start and end dots for 2019 red line
+        + geom_point(
+            df_ski_2019_pts,
+            aes(x="DAY_OF_SEASON", y="temp"),
+            color=df_ski_2019_pts["color"],
+            size=1,
+        )
+        + labs(x="Day of season", y="")
+        + scale_x_continuous(
+            breaks=[0, 50, 100, 150], limits=(0, 200), expand=(0, 10, 0, 15)
+        )
+        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
+        # annotations for 4 blue lines
+        + geom_text(
+            df_decade_annt,
+            aes(x="x", y="y", label="label"), # <6>
+            color=df_decade_annt["color"],
+            size=axis_fontsize,
+            fontweight=axis_fontweight,
+            ha="left",
+            va="center",
+        )
+    )
+```
+
+1. We define the default aesthetic mapping in [ggplot()](https://plotnine.org/reference/ggplot.html#plotnine.ggplot) to avoid repetition in later layers.
+2. `factor(year)` is mapped to `color`, and the `Greys` colormap is applied using [scale_color_cmap()](https://plotnine.org/reference/scale_color_cmap.html#plotnine.scale_color_cmap)—a very convenient way to show progression.
+3. For the decade lines, `factor(DECADE)` is mapped to the `fill` aesthetic. Colors are controlled via a `color` column in the dataframe—an effective trick.
+4. The `lineend` parameter is useful if you don’t plan to mark endpoints with dots.
+5. Using [geom_hline()](https://plotnine.org/reference/geom_hline.html#plotnine.geom_hline) would extend the line infinitely in both directions. In this case, we used [geom_segment()](https://plotnine.org/reference/geom_segment.html#plotnine.geom_segment) to constrain the line.
+6. The `label` aesthetic in [geom_text()](https://plotnine.org/reference/geom_text.html#plotnine.geom_text) is mapped from the `label` column in `df_decade_annt`.
+
+
+## Touchups
+
+### Adding a Theme
+We apply a custom theme using the `themify()` function, adjusting various **themeable** elements to refine the plot’s appearance:
+```python
+def points_to_inches(points):
+    return points / 72
+
+
+def themify(p: ggplot) -> plt.Figure:
+    figsize = (160, 165)  # pts
+    figsize_inches = [points_to_inches(dim) for dim in figsize]
+
+    return (
+        p
+        + theme_classic()
+        + theme(
+            axis_line_y=element_blank(),
+            axis_title_x=element_text(weight=axis_fontweight, size=axis_fontsize),
+            axis_title_y=element_text(weight=axis_fontweight, size=axis_fontsize),
+            axis_text_x=element_text(color="black"),
+            axis_text_y=element_text(color="black"),
+            dpi=300,
+            figure_size=figsize_inches,
+            aspect_ratio=2 / 3,
+            text=element_text("Roboto"),
+        )
+    ).draw(show=False)
+```
+
+### Adding a Title and Source Note
+For the title, we use `ax_text()` from the [HighlightText](https://github.com/znstrider/highlight_text) library. It allows inline text highlighting using `< >`, letting us emphasize specific parts of the title like `<Alta Ski Resort>`, `<Temperature trends by >`, `<decade>`, `< and >`, and `<2019>` with customized styles.
+
+To add a source note, we simply use Matplotlib's `ax.text()`: 
+```python
+def add_ax_text(ax):
+    ax_text(
+        s="<Alta Ski Resort>\n<Temperature trends by >\n<decade>< and ><2019>",
+        x=-5,
+        y=55,
+        fontsize=heading_fontsize,
+        ax=ax,
+        va="bottom",
+        ha="left",
+        zorder=5,
+        highlight_textprops=[
+            {"fontsize": heading_fontsize, "fontweight": heading_fontweight},
+            sub_props,
+            {"color": blue, **sub_props},
+            sub_props,
+            {"color": red, **sub_props},
+        ],
+    )
+
+    ax.text(
+        0,
+        -10,
+        "Source: NOAA",
+        fontsize=source_fontsize,
+        fontweight=source_fontweight,
+        color=grey,
+    )
+    return ax
+```
+
+## Rendering the Plot
+Now we put everything together and render the final plot. A key trick here is retrieving the `ax` object using `fig.axes[0]`, which allows us to apply both HighlightText and regular Matplotlib functions.
+```python
+df = tweak_df(data_path, columns, idx_colname)
+p = plot_temps(df, idx_colname)
+fig = themify(p)
+ax = fig.axes[0]
+ax = add_ax_text(ax)
+fig
+```
+
+## Takeaways
+Wrapping up this post, I’ve come to appreciate how powerful the plotnine library truly is. While its aesthetic system requires a bit of mental shift, it offers a clean, expressive way to build layered visualizations.
+
+One key takeaway for me is that each layer can operate on its own dataset, which adds a lot of flexibility. What I enjoyed most, though, is the theme system—it makes it easy to define a consistent visual style that can be reused across different plots.
+
+One limitation I ran into was the lack of a plotnine-native alternative to [pli.subplot_mosaic()](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot_mosaic.html). This feature allows for more granular layout control—for example, dividing the figure into separate axes with custom height ratios for the title, main plot, and source note using `gridspec_kw={"height_ratios": [6, 12, 1]}`.
 
 ::: {.callout-warning}
 # Disclaimer
