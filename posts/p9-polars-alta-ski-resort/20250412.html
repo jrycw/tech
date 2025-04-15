@@ -224,7 +224,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>It marks my first serious dive into plotnine—an impressive library with a bit of a learning curve.<br>
 I’ll walk through the journey I took to recreate the visualization. Some parts may overlap with the earlier post, but I believe that’s acceptable to keep this one self-contained.</p>
 <p>The final figure, shown below, visualizes temperature trends for the ski season in Alta over the past few decades. <img src="alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center" alt="Alta ski resort"></p>
-<div id="d816c159" class="cell" data-execution_count="1">
+<div id="03543ea9" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -400,45 +400,45 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a>        ggplot(mapping<span class="op">=</span>aes(x<span class="op">=</span>idx_colname, y<span class="op">=</span><span class="st">"temp"</span>))</span>
 <span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a>        <span class="co"># multiple grey lines</span></span>
 <span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
-<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>            df_main,</span>
-<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>            aes(color<span class="op">=</span><span class="st">"factor(year)"</span>),</span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(color<span class="op">=</span><span class="st">"factor(year)"</span>),</span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_main,</span>
 <span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>            alpha<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> scale_color_cmap(<span class="st">"Greys"</span>, guide<span class="op">=</span><span class="va">None</span>, labels<span class="op">=</span>[<span class="dv">10</span>, <span class="dv">32</span>, <span class="dv">50</span>])</span>
 <span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4 blue lines</span></span>
 <span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
-<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a>            df_decade,</span>
-<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>            aes(fill<span class="op">=</span><span class="st">"factor(DECADE)"</span>),</span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(fill<span class="op">=</span><span class="st">"factor(DECADE)"</span>),</span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade,</span>
 <span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade[<span class="st">"color"</span>],</span>
 <span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a>            lineend<span class="op">=</span><span class="st">"round"</span>,</span>
 <span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2019 red line</span></span>
 <span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
-<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>            ski_2019,</span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>ski_2019,</span>
 <span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>red,</span>
 <span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.8</span>,</span>
 <span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a>            lineend<span class="op">=</span><span class="st">"round"</span>,</span>
 <span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1 black dashed line for temp=32F</span></span>
 <span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_segment(</span>
-<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="dv">0</span>, xend<span class="op">=</span><span class="dv">200</span>, y<span class="op">=</span><span class="dv">32</span>, yend<span class="op">=</span><span class="dv">32</span>),</span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="dv">0</span>, xend<span class="op">=</span><span class="dv">200</span>, y<span class="op">=</span><span class="dv">32</span>, yend<span class="op">=</span><span class="dv">32</span>),</span>
 <span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"black"</span>,</span>
 <span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a>            linetype<span class="op">=</span><span class="st">"dashed"</span>,</span>
 <span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a>        <span class="co"># start and end dots for 4 blue lines</span></span>
 <span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_point(</span>
-<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>            df_decade_pts,</span>
-<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade_pts,</span>
 <span id="cb1-206"><a href="#cb1-206" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade_pts[<span class="st">"color"</span>],</span>
 <span id="cb1-207"><a href="#cb1-207" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span id="cb1-208"><a href="#cb1-208" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb1-209"><a href="#cb1-209" aria-hidden="true" tabindex="-1"></a>        <span class="co"># start and end dots for 2019 red line</span></span>
 <span id="cb1-210"><a href="#cb1-210" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_point(</span>
-<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a>            df_ski_2019_pts,</span>
-<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="cb1-211"><a href="#cb1-211" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="cb1-212"><a href="#cb1-212" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_ski_2019_pts,</span>
 <span id="cb1-213"><a href="#cb1-213" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_ski_2019_pts[<span class="st">"color"</span>],</span>
 <span id="cb1-214"><a href="#cb1-214" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="dv">1</span>,</span>
 <span id="cb1-215"><a href="#cb1-215" aria-hidden="true" tabindex="-1"></a>        )</span>
@@ -449,8 +449,8 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <span id="cb1-220"><a href="#cb1-220" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> scale_y_continuous(breaks<span class="op">=</span>[<span class="dv">10</span>, <span class="dv">32</span>, <span class="dv">40</span>], limits<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">70</span>), expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>))</span>
 <span id="cb1-221"><a href="#cb1-221" aria-hidden="true" tabindex="-1"></a>        <span class="co"># annotations for 4 blue lines</span></span>
 <span id="cb1-222"><a href="#cb1-222" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_text(</span>
-<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a>            df_decade_annt,</span>
-<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"x"</span>, y<span class="op">=</span><span class="st">"y"</span>, label<span class="op">=</span><span class="st">"label"</span>),</span>
+<span id="cb1-223"><a href="#cb1-223" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"x"</span>, y<span class="op">=</span><span class="st">"y"</span>, label<span class="op">=</span><span class="st">"label"</span>),</span>
+<span id="cb1-224"><a href="#cb1-224" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade_annt,</span>
 <span id="cb1-225"><a href="#cb1-225" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade_annt[<span class="st">"color"</span>],</span>
 <span id="cb1-226"><a href="#cb1-226" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span>axis_fontsize,</span>
 <span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a>            fontweight<span class="op">=</span>axis_fontweight,</span>
@@ -817,46 +817,46 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <span id="annotated-cell-16-3"><a href="#annotated-cell-16-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-16-4" class="code-annotation-target"><a href="#annotated-cell-16-4" aria-hidden="true" tabindex="-1"></a>        ggplot(mapping<span class="op">=</span>aes(x<span class="op">=</span>idx_colname, y<span class="op">=</span><span class="st">"temp"</span>))</span>
 <span id="annotated-cell-16-5"><a href="#annotated-cell-16-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># multiple grey lines</span></span>
-<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line( </span>
-<span id="annotated-cell-16-7"><a href="#annotated-cell-16-7" aria-hidden="true" tabindex="-1"></a>            df_main,</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-16-8" class="code-annotation-target"><a href="#annotated-cell-16-8" aria-hidden="true" tabindex="-1"></a>            aes(color<span class="op">=</span><span class="st">"factor(year)"</span>),</span>
+<span id="annotated-cell-16-6"><a href="#annotated-cell-16-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-16-7" class="code-annotation-target"><a href="#annotated-cell-16-7" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(color<span class="op">=</span><span class="st">"factor(year)"</span>),</span>
+<span id="annotated-cell-16-8"><a href="#annotated-cell-16-8" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_main,</span>
 <span id="annotated-cell-16-9"><a href="#annotated-cell-16-9" aria-hidden="true" tabindex="-1"></a>            alpha<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span id="annotated-cell-16-10"><a href="#annotated-cell-16-10" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <span id="annotated-cell-16-11"><a href="#annotated-cell-16-11" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="annotated-cell-16-12"><a href="#annotated-cell-16-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> scale_color_cmap(<span class="st">"Greys"</span>, guide<span class="op">=</span><span class="va">None</span>, labels<span class="op">=</span>[<span class="dv">10</span>, <span class="dv">32</span>, <span class="dv">50</span>])</span>
 <span id="annotated-cell-16-13"><a href="#annotated-cell-16-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 4 blue lines</span></span>
 <span id="annotated-cell-16-14"><a href="#annotated-cell-16-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
-<span id="annotated-cell-16-15"><a href="#annotated-cell-16-15" aria-hidden="true" tabindex="-1"></a>            df_decade,</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-16-16" class="code-annotation-target"><a href="#annotated-cell-16-16" aria-hidden="true" tabindex="-1"></a>            aes(fill<span class="op">=</span><span class="st">"factor(DECADE)"</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-16-15" class="code-annotation-target"><a href="#annotated-cell-16-15" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(fill<span class="op">=</span><span class="st">"factor(DECADE)"</span>),</span>
+<span id="annotated-cell-16-16"><a href="#annotated-cell-16-16" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade,</span>
 <span id="annotated-cell-16-17"><a href="#annotated-cell-16-17" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade[<span class="st">"color"</span>],</span>
 <span id="annotated-cell-16-18"><a href="#annotated-cell-16-18" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-16-19" class="code-annotation-target"><a href="#annotated-cell-16-19" aria-hidden="true" tabindex="-1"></a>            lineend<span class="op">=</span><span class="st">"round"</span>,</span>
 <span id="annotated-cell-16-20"><a href="#annotated-cell-16-20" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="annotated-cell-16-21"><a href="#annotated-cell-16-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2019 red line</span></span>
 <span id="annotated-cell-16-22"><a href="#annotated-cell-16-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_line(</span>
-<span id="annotated-cell-16-23"><a href="#annotated-cell-16-23" aria-hidden="true" tabindex="-1"></a>            ski_2019,</span>
+<span id="annotated-cell-16-23"><a href="#annotated-cell-16-23" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>ski_2019,</span>
 <span id="annotated-cell-16-24"><a href="#annotated-cell-16-24" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>red,</span>
 <span id="annotated-cell-16-25"><a href="#annotated-cell-16-25" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.8</span>,</span>
 <span id="annotated-cell-16-26"><a href="#annotated-cell-16-26" aria-hidden="true" tabindex="-1"></a>            lineend<span class="op">=</span><span class="st">"round"</span>,</span>
 <span id="annotated-cell-16-27"><a href="#annotated-cell-16-27" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="annotated-cell-16-28"><a href="#annotated-cell-16-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 1 black dashed line for temp=32F</span></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-16-29" class="code-annotation-target"><a href="#annotated-cell-16-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_segment(</span>
-<span id="annotated-cell-16-30"><a href="#annotated-cell-16-30" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="dv">0</span>, xend<span class="op">=</span><span class="dv">200</span>, y<span class="op">=</span><span class="dv">32</span>, yend<span class="op">=</span><span class="dv">32</span>),</span>
+<span id="annotated-cell-16-30"><a href="#annotated-cell-16-30" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="dv">0</span>, xend<span class="op">=</span><span class="dv">200</span>, y<span class="op">=</span><span class="dv">32</span>, yend<span class="op">=</span><span class="dv">32</span>),</span>
 <span id="annotated-cell-16-31"><a href="#annotated-cell-16-31" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"black"</span>,</span>
 <span id="annotated-cell-16-32"><a href="#annotated-cell-16-32" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.5</span>,</span>
 <span id="annotated-cell-16-33"><a href="#annotated-cell-16-33" aria-hidden="true" tabindex="-1"></a>            linetype<span class="op">=</span><span class="st">"dashed"</span>,</span>
 <span id="annotated-cell-16-34"><a href="#annotated-cell-16-34" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="annotated-cell-16-35"><a href="#annotated-cell-16-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># start and end dots for 4 blue lines</span></span>
 <span id="annotated-cell-16-36"><a href="#annotated-cell-16-36" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_point(</span>
-<span id="annotated-cell-16-37"><a href="#annotated-cell-16-37" aria-hidden="true" tabindex="-1"></a>            df_decade_pts,</span>
-<span id="annotated-cell-16-38"><a href="#annotated-cell-16-38" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="annotated-cell-16-37"><a href="#annotated-cell-16-37" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="annotated-cell-16-38"><a href="#annotated-cell-16-38" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade_pts,</span>
 <span id="annotated-cell-16-39"><a href="#annotated-cell-16-39" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade_pts[<span class="st">"color"</span>],</span>
 <span id="annotated-cell-16-40"><a href="#annotated-cell-16-40" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="fl">0.2</span>,</span>
 <span id="annotated-cell-16-41"><a href="#annotated-cell-16-41" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="annotated-cell-16-42"><a href="#annotated-cell-16-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># start and end dots for 2019 red line</span></span>
 <span id="annotated-cell-16-43"><a href="#annotated-cell-16-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_point(</span>
-<span id="annotated-cell-16-44"><a href="#annotated-cell-16-44" aria-hidden="true" tabindex="-1"></a>            df_ski_2019_pts,</span>
-<span id="annotated-cell-16-45"><a href="#annotated-cell-16-45" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="annotated-cell-16-44"><a href="#annotated-cell-16-44" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"DAY_OF_SEASON"</span>, y<span class="op">=</span><span class="st">"temp"</span>),</span>
+<span id="annotated-cell-16-45"><a href="#annotated-cell-16-45" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_ski_2019_pts,</span>
 <span id="annotated-cell-16-46"><a href="#annotated-cell-16-46" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_ski_2019_pts[<span class="st">"color"</span>],</span>
 <span id="annotated-cell-16-47"><a href="#annotated-cell-16-47" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span><span class="dv">1</span>,</span>
 <span id="annotated-cell-16-48"><a href="#annotated-cell-16-48" aria-hidden="true" tabindex="-1"></a>        )</span>
@@ -867,8 +867,8 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <span id="annotated-cell-16-53"><a href="#annotated-cell-16-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> scale_y_continuous(breaks<span class="op">=</span>[<span class="dv">10</span>, <span class="dv">32</span>, <span class="dv">40</span>], limits<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">70</span>), expand<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">0</span>))</span>
 <span id="annotated-cell-16-54"><a href="#annotated-cell-16-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># annotations for 4 blue lines</span></span>
 <span id="annotated-cell-16-55"><a href="#annotated-cell-16-55" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span> geom_text(</span>
-<span id="annotated-cell-16-56"><a href="#annotated-cell-16-56" aria-hidden="true" tabindex="-1"></a>            df_decade_annt,</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-16-57" class="code-annotation-target"><a href="#annotated-cell-16-57" aria-hidden="true" tabindex="-1"></a>            aes(x<span class="op">=</span><span class="st">"x"</span>, y<span class="op">=</span><span class="st">"y"</span>, label<span class="op">=</span><span class="st">"label"</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-16" data-target-annotation="6" onclick="event.preventDefault();">6</a><span id="annotated-cell-16-56" class="code-annotation-target"><a href="#annotated-cell-16-56" aria-hidden="true" tabindex="-1"></a>            mapping<span class="op">=</span>aes(x<span class="op">=</span><span class="st">"x"</span>, y<span class="op">=</span><span class="st">"y"</span>, label<span class="op">=</span><span class="st">"label"</span>),</span>
+<span id="annotated-cell-16-57"><a href="#annotated-cell-16-57" aria-hidden="true" tabindex="-1"></a>            data<span class="op">=</span>df_decade_annt,</span>
 <span id="annotated-cell-16-58"><a href="#annotated-cell-16-58" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span>df_decade_annt[<span class="st">"color"</span>],</span>
 <span id="annotated-cell-16-59"><a href="#annotated-cell-16-59" aria-hidden="true" tabindex="-1"></a>            size<span class="op">=</span>axis_fontsize,</span>
 <span id="annotated-cell-16-60"><a href="#annotated-cell-16-60" aria-hidden="true" tabindex="-1"></a>            fontweight<span class="op">=</span>axis_fontweight,</span>
@@ -883,11 +883,11 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 </dd>
 <dt data-target-cell="annotated-cell-16" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-16" data-code-lines="8" data-code-annotation="2"><code>factor(year)</code> is mapped to <code>color</code>, and the <code>Greys</code> colormap is applied using <a href="https://plotnine.org/reference/scale_color_cmap.html#plotnine.scale_color_cmap">scale_color_cmap()</a>—a very convenient way to show progression.</span>
+<span data-code-cell="annotated-cell-16" data-code-lines="7" data-code-annotation="2"><code>factor(year)</code> is mapped to <code>color</code>, and the <code>Greys</code> colormap is applied using <a href="https://plotnine.org/reference/scale_color_cmap.html#plotnine.scale_color_cmap">scale_color_cmap()</a>—a very convenient way to show progression.</span>
 </dd>
 <dt data-target-cell="annotated-cell-16" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-16" data-code-lines="16" data-code-annotation="3">For the decade lines, <code>factor(DECADE)</code> is mapped to the <code>fill</code> aesthetic. Colors are controlled via a <code>color</code> column in the dataframe—an effective trick.</span>
+<span data-code-cell="annotated-cell-16" data-code-lines="15" data-code-annotation="3">For the decade lines, <code>factor(DECADE)</code> is mapped to the <code>fill</code> aesthetic. Colors are controlled via a <code>color</code> column in the dataframe—an effective trick.</span>
 </dd>
 <dt data-target-cell="annotated-cell-16" data-target-annotation="4">4</dt>
 <dd>
@@ -899,7 +899,7 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 </dd>
 <dt data-target-cell="annotated-cell-16" data-target-annotation="6">6</dt>
 <dd>
-<span data-code-cell="annotated-cell-16" data-code-lines="57" data-code-annotation="6">The <code>label</code> aesthetic in <a href="https://plotnine.org/reference/geom_text.html#plotnine.geom_text">geom_text()</a> is mapped from the <code>label</code> column in <code>df_decade_annt</code>.</span>
+<span data-code-cell="annotated-cell-16" data-code-lines="56" data-code-annotation="6">The <code>label</code> aesthetic in <a href="https://plotnine.org/reference/geom_text.html#plotnine.geom_text">geom_text()</a> is mapped from the <code>label</code> column in <code>df_decade_annt</code>.</span>
 </dd>
 </dl>
 </section>
