@@ -192,45 +192,45 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
         ggplot(mapping=aes(x=idx_colname, y="temp"))
         # multiple grey lines
         + geom_line(
-            df_main,
-            aes(color="factor(year)"),
+            mapping=aes(color="factor(year)"),
+            data=df_main,
             alpha=0.2,
             size=0.5,
         )
         + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
         # 4 blue lines
         + geom_line(
-            df_decade,
-            aes(fill="factor(DECADE)"),
+            mapping=aes(fill="factor(DECADE)"),
+            data=df_decade,
             color=df_decade["color"],
             size=0.5,
             lineend="round",
         )
         # 2019 red line
         + geom_line(
-            ski_2019,
+            data=ski_2019,
             color=red,
             size=0.8,
             lineend="round",
         )
         # 1 black dashed line for temp=32F
         + geom_segment(
-            aes(x=0, xend=200, y=32, yend=32),
+            mapping=aes(x=0, xend=200, y=32, yend=32),
             color="black",
             size=0.5,
             linetype="dashed",
         )
         # start and end dots for 4 blue lines
         + geom_point(
-            df_decade_pts,
-            aes(x="DAY_OF_SEASON", y="temp"),
+            mapping=aes(x="DAY_OF_SEASON", y="temp"),
+            data=df_decade_pts,
             color=df_decade_pts["color"],
             size=0.2,
         )
         # start and end dots for 2019 red line
         + geom_point(
-            df_ski_2019_pts,
-            aes(x="DAY_OF_SEASON", y="temp"),
+            mapping=aes(x="DAY_OF_SEASON", y="temp"),
+            data=df_ski_2019_pts,
             color=df_ski_2019_pts["color"],
             size=1,
         )
@@ -241,8 +241,8 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
         + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
         # annotations for 4 blue lines
         + geom_text(
-            df_decade_annt,
-            aes(x="x", y="y", label="label"),
+            mapping=aes(x="x", y="y", label="label"),
+            data=df_decade_annt,
             color=df_decade_annt["color"],
             size=axis_fontsize,
             fontweight=axis_fontweight,
@@ -620,46 +620,46 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
     return (
         ggplot(mapping=aes(x=idx_colname, y="temp")) # <1>
         # multiple grey lines
-        + geom_line( 
-            df_main,
-            aes(color="factor(year)"), # <2>
+        + geom_line(
+            mapping=aes(color="factor(year)"), # <2>
+            data=df_main,
             alpha=0.2,
             size=0.5,
         )
         + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
         # 4 blue lines
         + geom_line(
-            df_decade,
-            aes(fill="factor(DECADE)"), # <3>
+            mapping=aes(fill="factor(DECADE)"), # <3>
+            data=df_decade,
             color=df_decade["color"],
             size=0.5,
             lineend="round", # <4>
         )
         # 2019 red line
         + geom_line(
-            ski_2019,
+            data=ski_2019,
             color=red,
             size=0.8,
             lineend="round",
         )
         # 1 black dashed line for temp=32F
         + geom_segment( # <5>
-            aes(x=0, xend=200, y=32, yend=32),
+            mapping=aes(x=0, xend=200, y=32, yend=32),
             color="black",
             size=0.5,
             linetype="dashed",
         )
         # start and end dots for 4 blue lines
         + geom_point(
-            df_decade_pts,
-            aes(x="DAY_OF_SEASON", y="temp"),
+            mapping=aes(x="DAY_OF_SEASON", y="temp"),
+            data=df_decade_pts,
             color=df_decade_pts["color"],
             size=0.2,
         )
         # start and end dots for 2019 red line
         + geom_point(
-            df_ski_2019_pts,
-            aes(x="DAY_OF_SEASON", y="temp"),
+            mapping=aes(x="DAY_OF_SEASON", y="temp"),
+            data=df_ski_2019_pts,
             color=df_ski_2019_pts["color"],
             size=1,
         )
@@ -670,8 +670,8 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
         + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
         # annotations for 4 blue lines
         + geom_text(
-            df_decade_annt,
-            aes(x="x", y="y", label="label"), # <6>
+            mapping=aes(x="x", y="y", label="label"), # <6>
+            data=df_decade_annt,
             color=df_decade_annt["color"],
             size=axis_fontsize,
             fontweight=axis_fontweight,
