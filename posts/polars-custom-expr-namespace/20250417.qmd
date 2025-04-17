@@ -1,0 +1,204 @@
+---
+title: "Polars Custom Expression Namespace"
+html-table-processing: none
+date: "2025-04-17"
+categories: [python, polars]
+jupyter: python3
+image: "code.png"
+---
+Today I explored how to register a **custom expression namespace** in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—**colorizing rows based on their row index**.
+
+Here is the code snippet:
+![](code.png){fig-align="center" fig-alt="Cloned Snippet"}
+```{python}
+# | code-fold: true
+# | eval: false
+# | code-summary: Show full code
+from typing import Any
+import polars as pl
+
+
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def __init__(self, expr: pl.Expr) -> None:
+        self._expr = expr
+
+    def _mod_expr(self, n: int) -> pl.Expr:
+        return pl.int_range(pl.len(), dtype=pl.UInt32).mod(n)
+
+    def binarize(
+        self, lit1: str, lit2: str, name: str = "binarized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(2)
+        return (
+            pl.when(mod_expr.eq(0))
+            .then(pl.lit(lit1))
+            .otherwise(pl.lit(lit2))
+            .alias(name)
+        )
+
+    def trinarize(
+        self, lit1: str, lit2: str, lit3: str, name: str = "trinarized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(3)
+        return (
+            pl.when(mod_expr.eq(0))
+            .then(pl.lit(lit1))
+            .when(mod_expr.eq(1))
+            .then(pl.lit(lit2))
+            .otherwise(pl.lit(lit3))
+            .alias(name)
+        )
+
+    def bucketize(
+        self, lits: list[Any], name: str = "bucketized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(len(lits))
+
+        # first
+        expr = pl.when(mod_expr.eq(0)).then(pl.lit(lits[0]))
+
+        # middles
+        for i, one_lit in enumerate(lits[1:-1], start=1):
+            expr = expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))
+
+        # last
+        expr = expr.otherwise(pl.lit(lits[-1]))
+        return expr.alias(name)
+
+
+df = pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
+
+(
+    df.with_row_index(offset=1).with_columns(
+        pl.col("n").spt.binarize("blue", "yellow"),
+        pl.col("n").spt.trinarize("one", "two", "three"),
+        pl.col("n").spt.bucketize([1, 2, 3, 4]),
+    )
+)
+```
+
+## Step-by-Step Breakdown
+
+### Registering the Namespace
+We use [`pl.api.register_expr_namespace()`](https://docs.pola.rs/api/python/stable/reference/api/polars.api.register_expr_namespace.html) to attach our class to the `spt` namespace. Once registered, we can call our methods like this: `pl.col("any").spt.binarize(...)`.
+```python
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def __init__(self, expr: pl.Expr) -> None:
+        self._expr = expr
+```
+
+### Helper: Row-Index Based Modulo Expression
+To assign values based on row position, we need a way to refer to the row index inside an expression. Polars provides a trick using `pl.int_range(pl.len())`, as shown in [pl.DataFrame.with_row_index()](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html).
+
+```python
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def _mod_expr(self, n: int) -> pl.Expr:
+        return pl.int_range(pl.len(), dtype=pl.UInt32).mod(n)
+```
+
+### `binarize`: Two Groups
+This method maps alternating rows into two categories using [pl.when().then().otherwise()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when).
+```python
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def binarize(
+        self, lit1: str, lit2: str, name: str = "binarized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(2)
+        return (
+            pl.when(mod_expr.eq(0))
+            .then(pl.lit(lit1))
+            .otherwise(pl.lit(lit2))
+            .alias(name)
+        )
+```
+
+### `trinarize`: Three Groups
+Similar to `binarize`, but splits the rows into three groups using two `when().then()` branches before the final `otherwise()`.
+```python
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def trinarize(
+        self, lit1: str, lit2: str, lit3: str, name: str = "trinarized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(3)
+        return (
+            pl.when(mod_expr.eq(0))
+            .then(pl.lit(lit1))
+            .when(mod_expr.eq(1))
+            .then(pl.lit(lit2))
+            .otherwise(pl.lit(lit3))
+            .alias(name)
+        )
+```
+
+### `bucketize`: N Groups
+A generalized version of the above, which dynamically assigns values from a list across `n` groups:
+```python
+@pl.api.register_expr_namespace("spt")
+class DiscreteSplitter:
+    def bucketize(
+        self, lits: list[Any], name: str = "bucketized"
+    ) -> pl.Expr:
+        mod_expr = self._mod_expr(len(lits))
+
+        # first
+        expr = pl.when(mod_expr.eq(0)).then(pl.lit(lits[0]))
+
+        # middles
+        for i, one_lit in enumerate(lits[1:-1], start=1):
+            expr = expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))
+
+        # last
+        expr = expr.otherwise(pl.lit(lits[-1]))
+        return expr.alias(name)
+```
+
+### Example Usage
+Here’s a simple example to demonstrate how the custom namespace works in practice:
+```python
+df = pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
+
+(
+    df.with_row_index(offset=1).with_columns(
+        pl.col("n").spt.binarize("blue", "yellow"),
+        pl.col("n").spt.trinarize("one", "two", "three"),
+        pl.col("n").spt.bucketize([1, 2, 3, 4]),
+    )
+)
+```
+
+This produces the following DataFrame:
+```python
+shape: (9, 5)
+┌───────┬─────┬───────────┬────────────┬────────────┐
+│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │
+│ ---   ┆ --- ┆ ---       ┆ ---        ┆ ---        │
+│ u32   ┆ i64 ┆ str       ┆ str        ┆ i32        │
+╞═══════╪═════╪═══════════╪════════════╪════════════╡
+│ 1     ┆ 100 ┆ blue      ┆ one        ┆ 1          │
+│ 2     ┆ 50  ┆ yellow    ┆ two        ┆ 2          │
+│ 3     ┆ 72  ┆ blue      ┆ three      ┆ 3          │
+│ 4     ┆ 83  ┆ yellow    ┆ one        ┆ 4          │
+│ 5     ┆ 97  ┆ blue      ┆ two        ┆ 1          │
+│ 6     ┆ 42  ┆ yellow    ┆ three      ┆ 2          │
+│ 7     ┆ 20  ┆ blue      ┆ one        ┆ 3          │
+│ 8     ┆ 51  ┆ yellow    ┆ two        ┆ 4          │
+│ 9     ┆ 77  ┆ blue      ┆ three      ┆ 1          │
+└───────┴─────┴───────────┴────────────┴────────────┘
+```
+Each new column shows how rows are grouped based on their index modulo 2, 3, or 4 respectively—making it easier to visualize patterns or apply styling.
+
+### Conclusion
+Registering a custom expression namespace in Polars is a powerful way to encapsulate and reuse logic across your codebase. In this post, we created a `DiscreteSplitter` class to simplify index-based grouping, enabling operations like `binarize`, `trinarize`, and `bucketize`. This approach keeps your expressions clean and composable, especially when generating tables or plots that require styling based on row position.
+
+It’s also worth noting that Polars supports similar registration for Series, LazyFrame, and DataFrame objects—check out the [official documentation](https://docs.pola.rs/api/python/stable/reference/api.html) for more details.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
+
