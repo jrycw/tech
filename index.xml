@@ -10,7 +10,747 @@
 <atom:link href="https://tech.ycwu.space/index.xml" rel="self" type="application/rss+xml"/>
 <description>This is Jerry Wu&#39;s Tech&#39;n&#39;take.</description>
 <generator>quarto-1.6.43</generator>
-<lastBuildDate>Wed, 16 Apr 2025 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 17 Apr 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Polars Custom Expression Namespace</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/polars-custom-expr-namespace/20250417.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
+<p>Here is the code snippet: <img src="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Snippet"></p>
+<div id="283f3293" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show full code</summary>
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> typing <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Any</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb1-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb1-7">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, expr: pl.Expr) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb1-8">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr</span>
+<span id="cb1-9"></span>
+<span id="cb1-10">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _mod_expr(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb1-11">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> pl.int_range(pl.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(), dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.UInt32).mod(n)</span>
+<span id="cb1-12"></span>
+<span id="cb1-13">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> binarize(</span>
+<span id="cb1-14">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"binarized"</span></span>
+<span id="cb1-15">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb1-16">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb1-17">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (</span>
+<span id="cb1-18">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb1-19">            .then(pl.lit(lit1))</span>
+<span id="cb1-20">            .otherwise(pl.lit(lit2))</span>
+<span id="cb1-21">            .alias(name)</span>
+<span id="cb1-22">        )</span>
+<span id="cb1-23"></span>
+<span id="cb1-24">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> trinarize(</span>
+<span id="cb1-25">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit3: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"trinarized"</span></span>
+<span id="cb1-26">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb1-27">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span>
+<span id="cb1-28">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (</span>
+<span id="cb1-29">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb1-30">            .then(pl.lit(lit1))</span>
+<span id="cb1-31">            .when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb1-32">            .then(pl.lit(lit2))</span>
+<span id="cb1-33">            .otherwise(pl.lit(lit3))</span>
+<span id="cb1-34">            .alias(name)</span>
+<span id="cb1-35">        )</span>
+<span id="cb1-36"></span>
+<span id="cb1-37">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> bucketize(</span>
+<span id="cb1-38">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lits: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>[Any], name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bucketized"</span></span>
+<span id="cb1-39">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb1-40">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(lits))</span>
+<span id="cb1-41"></span>
+<span id="cb1-42">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># first</span></span>
+<span id="cb1-43">        expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)).then(pl.lit(lits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]))</span>
+<span id="cb1-44"></span>
+<span id="cb1-45">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># middles</span></span>
+<span id="cb1-46">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, one_lit <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(lits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], start<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb1-47">            expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
+<span id="cb1-48"></span>
+<span id="cb1-49">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># last</span></span>
+<span id="cb1-50">        expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr.otherwise(pl.lit(lits[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]))</span>
+<span id="cb1-51">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> expr.alias(name)</span>
+<span id="cb1-52"></span>
+<span id="cb1-53"></span>
+<span id="cb1-54">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.DataFrame({<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">72</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">83</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">97</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">77</span>]})</span>
+<span id="cb1-55"></span>
+<span id="cb1-56">(</span>
+<span id="cb1-57">    df.with_row_index(offset<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).with_columns(</span>
+<span id="cb1-58">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.binarize(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"blue"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"yellow"</span>),</span>
+<span id="cb1-59">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.trinarize(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"one"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"two"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"three"</span>),</span>
+<span id="cb1-60">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.bucketize([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>]),</span>
+<span id="cb1-61">    )</span>
+<span id="cb1-62">)</span></code></pre></div>
+</details>
+</div>
+<section id="step-by-step-breakdown" class="level2">
+<h2 class="anchored" data-anchor-id="step-by-step-breakdown">Step-by-Step Breakdown</h2>
+<section id="registering-the-namespace" class="level3">
+<h3 class="anchored" data-anchor-id="registering-the-namespace">Registering the Namespace</h3>
+<p>We use <a href="https://docs.pola.rs/api/python/stable/reference/api/polars.api.register_expr_namespace.html"><code>pl.api.register_expr_namespace()</code></a> to attach our class to the <code>spt</code> namespace. Once registered, we can call our methods like this: <code>pl.col("any").spt.binarize(...)</code>.</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb2-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb2-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, expr: pl.Expr) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb2-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr</span></code></pre></div>
+</section>
+<section id="helper-row-index-based-modulo-expression" class="level3">
+<h3 class="anchored" data-anchor-id="helper-row-index-based-modulo-expression">Helper: Row-Index Based Modulo Expression</h3>
+<p>To assign values based on row position, we need a way to refer to the row index inside an expression. Polars provides a trick using <code>pl.int_range(pl.len())</code>, as shown in <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>.</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb3-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb3-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _mod_expr(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb3-4">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> pl.int_range(pl.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(), dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>pl.UInt32).mod(n)</span></code></pre></div>
+</section>
+<section id="binarize-two-groups" class="level3">
+<h3 class="anchored" data-anchor-id="binarize-two-groups"><code>binarize</code>: Two Groups</h3>
+<p>This method maps alternating rows into two categories using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when().then().otherwise()</a>.</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb4-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb4-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> binarize(</span>
+<span id="cb4-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"binarized"</span></span>
+<span id="cb4-5">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb4-6">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb4-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (</span>
+<span id="cb4-8">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb4-9">            .then(pl.lit(lit1))</span>
+<span id="cb4-10">            .otherwise(pl.lit(lit2))</span>
+<span id="cb4-11">            .alias(name)</span>
+<span id="cb4-12">        )</span></code></pre></div>
+</section>
+<section id="trinarize-three-groups" class="level3">
+<h3 class="anchored" data-anchor-id="trinarize-three-groups"><code>trinarize</code>: Three Groups</h3>
+<p>Similar to <code>binarize</code>, but splits the rows into three groups using two <code>when().then()</code> branches before the final <code>otherwise()</code>.</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb5-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb5-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> trinarize(</span>
+<span id="cb5-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, lit3: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"trinarized"</span></span>
+<span id="cb5-5">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb5-6">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span>
+<span id="cb5-7">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (</span>
+<span id="cb5-8">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>))</span>
+<span id="cb5-9">            .then(pl.lit(lit1))</span>
+<span id="cb5-10">            .when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))</span>
+<span id="cb5-11">            .then(pl.lit(lit2))</span>
+<span id="cb5-12">            .otherwise(pl.lit(lit3))</span>
+<span id="cb5-13">            .alias(name)</span>
+<span id="cb5-14">        )</span></code></pre></div>
+</section>
+<section id="bucketize-n-groups" class="level3">
+<h3 class="anchored" data-anchor-id="bucketize-n-groups"><code>bucketize</code>: N Groups</h3>
+<p>A generalized version of the above, which dynamically assigns values from a list across <code>n</code> groups:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"spt"</span>)</span>
+<span id="cb6-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> DiscreteSplitter:</span>
+<span id="cb6-3">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> bucketize(</span>
+<span id="cb6-4">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, lits: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">list</span>[Any], name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bucketized"</span></span>
+<span id="cb6-5">    ) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> pl.Expr:</span>
+<span id="cb6-6">        mod_expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>._mod_expr(<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(lits))</span>
+<span id="cb6-7"></span>
+<span id="cb6-8">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># first</span></span>
+<span id="cb6-9">        expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)).then(pl.lit(lits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]))</span>
+<span id="cb6-10"></span>
+<span id="cb6-11">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># middles</span></span>
+<span id="cb6-12">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i, one_lit <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(lits[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], start<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>):</span>
+<span id="cb6-13">            expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
+<span id="cb6-14"></span>
+<span id="cb6-15">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># last</span></span>
+<span id="cb6-16">        expr <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> expr.otherwise(pl.lit(lits[<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>]))</span>
+<span id="cb6-17">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> expr.alias(name)</span></code></pre></div>
+</section>
+<section id="example-usage" class="level3">
+<h3 class="anchored" data-anchor-id="example-usage">Example Usage</h3>
+<p>Here’s a simple example to demonstrate how the custom namespace works in practice:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.DataFrame({<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>: [<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">72</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">83</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">97</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">77</span>]})</span>
+<span id="cb7-2"></span>
+<span id="cb7-3">(</span>
+<span id="cb7-4">    df.with_row_index(offset<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>).with_columns(</span>
+<span id="cb7-5">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.binarize(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"blue"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"yellow"</span>),</span>
+<span id="cb7-6">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.trinarize(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"one"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"two"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"three"</span>),</span>
+<span id="cb7-7">        pl.col(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>).spt.bucketize([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>]),</span>
+<span id="cb7-8">    )</span>
+<span id="cb7-9">)</span></code></pre></div>
+<p>This produces the following DataFrame:</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">shape: (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>)</span>
+<span id="cb8-2">┌───────┬─────┬───────────┬────────────┬────────────┐</span>
+<span id="cb8-3">│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │</span>
+<span id="cb8-4">│ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">---</span>   ┆ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">---</span> ┆ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">---</span>       ┆ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">---</span>        ┆ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">---</span>        │</span>
+<span id="cb8-5">│ u32   ┆ i64 ┆ <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>       ┆ <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>        ┆ i32        │</span>
+<span id="cb8-6">╞═══════╪═════╪═══════════╪════════════╪════════════╡</span>
+<span id="cb8-7">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span> ┆ blue      ┆ one        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>          │</span>
+<span id="cb8-8">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>  ┆ yellow    ┆ two        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>          │</span>
+<span id="cb8-9">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">72</span>  ┆ blue      ┆ three      ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>          │</span>
+<span id="cb8-10">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">83</span>  ┆ yellow    ┆ one        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>          │</span>
+<span id="cb8-11">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">97</span>  ┆ blue      ┆ two        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>          │</span>
+<span id="cb8-12">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">42</span>  ┆ yellow    ┆ three      ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>          │</span>
+<span id="cb8-13">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>  ┆ blue      ┆ one        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>          │</span>
+<span id="cb8-14">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">51</span>  ┆ yellow    ┆ two        ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>          │</span>
+<span id="cb8-15">│ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>     ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">77</span>  ┆ blue      ┆ three      ┆ <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>          │</span>
+<span id="cb8-16">└───────┴─────┴───────────┴────────────┴────────────┘</span></code></pre></div>
+<p>Each new column shows how rows are grouped based on their index modulo 2, 3, or 4 respectively—making it easier to visualize patterns or apply styling.</p>
+</section>
+<section id="conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
+<p>Registering a custom expression namespace in Polars is a powerful way to encapsulate and reuse logic across your codebase. In this post, we created a <code>DiscreteSplitter</code> class to simplify index-based grouping, enabling operations like <code>binarize</code>, <code>trinarize</code>, and <code>bucketize</code>. This approach keeps your expressions clean and composable, especially when generating tables or plots that require styling based on row position.</p>
+<p>It’s also worth noting that Polars supports similar registration for Series, LazyFrame, and DataFrame objects—check out the <a href="https://docs.pola.rs/api/python/stable/reference/api.html">official documentation</a> for more details.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>python</category>
+  <category>polars</category>
+  <guid>https://tech.ycwu.space/posts/polars-custom-expr-namespace/20250417.html</guid>
+  <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" medium="image" type="image/png" height="205" width="144"/>
+</item>
 <item>
   <title>Clone the Reciprocal Tariffs Table Using Plotnine</title>
   <dc:creator>Jerry Wu</dc:creator>
@@ -23,7 +763,7 @@
 
 <p>This post presents a recreated visualization using Polars and plotnine, based on my <a href="../../posts/clone-reciprocal-tariffs-table/20250403.html">earlier work</a>.</p>
 <p>Below is the final figure: <img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table-p9/reciprocal_tariffs_p9.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Reciprocal Tariffs Table"></p>
-<div id="5283926e" class="cell" data-execution_count="1">
+<div id="2c64bd74" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -2041,7 +2781,7 @@ Disclaimer
 <p>It marks my first serious dive into plotnine—an impressive library with a bit of a learning curve.<br>
 I’ll walk through the journey I took to recreate the visualization. Some parts may overlap with the earlier post, but I believe that’s acceptable to keep this one self-contained.</p>
 <p>The final figure, shown below, visualizes temperature trends for the ski season in Alta over the past few decades. <img src="https://tech.ycwu.space/posts/p9-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center" alt="Alta ski resort"></p>
-<div id="ec915abf" class="cell" data-execution_count="1">
+<div id="25aae237" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -4926,7 +5666,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/access-axes-in-plotnine/p9_ht_ax_text.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="plotnine used in combination with HighlightText"></p>
 </figure>
 </div>
-<div id="8c383734" class="cell" data-execution_count="1">
+<div id="9a5be93a" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> highlight_text <span class="im" style="color: #00769E;
@@ -5061,7 +5801,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table/reciprocal_tariffs_gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Cloned Reciprocal Tariffs Table"></p>
 </figure>
 </div>
-<div id="0b27dad4" class="cell" data-execution_count="1">
+<div id="eb9ce3c5" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -6167,7 +6907,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll start by creating a <code>data</code> dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a <code>color_mapping</code> dictionary to store the palette information for styling.</p>
-<div id="29a55e99" class="cell" data-execution_count="1">
+<div id="3e5040f1" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
@@ -6255,7 +6995,7 @@ font-style: inherit;">"papayawhip"</span>}</span></code></pre></div>
 <section id="pandas" class="level2">
 <h2 class="anchored" data-anchor-id="pandas">Pandas</h2>
 <p>First, we create a Pandas DataFrame called <code>df_pd</code> using <code>data</code> as the input:</p>
-<div id="f5f0420a" class="cell" data-execution_count="2">
+<div id="207ab0bd" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">df_pd <span class="op" style="color: #5E5E5E;
@@ -6277,7 +7017,7 @@ font-style: inherit;">print</span>(df_pd)</span></code></pre></div>
 <section id="using-an-existing-column" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column">Using an Existing Column</h3>
 <p>In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the <a href="https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column">from_column()</a> function provided by Great Tables to apply colors to the table body:</p>
-<div id="04749d94" class="cell" data-execution_count="3">
+<div id="53a12efc" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df_pd)</span>
 <span id="cb4-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -6309,7 +7049,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-functions" class="level3">
 <h3 class="anchored" data-anchor-id="using-functions">Using Functions</h3>
 <p>In cases where colors need to be determined dynamically based on conditions, the <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when">pd.Series.case_when()</a> function can be very useful. The following example categorizes the values of the <code>col1</code> column into three different colors:</p>
-<div id="6dc88bea" class="cell" data-execution_count="4">
+<div id="8d2d4959" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -6382,7 +7122,7 @@ font-style: inherit;">"pink"</span>)</span>
 <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" aria-controls="tabset-1-1" aria-selected="true">pd.Series.map()</a></li><li class="nav-item"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" aria-controls="tabset-1-2" aria-selected="false">pd.Series.replace()</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" aria-labelledby="tabset-1-1-tab">
-<div id="92e08c77" class="cell" data-execution_count="5">
+<div id="3473e81a" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">(</span>
 <span id="cb6-2">    GT(df_pd)</span>
 <span id="cb6-3">    .tab_style(</span>
@@ -6420,7 +7160,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" aria-labelledby="tabset-1-2-tab">
-<div id="b58059b1" class="cell" data-execution_count="6">
+<div id="8bbbfa38" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">(</span>
 <span id="cb7-2">    GT(df_pd)</span>
 <span id="cb7-3">    .tab_style(</span>
@@ -6458,7 +7198,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <p>Alternatively, if you prefer sticking with the same approach, <code>pd.Series.case_when()</code> still works:</p>
-<div id="cc209abe" class="cell" data-execution_count="7">
+<div id="b62b12cf" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -6525,7 +7265,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="polars" class="level2">
 <h2 class="anchored" data-anchor-id="polars">Polars</h2>
 <p>Just like before, let’s start by creating a Polars DataFrame named <code>df_pl</code> using <code>data</code> as input:</p>
-<div id="026f1276" class="cell" data-execution_count="8">
+<div id="7b9cf629" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">df_pl<span class="op" style="color: #5E5E5E;
@@ -6553,7 +7293,7 @@ font-style: inherit;">print</span>(df_pl)</span></code></pre></div>
 <section id="using-an-existing-column-1" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column-1">Using an Existing Column</h3>
 <p>If the DataFrame already contains a column specifying colors, we can apply them directly with <code>from_column()</code>:</p>
-<div id="9a13ffd6" class="cell" data-execution_count="9">
+<div id="1b498cc9" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">(</span>
 <span id="cb11-2">    GT(df_pl)</span>
 <span id="cb11-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -6582,7 +7322,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb11-6">)</span></code></pre></div>
 </div>
 <p>As another option, we can reference the <code>color</code> column using a Polars expression:</p>
-<div id="2aed4b55" class="cell" data-execution_count="10">
+<div id="077d1c1a" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">(</span>
 <span id="cb12-2">    GT(df_pl)</span>
 <span id="cb12-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -6614,7 +7354,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-conditional-logic-with-polars-expressions" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-logic-with-polars-expressions">Using Conditional Logic with Polars Expressions</h3>
 <p>For cases where colors need to be assigned dynamically, <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when()</a> provides a structured way to define conditions. The example below assigns colors based on the values in <code>col1</code>:</p>
-<div id="acc8297f" class="cell" data-execution_count="11">
+<div id="0e501e60" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -6676,7 +7416,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb13-15">)</span></code></pre></div>
 </div>
 <p>For categorical-like columns (e.g., <code>col2</code>), predefined mappings can be applied efficiently using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace">pl.Expr.replace()</a>:</p>
-<div id="93ae823a" class="cell" data-execution_count="12">
+<div id="4be3f6bb" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">(</span>
 <span id="cb14-2">    GT(df_pl)</span>
 <span id="cb14-3">    .tab_style(</span>
@@ -6708,7 +7448,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb14-9">)</span></code></pre></div>
 </div>
 <p>Alternatively, if you prefer the conditional approach, <code>pl.when()</code> can still be used:</p>
-<div id="4f7c5b67" class="cell" data-execution_count="13">
+<div id="f1d219fe" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -6814,7 +7554,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/effective-dataviz-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="e38d4a73" class="cell" data-execution_count="1">
+<div id="d937d6f7" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -7731,7 +8471,7 @@ font-style: inherit;">=</span>idx_colname))</span>
 <li><strong><code>DATE</code></strong>: The dates.</li>
 <li><strong><code>TOBS</code></strong>: The recorded temperature in Fahrenheit.</li>
 </ul>
-<div id="42988027" class="cell" data-execution_count="2">
+<div id="07d09e7d" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -8901,7 +9641,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll use the built-in dataset <code>gtcars</code> to create a Polars DataFrame. First, we’ll select the columns <code>mfr</code>, <code>drivetrain</code>, <code>year</code>, and <code>hp</code> to create a small pivoted table named <code>df_mini</code>. Then, we’ll pass <code>df_mini</code> to the <code>GT</code> object and use <code>GT.tab_stub()</code>, setting <code>drivetrain</code> as <code>rowname_col=</code> and <code>mfr</code> as <code>groupname_col=</code> to create the table <code>gt</code>, as shown below:</p>
-<div id="e90d672a" class="cell" data-execution_count="1">
+<div id="c733d62d" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -8998,52 +9738,52 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <span id="cb1-16">gt</span></code></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<div id="yvxsarzpwy" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="qcnhcqaxcj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#yvxsarzpwy table {
+#qcnhcqaxcj table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#yvxsarzpwy thead, tbody, tfoot, tr, td, th { border-style: none; }
+#qcnhcqaxcj thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#yvxsarzpwy p { margin: 0; padding: 0; }
- #yvxsarzpwy .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #yvxsarzpwy .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #yvxsarzpwy .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #yvxsarzpwy .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #yvxsarzpwy .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yvxsarzpwy .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #yvxsarzpwy .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yvxsarzpwy .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #yvxsarzpwy .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #yvxsarzpwy .gt_column_spanner_outer:first-child { padding-left: 0; }
- #yvxsarzpwy .gt_column_spanner_outer:last-child { padding-right: 0; }
- #yvxsarzpwy .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #yvxsarzpwy .gt_spanner_row { border-bottom-style: hidden; }
- #yvxsarzpwy .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #yvxsarzpwy .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #yvxsarzpwy .gt_from_md> :first-child { margin-top: 0; }
- #yvxsarzpwy .gt_from_md> :last-child { margin-bottom: 0; }
- #yvxsarzpwy .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #yvxsarzpwy .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #yvxsarzpwy .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #yvxsarzpwy .gt_row_group_first td { border-top-width: 2px; }
- #yvxsarzpwy .gt_row_group_first th { border-top-width: 2px; }
- #yvxsarzpwy .gt_striped { background-color: #F4F4F4; }
- #yvxsarzpwy .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #yvxsarzpwy .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #yvxsarzpwy .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #yvxsarzpwy .gt_left { text-align: left; }
- #yvxsarzpwy .gt_center { text-align: center; }
- #yvxsarzpwy .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #yvxsarzpwy .gt_font_normal { font-weight: normal; }
- #yvxsarzpwy .gt_font_bold { font-weight: bold; }
- #yvxsarzpwy .gt_font_italic { font-style: italic; }
- #yvxsarzpwy .gt_super { font-size: 65%; }
- #yvxsarzpwy .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #yvxsarzpwy .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#qcnhcqaxcj p { margin: 0; padding: 0; }
+ #qcnhcqaxcj .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #qcnhcqaxcj .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #qcnhcqaxcj .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #qcnhcqaxcj .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #qcnhcqaxcj .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #qcnhcqaxcj .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #qcnhcqaxcj .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #qcnhcqaxcj .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #qcnhcqaxcj .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #qcnhcqaxcj .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #qcnhcqaxcj .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #qcnhcqaxcj .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #qcnhcqaxcj .gt_spanner_row { border-bottom-style: hidden; }
+ #qcnhcqaxcj .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #qcnhcqaxcj .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #qcnhcqaxcj .gt_from_md> :first-child { margin-top: 0; }
+ #qcnhcqaxcj .gt_from_md> :last-child { margin-bottom: 0; }
+ #qcnhcqaxcj .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #qcnhcqaxcj .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #qcnhcqaxcj .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #qcnhcqaxcj .gt_row_group_first td { border-top-width: 2px; }
+ #qcnhcqaxcj .gt_row_group_first th { border-top-width: 2px; }
+ #qcnhcqaxcj .gt_striped { background-color: #F4F4F4; }
+ #qcnhcqaxcj .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #qcnhcqaxcj .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #qcnhcqaxcj .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #qcnhcqaxcj .gt_left { text-align: left; }
+ #qcnhcqaxcj .gt_center { text-align: center; }
+ #qcnhcqaxcj .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #qcnhcqaxcj .gt_font_normal { font-weight: normal; }
+ #qcnhcqaxcj .gt_font_bold { font-weight: bold; }
+ #qcnhcqaxcj .gt_font_italic { font-style: italic; }
+ #qcnhcqaxcj .gt_super { font-size: 65%; }
+ #qcnhcqaxcj .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #qcnhcqaxcj .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -9124,7 +9864,7 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <section id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column" class="level2">
 <h2 class="anchored" data-anchor-id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column">Using a For-Loop: Repeatedly Call <code>GT.tab_style()</code> for Each Column</h2>
 <p>The most intuitive way is to call <code>GT.tab_style()</code> for each column. Here’s how:</p>
-<div id="224bd65e" class="cell" data-execution_count="2">
+<div id="1c663fcc" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="annotated-cell-2" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target">gt1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> gt</span>
@@ -9165,52 +9905,52 @@ font-style: inherit;">650</span>))</span>
 </dl>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="jcuqtjcrjm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ypxpiujzrr" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#jcuqtjcrjm table {
+#ypxpiujzrr table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#jcuqtjcrjm thead, tbody, tfoot, tr, td, th { border-style: none; }
+#ypxpiujzrr thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#jcuqtjcrjm p { margin: 0; padding: 0; }
- #jcuqtjcrjm .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #jcuqtjcrjm .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #jcuqtjcrjm .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #jcuqtjcrjm .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #jcuqtjcrjm .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #jcuqtjcrjm .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #jcuqtjcrjm .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #jcuqtjcrjm .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #jcuqtjcrjm .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #jcuqtjcrjm .gt_column_spanner_outer:first-child { padding-left: 0; }
- #jcuqtjcrjm .gt_column_spanner_outer:last-child { padding-right: 0; }
- #jcuqtjcrjm .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #jcuqtjcrjm .gt_spanner_row { border-bottom-style: hidden; }
- #jcuqtjcrjm .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #jcuqtjcrjm .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #jcuqtjcrjm .gt_from_md> :first-child { margin-top: 0; }
- #jcuqtjcrjm .gt_from_md> :last-child { margin-bottom: 0; }
- #jcuqtjcrjm .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #jcuqtjcrjm .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #jcuqtjcrjm .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #jcuqtjcrjm .gt_row_group_first td { border-top-width: 2px; }
- #jcuqtjcrjm .gt_row_group_first th { border-top-width: 2px; }
- #jcuqtjcrjm .gt_striped { background-color: #F4F4F4; }
- #jcuqtjcrjm .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #jcuqtjcrjm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #jcuqtjcrjm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #jcuqtjcrjm .gt_left { text-align: left; }
- #jcuqtjcrjm .gt_center { text-align: center; }
- #jcuqtjcrjm .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #jcuqtjcrjm .gt_font_normal { font-weight: normal; }
- #jcuqtjcrjm .gt_font_bold { font-weight: bold; }
- #jcuqtjcrjm .gt_font_italic { font-style: italic; }
- #jcuqtjcrjm .gt_super { font-size: 65%; }
- #jcuqtjcrjm .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #jcuqtjcrjm .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#ypxpiujzrr p { margin: 0; padding: 0; }
+ #ypxpiujzrr .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #ypxpiujzrr .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #ypxpiujzrr .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #ypxpiujzrr .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #ypxpiujzrr .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ypxpiujzrr .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #ypxpiujzrr .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ypxpiujzrr .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #ypxpiujzrr .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #ypxpiujzrr .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #ypxpiujzrr .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #ypxpiujzrr .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #ypxpiujzrr .gt_spanner_row { border-bottom-style: hidden; }
+ #ypxpiujzrr .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #ypxpiujzrr .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #ypxpiujzrr .gt_from_md> :first-child { margin-top: 0; }
+ #ypxpiujzrr .gt_from_md> :last-child { margin-bottom: 0; }
+ #ypxpiujzrr .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #ypxpiujzrr .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #ypxpiujzrr .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #ypxpiujzrr .gt_row_group_first td { border-top-width: 2px; }
+ #ypxpiujzrr .gt_row_group_first th { border-top-width: 2px; }
+ #ypxpiujzrr .gt_striped { background-color: #F4F4F4; }
+ #ypxpiujzrr .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #ypxpiujzrr .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #ypxpiujzrr .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #ypxpiujzrr .gt_left { text-align: left; }
+ #ypxpiujzrr .gt_center { text-align: center; }
+ #ypxpiujzrr .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #ypxpiujzrr .gt_font_normal { font-weight: normal; }
+ #ypxpiujzrr .gt_font_bold { font-weight: bold; }
+ #ypxpiujzrr .gt_font_italic { font-style: italic; }
+ #ypxpiujzrr .gt_super { font-size: 65%; }
+ #ypxpiujzrr .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #ypxpiujzrr .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -9289,7 +10029,7 @@ font-style: inherit;">650</span>))</span>
 <section id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects" class="level2">
 <h2 class="anchored" data-anchor-id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects">Utilizing the <code>locations=</code> Parameter in <code>GT.tab_style()</code>: Pass a List of <code>loc.body()</code> Objects</h2>
 <p>A more concise method is to pass a list of <code>loc.body()</code> objects to the <code>locations=</code> parameter in <code>GT.tab_style()</code>, as shown below:</p>
-<div id="45111c0d" class="cell" data-execution_count="3">
+<div id="7c97a205" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">(</span>
 <span id="cb2-2">    gt.tab_style(</span>
 <span id="cb2-3">        style<span class="op" style="color: #5E5E5E;
@@ -9320,52 +10060,52 @@ font-style: inherit;">in</span> year_cols</span>
 <span id="cb2-8">    )</span>
 <span id="cb2-9">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<div id="sxegschplp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="aczqpgalff" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#sxegschplp table {
+#aczqpgalff table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#sxegschplp thead, tbody, tfoot, tr, td, th { border-style: none; }
+#aczqpgalff thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#sxegschplp p { margin: 0; padding: 0; }
- #sxegschplp .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #sxegschplp .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #sxegschplp .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #sxegschplp .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #sxegschplp .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #sxegschplp .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #sxegschplp .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #sxegschplp .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #sxegschplp .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #sxegschplp .gt_column_spanner_outer:first-child { padding-left: 0; }
- #sxegschplp .gt_column_spanner_outer:last-child { padding-right: 0; }
- #sxegschplp .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #sxegschplp .gt_spanner_row { border-bottom-style: hidden; }
- #sxegschplp .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #sxegschplp .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #sxegschplp .gt_from_md> :first-child { margin-top: 0; }
- #sxegschplp .gt_from_md> :last-child { margin-bottom: 0; }
- #sxegschplp .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #sxegschplp .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #sxegschplp .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #sxegschplp .gt_row_group_first td { border-top-width: 2px; }
- #sxegschplp .gt_row_group_first th { border-top-width: 2px; }
- #sxegschplp .gt_striped { background-color: #F4F4F4; }
- #sxegschplp .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #sxegschplp .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #sxegschplp .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #sxegschplp .gt_left { text-align: left; }
- #sxegschplp .gt_center { text-align: center; }
- #sxegschplp .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #sxegschplp .gt_font_normal { font-weight: normal; }
- #sxegschplp .gt_font_bold { font-weight: bold; }
- #sxegschplp .gt_font_italic { font-style: italic; }
- #sxegschplp .gt_super { font-size: 65%; }
- #sxegschplp .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #sxegschplp .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#aczqpgalff p { margin: 0; padding: 0; }
+ #aczqpgalff .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #aczqpgalff .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #aczqpgalff .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #aczqpgalff .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #aczqpgalff .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #aczqpgalff .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #aczqpgalff .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #aczqpgalff .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #aczqpgalff .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #aczqpgalff .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #aczqpgalff .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #aczqpgalff .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #aczqpgalff .gt_spanner_row { border-bottom-style: hidden; }
+ #aczqpgalff .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #aczqpgalff .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #aczqpgalff .gt_from_md> :first-child { margin-top: 0; }
+ #aczqpgalff .gt_from_md> :last-child { margin-bottom: 0; }
+ #aczqpgalff .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #aczqpgalff .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #aczqpgalff .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #aczqpgalff .gt_row_group_first td { border-top-width: 2px; }
+ #aczqpgalff .gt_row_group_first th { border-top-width: 2px; }
+ #aczqpgalff .gt_striped { background-color: #F4F4F4; }
+ #aczqpgalff .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #aczqpgalff .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #aczqpgalff .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #aczqpgalff .gt_left { text-align: left; }
+ #aczqpgalff .gt_center { text-align: center; }
+ #aczqpgalff .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #aczqpgalff .gt_font_normal { font-weight: normal; }
+ #aczqpgalff .gt_font_bold { font-weight: bold; }
+ #aczqpgalff .gt_font_italic { font-style: italic; }
+ #aczqpgalff .gt_super { font-size: 65%; }
+ #aczqpgalff .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #aczqpgalff .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -9444,7 +10184,7 @@ font-style: inherit;">in</span> year_cols</span>
 <section id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling" class="level2">
 <h2 class="anchored" data-anchor-id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling">Leveraging the <code>mask=</code> Parameter in <code>loc.body()</code>: Use Polars Expressions for Streamlined Styling</h2>
 <p>The most modern approach (<code>0.16.0</code>) is to pass a Polars expression to the <code>mask=</code> parameter in <code>loc.body()</code>, as illustrated here:</p>
-<div id="9f204307" class="cell" data-execution_count="4">
+<div id="b4d2f348" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    gt.tab_style(</span>
 <span id="cb3-3">        style<span class="op" style="color: #5E5E5E;
@@ -9464,52 +10204,52 @@ font-style: inherit;">650</span>))</span>
 <span id="cb3-5">    )</span>
 <span id="cb3-6">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-<div id="kkiyevghef" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="svvfbvyxoh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#kkiyevghef table {
+#svvfbvyxoh table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#kkiyevghef thead, tbody, tfoot, tr, td, th { border-style: none; }
+#svvfbvyxoh thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#kkiyevghef p { margin: 0; padding: 0; }
- #kkiyevghef .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #kkiyevghef .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #kkiyevghef .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #kkiyevghef .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #kkiyevghef .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #kkiyevghef .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #kkiyevghef .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #kkiyevghef .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #kkiyevghef .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #kkiyevghef .gt_column_spanner_outer:first-child { padding-left: 0; }
- #kkiyevghef .gt_column_spanner_outer:last-child { padding-right: 0; }
- #kkiyevghef .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #kkiyevghef .gt_spanner_row { border-bottom-style: hidden; }
- #kkiyevghef .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #kkiyevghef .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #kkiyevghef .gt_from_md> :first-child { margin-top: 0; }
- #kkiyevghef .gt_from_md> :last-child { margin-bottom: 0; }
- #kkiyevghef .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #kkiyevghef .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #kkiyevghef .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #kkiyevghef .gt_row_group_first td { border-top-width: 2px; }
- #kkiyevghef .gt_row_group_first th { border-top-width: 2px; }
- #kkiyevghef .gt_striped { background-color: #F4F4F4; }
- #kkiyevghef .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #kkiyevghef .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #kkiyevghef .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #kkiyevghef .gt_left { text-align: left; }
- #kkiyevghef .gt_center { text-align: center; }
- #kkiyevghef .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #kkiyevghef .gt_font_normal { font-weight: normal; }
- #kkiyevghef .gt_font_bold { font-weight: bold; }
- #kkiyevghef .gt_font_italic { font-style: italic; }
- #kkiyevghef .gt_super { font-size: 65%; }
- #kkiyevghef .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #kkiyevghef .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#svvfbvyxoh p { margin: 0; padding: 0; }
+ #svvfbvyxoh .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #svvfbvyxoh .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #svvfbvyxoh .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #svvfbvyxoh .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #svvfbvyxoh .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #svvfbvyxoh .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #svvfbvyxoh .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #svvfbvyxoh .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #svvfbvyxoh .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #svvfbvyxoh .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #svvfbvyxoh .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #svvfbvyxoh .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #svvfbvyxoh .gt_spanner_row { border-bottom-style: hidden; }
+ #svvfbvyxoh .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #svvfbvyxoh .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #svvfbvyxoh .gt_from_md> :first-child { margin-top: 0; }
+ #svvfbvyxoh .gt_from_md> :last-child { margin-bottom: 0; }
+ #svvfbvyxoh .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #svvfbvyxoh .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #svvfbvyxoh .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #svvfbvyxoh .gt_row_group_first td { border-top-width: 2px; }
+ #svvfbvyxoh .gt_row_group_first th { border-top-width: 2px; }
+ #svvfbvyxoh .gt_striped { background-color: #F4F4F4; }
+ #svvfbvyxoh .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #svvfbvyxoh .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #svvfbvyxoh .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #svvfbvyxoh .gt_left { text-align: left; }
+ #svvfbvyxoh .gt_center { text-align: center; }
+ #svvfbvyxoh .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #svvfbvyxoh .gt_font_normal { font-weight: normal; }
+ #svvfbvyxoh .gt_font_bold { font-weight: bold; }
+ #svvfbvyxoh .gt_font_italic { font-style: italic; }
+ #svvfbvyxoh .gt_super { font-size: 65%; }
+ #svvfbvyxoh .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #svvfbvyxoh .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
