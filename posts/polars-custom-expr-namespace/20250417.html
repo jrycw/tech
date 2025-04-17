@@ -195,7 +195,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#trinarize-three-groups" id="toc-trinarize-three-groups" class="nav-link" data-scroll-target="#trinarize-three-groups"><code>trinarize</code>: Three Groups</a></li>
   <li><a href="#bucketize-n-groups" id="toc-bucketize-n-groups" class="nav-link" data-scroll-target="#bucketize-n-groups"><code>bucketize</code>: N Groups</a></li>
   <li><a href="#example-usage" id="toc-example-usage" class="nav-link" data-scroll-target="#example-usage">Example Usage</a></li>
-  <li><a href="#example-usage-1" id="toc-example-usage-1" class="nav-link" data-scroll-target="#example-usage-1">Example Usage</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul></li>
   </ul>
@@ -209,72 +208,80 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
-<p>Here is the code snippet: <img src="code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Snippet"></p>
-<div id="23fc3fca" class="cell" data-execution_count="1">
+<p>Here is the code snippet: <img src="code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
+<div id="4adadf87" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">@pl.api.register_expr_namespace</span>(<span class="st">"spt"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DiscreteSplitter:</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, expr: pl.Expr) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._expr <span class="op">=</span> expr</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _mod_expr(<span class="va">self</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pl.int_range(pl.<span class="bu">len</span>(), dtype<span class="op">=</span>pl.UInt32).mod(n)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> binarize(</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"binarized"</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="dv">2</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            pl.when(mod_expr.eq(<span class="dv">0</span>))</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit2))</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> trinarize(</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, lit3: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"trinarized"</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="dv">3</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            pl.when(mod_expr.eq(<span class="dv">0</span>))</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            .when(mod_expr.eq(<span class="dv">1</span>))</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit2))</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit3))</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> bucketize(</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lits: <span class="bu">list</span>[Any], name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"bucketized"</span></span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="bu">len</span>(lits))</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># first</span></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> pl.when(mod_expr.eq(<span class="dv">0</span>)).then(pl.lit(lits[<span class="dv">0</span>]))</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># middles</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, one_lit <span class="kw">in</span> <span class="bu">enumerate</span>(lits[<span class="dv">1</span>:<span class="op">-</span><span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            expr <span class="op">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># last</span></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.otherwise(pl.lit(lits[<span class="op">-</span><span class="dv">1</span>]))</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> expr.alias(name)</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, loc, style</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">@pl.api.register_expr_namespace</span>(<span class="st">"spt"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DiscreteSplitter:</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, expr: pl.Expr) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._expr <span class="op">=</span> expr</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _mod_expr(<span class="va">self</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pl.int_range(pl.<span class="bu">len</span>(), dtype<span class="op">=</span>pl.UInt32).mod(n)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> binarize(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"binarized"</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="dv">2</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>            pl.when(mod_expr.eq(<span class="dv">0</span>))</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit2))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> trinarize(</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, lit3: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"trinarized"</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="dv">3</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            pl.when(mod_expr.eq(<span class="dv">0</span>))</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            .when(mod_expr.eq(<span class="dv">1</span>))</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit2))</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit3))</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> bucketize(</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lits: <span class="bu">list</span>[Any], name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"bucketized"</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.Expr:</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        mod_expr <span class="op">=</span> <span class="va">self</span>._mod_expr(<span class="bu">len</span>(lits))</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># first</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> pl.when(mod_expr.eq(<span class="dv">0</span>)).then(pl.lit(lits[<span class="dv">0</span>]))</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># middles</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, one_lit <span class="kw">in</span> <span class="bu">enumerate</span>(lits[<span class="dv">1</span>:<span class="op">-</span><span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            expr <span class="op">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># last</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.otherwise(pl.lit(lits[<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> expr.alias(name)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    .with_row_index(offset<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"lightgray"</span>),</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    GT(df)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(pl.col(<span class="st">"binarized"</span>)), locations<span class="op">=</span>loc.body())</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="step-by-step-breakdown" class="level2">
@@ -352,12 +359,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="example-usage" class="level3">
 <h3 class="anchored" data-anchor-id="example-usage">Example Usage</h3>
-<p>Here’s a simple example to demonstrate how the custom namespace works in practice:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
+<p>Here’s a simple example that demonstrates how the custom namespace works in practice:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .with_row_index(offset<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"lightgray"</span>),</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -369,48 +376,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>│ <span class="op">---</span>   ┆ <span class="op">---</span> ┆ <span class="op">---</span>       ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        │</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>│ u32   ┆ i64 ┆ <span class="bu">str</span>       ┆ <span class="bu">str</span>        ┆ i32        │</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>╞═══════╪═════╪═══════════╪════════════╪════════════╡</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ blue      ┆ one        ┆ <span class="dv">1</span>          │</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ yellow    ┆ two        ┆ <span class="dv">2</span>          │</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ blue      ┆ three      ┆ <span class="dv">3</span>          │</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ yellow    ┆ one        ┆ <span class="dv">4</span>          │</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ blue      ┆ two        ┆ <span class="dv">1</span>          │</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ yellow    ┆ three      ┆ <span class="dv">2</span>          │</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ blue      ┆ one        ┆ <span class="dv">3</span>          │</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ yellow    ┆ two        ┆ <span class="dv">4</span>          │</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ blue      ┆ three      ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ lightblue ┆ one        ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ lightgray ┆ two        ┆ <span class="dv">2</span>          │</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ lightblue ┆ three      ┆ <span class="dv">3</span>          │</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ lightgray ┆ one        ┆ <span class="dv">4</span>          │</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ lightblue ┆ two        ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ lightgray ┆ three      ┆ <span class="dv">2</span>          │</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ lightblue ┆ one        ┆ <span class="dv">3</span>          │</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ lightgray ┆ two        ┆ <span class="dv">4</span>          │</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ lightblue ┆ three      ┆ <span class="dv">1</span>          │</span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴───────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="example-usage-1" class="level3">
-<h3 class="anchored" data-anchor-id="example-usage-1">Example Usage</h3>
-<p>Here’s a simple example that demonstrates how the custom namespace works in practice:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This produces the following DataFrame:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shape: (<span class="dv">9</span>, <span class="dv">5</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>┌───────┬─────┬───────────┬────────────┬────────────┐</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>│ <span class="op">---</span>   ┆ <span class="op">---</span> ┆ <span class="op">---</span>       ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        │</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>│ u32   ┆ i64 ┆ <span class="bu">str</span>       ┆ <span class="bu">str</span>        ┆ i32        │</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>╞═══════╪═════╪═══════════╪════════════╪════════════╡</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ blue      ┆ one        ┆ <span class="dv">1</span>          │</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ yellow    ┆ two        ┆ <span class="dv">2</span>          │</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ blue      ┆ three      ┆ <span class="dv">3</span>          │</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ yellow    ┆ one        ┆ <span class="dv">4</span>          │</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ blue      ┆ two        ┆ <span class="dv">1</span>          │</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ yellow    ┆ three      ┆ <span class="dv">2</span>          │</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ blue      ┆ one        ┆ <span class="dv">3</span>          │</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ yellow    ┆ two        ┆ <span class="dv">4</span>          │</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ blue      ┆ three      ┆ <span class="dv">1</span>          │</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴───────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note: Since we’re not using the actual column values in the custom logic, you can simply use <code>pl.col("")</code> as a placeholder to trigger the namespace methods.</p>
-<p>Each new column shows how rows are grouped based on their index modulo 2, 3, or 4 respectively—making it easier to visualize patterns or apply styling.</p>
+<p>Note: Since the custom logic is based on the row index rather than actual column values, you can safely use <code>pl.col("")</code> as a placeholder when calling the namespace methods.</p>
+<p>Each new column shows how rows are grouped using the row index modulo 2, 3, or 4—useful for highlighting patterns or applying styling.</p>
+<p>For instance, you can use the <code>binarized</code> column with Great Tables like this:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    GT(df)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(pl.col(<span class="st">"binarized"</span>)), locations<span class="op">=</span>loc.body())</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Table with alternating row colors"></p>
+</figure>
+</div>
 </section>
 <section id="conclusion" class="level3">
 <h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
