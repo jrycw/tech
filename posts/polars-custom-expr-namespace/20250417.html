@@ -209,7 +209,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
 <p>Here is the code snippet: <img src="code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
-<div id="4adadf87" class="cell" data-execution_count="1">
+<div id="9835ef62" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
@@ -271,7 +271,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    .with_row_index(offset<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"lightgray"</span>),</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"papayawhip"</span>),</span>
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    )</span>
@@ -364,28 +364,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .with_row_index(offset<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    .with_columns(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"lightgray"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"papayawhip"</span>),</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This produces the following DataFrame:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>shape: (<span class="dv">9</span>, <span class="dv">5</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>┌───────┬─────┬───────────┬────────────┬────────────┐</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>│ <span class="op">---</span>   ┆ <span class="op">---</span> ┆ <span class="op">---</span>       ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        │</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>│ u32   ┆ i64 ┆ <span class="bu">str</span>       ┆ <span class="bu">str</span>        ┆ i32        │</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>╞═══════╪═════╪═══════════╪════════════╪════════════╡</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ lightblue ┆ one        ┆ <span class="dv">1</span>          │</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ lightgray ┆ two        ┆ <span class="dv">2</span>          │</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ lightblue ┆ three      ┆ <span class="dv">3</span>          │</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ lightgray ┆ one        ┆ <span class="dv">4</span>          │</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ lightblue ┆ two        ┆ <span class="dv">1</span>          │</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ lightgray ┆ three      ┆ <span class="dv">2</span>          │</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ lightblue ┆ one        ┆ <span class="dv">3</span>          │</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ lightgray ┆ two        ┆ <span class="dv">4</span>          │</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ lightblue ┆ three      ┆ <span class="dv">1</span>          │</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴───────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>┌───────┬─────┬────────────┬────────────┬────────────┐</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>│ index ┆ n   ┆ binarized  ┆ trinarized ┆ bucketized │</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>│ <span class="op">---</span>   ┆ <span class="op">---</span> ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        │</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>│ u32   ┆ i64 ┆ <span class="bu">str</span>        ┆ <span class="bu">str</span>        ┆ i32        │</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>╞═══════╪═════╪════════════╪════════════╪════════════╡</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ lightblue  ┆ one        ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ papayawhip ┆ two        ┆ <span class="dv">2</span>          │</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ lightblue  ┆ three      ┆ <span class="dv">3</span>          │</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ papayawhip ┆ one        ┆ <span class="dv">4</span>          │</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ lightblue  ┆ two        ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ papayawhip ┆ three      ┆ <span class="dv">2</span>          │</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ lightblue  ┆ one        ┆ <span class="dv">3</span>          │</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ papayawhip ┆ two        ┆ <span class="dv">4</span>          │</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ lightblue  ┆ three      ┆ <span class="dv">1</span>          │</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴────────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Note: Since the custom logic is based on the row index rather than actual column values, you can safely use <code>pl.col("")</code> as a placeholder when calling the namespace methods.</p>
 <p>Each new column shows how rows are grouped using the row index modulo 2, 3, or 4—useful for highlighting patterns or applying styling.</p>
 <p>For instance, you can use the <code>binarized</code> column with Great Tables like this:</p>
