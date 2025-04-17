@@ -21,18 +21,20 @@ from highlight_text import ax_text
 
 from plotnine import (
     aes,
-    coord_flip,
     element_blank,
     element_rect,
     element_text,
     geom_segment,
     geom_text,
     ggplot,
-    scale_x_discrete,
+    position_nudge,
+    scale_color_identity,
+    scale_y_discrete,
     theme,
-    theme_classic,
+    theme_void,
     watermark,
 )
+
 
 # source1: https://truthsocial.com/@realDonaldTrump/114270398531479278
 # source2:
@@ -41,7 +43,7 @@ from plotnine import (
 # 800px-Seal_of_the_President_of_the_United_States.svg.png"
 logo_filename = "logo_resized.png"
 
-reciprocal_tariffs = {
+data = {
     "country": [
         "China",
         "European Union",
@@ -125,6 +127,8 @@ reciprocal_tariffs = {
     ],
 }
 
+country, tariffs_charged, reciprocal_tariffs = data.keys()
+
 dark_navy_blue = "#0B162A"  # background
 light_blue = "#B5D3E7"  # row
 white = "#FFFFFF"  # row
@@ -133,139 +137,91 @@ gold = "#FFF8DE"  # logo
 
 fontname_georgia = "Georgia"  # title
 fontname_roboto = "Roboto"  # body
-title_fontsize = 12
-title_fontweight = "bold"
-heading_fontsize = 8
-heading_fontweight = "bold"
-subheading_fontsize = 6
-subheading_fontweight = "normal"
 
-country = "country"
-y_col1_start, y_col1_end = 5, 52.5
-y_col2_start, y_col2_end = 60, 75
-y_col3_start, y_col3_end = 82.5, 97.5
+# column width
+x_col1_start, x_col1_end = 5, 52.5
+x_col2_start, x_col2_end = 60, 75
+x_col3_start, x_col3_end = 82.5, 97.5
 
-x_label, y_label = 25.5, 6  # ref point
-y_col1_text = 5
-y_col2_text = y_col2_start + (y_col2_end - y_col2_start) / 3 + 1
-y_col3_text = y_col3_start + (y_col3_end - y_col3_start) / 3 + 1
+# x-position for body text
+x_col1_text = 5
+x_col2_text = x_col2_start + (x_col2_end - x_col2_start) / 3 + 1
+x_col3_text = x_col3_start + (x_col3_end - x_col3_start) / 3 + 1
 
-segment_size = 8
-body_text_size = 10
-
-title_props = {
-    "color": gold,
-    "fontsize": title_fontsize,
-    "fontweight": title_fontweight,
-    "fontname": fontname_georgia,
+geom_segment_props = {
+    "size": 8,
+    "lineend": "round",
 }
-heading_props = {
-    "color": white,
-    "fontsize": heading_fontsize,
-    "fontweight": heading_fontweight,
-    "fontname": fontname_georgia,
-}
-subheading_props = {
-    "color": white,
-    "fontsize": subheading_fontsize,
-    "fontweight": subheading_fontweight,
-    "fontname": fontname_georgia,
+geom_text_props = {
+    "ha": "left",
+    "va": "center",
+    "position": position_nudge(y=-0.08),
+    "size": 10,
+    "fontweight": "bold",
 }
 
 
 def tweak_df() -> pl.DataFrame:
     return (
-        pl.DataFrame(reciprocal_tariffs)
-        .select(pl.all().reverse())
-        .cast({"country": pl.Categorical})
+        pl.DataFrame(data)
+        .with_row_index()
+        .with_columns(
+            pl.col(country).cast(pl.Categorical),
+            pl.when(pl.col("index").mod(2).eq(0))
+            .then(pl.lit(light_blue))
+            .otherwise(pl.lit(white))
+            .alias("color_mod"),
+        )
     )
 
 
 def plot_g() -> ggplot:
     return (
-        ggplot(data=df)
-        + coord_flip()
+        ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
         + geom_segment(
-            data=odd_df,
-            mapping=aes(y=y_col1_start, yend=y_col1_end, x=country, xend=country),
-            size=segment_size,
-            color=light_blue,
-            lineend="round",
-        )
-        + geom_segment(
-            data=even_df,
-            mapping=aes(y=y_col1_start, yend=y_col1_end, x=country, xend=country),
-            size=segment_size,
-            color=white,
-            lineend="round",
+            mapping=aes(x=x_col1_start, xend=x_col1_end, color="color_mod"),
+            **geom_segment_props,
         )
         # col2 segment
         + geom_segment(
-            data=odd_df,
-            mapping=aes(y=y_col2_start, yend=y_col2_end, x=country, xend=country),
-            size=segment_size,
-            color=light_blue,
-            lineend="round",
-        )
-        + geom_segment(
-            data=even_df,
-            mapping=aes(y=y_col2_start, yend=y_col2_end, x=country, xend=country),
-            size=segment_size,
-            color=white,
-            lineend="round",
+            mapping=aes(x=x_col2_start, xend=x_col2_end, color="color_mod"),
+            **geom_segment_props,
         )
         # col3 segment
         + geom_segment(
-            mapping=aes(y=y_col3_start, yend=y_col3_end, x=country, xend=country),
-            size=segment_size,
+            mapping=aes(x=x_col3_start, xend=x_col3_end),
             color=yellow,
-            lineend="round",
+            **geom_segment_props,
         )
         # col1 text
-        + geom_text(
-            aes(x=country, y=y_col1_text, label="country"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col1_text, label=country), **geom_text_props)
         # col2 text
-        + geom_text(
-            aes(x=country, y=y_col2_text, label="tariffs_charged"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col2_text, label=tariffs_charged), **geom_text_props)
         # col3 text
-        + geom_text(
-            aes(x=country, y=y_col3_text, label="reciprocal_tariffs"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col3_text, label=reciprocal_tariffs), **geom_text_props)
+        # using "color_mod" column directly
+        + scale_color_identity()
         # expand extra space
-        + scale_x_discrete(expand=(0.02, 0, 0.14, 0))
+        + scale_y_discrete(
+            limits=df.select(country).reverse().to_series().to_list(),
+            expand=(0.02, 0, 0.14, 0),
+        )
         # logo
-        + watermark(logo_filename, 100, 2200)
+        + watermark(logo_filename, 100, 2235)
     )
 
 
 def themify(p: ggplot) -> plt.Figure:
     return (
         p
-        + theme_classic()
+        + theme_void()
         + theme(
+            legend_position="none",  # turns off the legend
             axis_text_x=element_blank(),
             axis_text_y=element_blank(),
             axis_title_x=element_blank(),
             axis_title_y=element_blank(),
-            axis_line_x=element_blank(),
-            axis_line_y=element_blank(),
-            axis_ticks_x=element_blank(),
-            axis_ticks_y=element_blank(),
             panel_background=element_rect(fill=dark_navy_blue),
             plot_background=element_rect(fill=dark_navy_blue),
             text=element_text(family=fontname_roboto),
@@ -276,11 +232,39 @@ def themify(p: ggplot) -> plt.Figure:
 
 
 def add_ax_text(ax):
+    title_fontsize = 12
+    title_fontweight = "bold"
+    heading_fontsize = 8
+    heading_fontweight = "bold"
+    subheading_fontsize = 6
+    subheading_fontweight = "normal"
+
+    title_props = {
+        "color": gold,
+        "fontsize": title_fontsize,
+        "fontweight": title_fontweight,
+        "fontname": fontname_georgia,
+    }
+    heading_props = {
+        "color": white,
+        "fontsize": heading_fontsize,
+        "fontweight": heading_fontweight,
+        "fontname": fontname_georgia,
+    }
+    subheading_props = {
+        "color": white,
+        "fontsize": subheading_fontsize,
+        "fontweight": subheading_fontweight,
+        "fontname": fontname_georgia,
+    }
+
+    x_ref, y_ref = 25.5, 6  # ref point
+
     # title
     ax_text(
         s="<Reciprocal Tariffs>",
-        x=x_label + 7,
-        y=y_label + 20.9,
+        x=x_ref + 7,
+        y=y_ref + 20.9,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
@@ -290,8 +274,8 @@ def add_ax_text(ax):
     # col1
     ax_text(
         s="<Country>",
-        x=x_label + 4,
-        y=y_label + 19.5,
+        x=x_ref + 4,
+        y=y_ref + 19.5,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
@@ -301,50 +285,46 @@ def add_ax_text(ax):
     # col2
     ax_text(
         s="<Tariffs Charged>",
-        x=x_label + 42,
-        y=y_label + 20.8,
+        x=x_ref + 42,
+        y=y_ref + 20.8,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<to the U.S.A.>",
-        x=x_label + 42,
-        y=y_label + 20.4,
+        x=x_ref + 42,
+        y=y_ref + 20.4,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<Including>",
-        x=x_label + 42,
-        y=y_label + 20.1,
+        x=x_ref + 42,
+        y=y_ref + 20.1,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[subheading_props],
     )
-
     ax_text(
         s="<Currency Manipulation>",
-        x=x_label + 42,
-        y=y_label + 19.8,
+        x=x_ref + 42,
+        y=y_ref + 19.8,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[subheading_props],
     )
-
     ax_text(
         s="<and Trade Barriers>",
-        x=x_label + 42,
-        y=y_label + 19.5,
+        x=x_ref + 42,
+        y=y_ref + 19.5,
         ax=ax,
         va="bottom",
         ha="center",
@@ -353,18 +333,17 @@ def add_ax_text(ax):
     # col3
     ax_text(
         s="<U.S.A. Discounted>",
-        x=x_label + 64,
-        y=y_label + 20,
+        x=x_ref + 64,
+        y=y_ref + 20,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<Reciprocal Tariffs>",
-        x=x_label + 64,
-        y=y_label + 19.6,
+        x=x_ref + 64,
+        y=y_ref + 19.6,
         ax=ax,
         va="bottom",
         ha="center",
@@ -372,11 +351,8 @@ def add_ax_text(ax):
     )
     return ax
 
-df = tweak_df()
-mod2_expr = pl.col("index").mod(2).eq(0)
-odd_df = df.with_row_index().filter(mod2_expr)
-even_df = df.with_row_index().filter(mod2_expr.not_())
 
+df = tweak_df()
 p = plot_g()
 fig = themify(p)
 ax = fig.axes[0]
@@ -386,146 +362,71 @@ fig
 
 
 ## Preparing the DataFrames
-The data was first extracted from the previous work. I reversed all the columns and cast the `country` column as a categorical type, which makes it easier to work with in plotnine.
+We start by extracting the data from a previous project. The `country` column is converted to a categorical type, which simplifies handling in plotnine. To enable alternating row colors in the final visualization, we also create a new column called `color_mod`.
+
 ```python
 def tweak_df() -> pl.DataFrame:
     return (
-        pl.DataFrame(reciprocal_tariffs)
-        .select(pl.all().reverse())
-        .cast({"country": pl.Categorical})
+        pl.DataFrame(data)
+        .with_row_index()
+        .with_columns(
+            pl.col(country).cast(pl.Categorical),
+            pl.when(pl.col("index").mod(2).eq(0))
+            .then(pl.lit(light_blue))
+            .otherwise(pl.lit(white))
+            .alias("color_mod"),
+        )
     )
 
 df = tweak_df()
 ```
-```{python}
-# | code-fold: true
-# | eval: false
-# | code-summary: Show DataFrame
-shape: (25, 3)
-┌────────────────┬─────────────────┬────────────────────┐
-│ country        ┆ tariffs_charged ┆ reciprocal_tariffs │
-│ ---            ┆ ---             ┆ ---                │
-│ cat            ┆ str             ┆ str                │
-╞════════════════╪═════════════════╪════════════════════╡
-│ Colombia       ┆ 10%             ┆ 10%                │
-│ Sri Lanka      ┆ 88%             ┆ 44%                │
-│ Turkey         ┆ 10%             ┆ 10%                │
-│ Pakistan       ┆ 58%             ┆ 29%                │
-│ Australia      ┆ 10%             ┆ 10%                │
-│ Chile          ┆ 10%             ┆ 10%                │
-│ Philippines    ┆ 34%             ┆ 17%                │
-│ Israel         ┆ 33%             ┆ 17%                │
-│ Singapore      ┆ 10%             ┆ 10%                │
-│ Bangladesh     ┆ 74%             ┆ 37%                │
-│ Brazil         ┆ 10%             ┆ 10%                │
-│ South Africa   ┆ 60%             ┆ 30%                │
-│ United Kingdom ┆ 10%             ┆ 10%                │
-│ Cambodia       ┆ 97%             ┆ 49%                │
-│ Malaysia       ┆ 47%             ┆ 24%                │
-│ Indonesia      ┆ 64%             ┆ 32%                │
-│ Switzerland    ┆ 61%             ┆ 31%                │
-│ Thailand       ┆ 72%             ┆ 36%                │
-│ South Korea    ┆ 50%             ┆ 25%                │
-│ India          ┆ 52%             ┆ 26%                │
-│ Japan          ┆ 46%             ┆ 24%                │
-│ Taiwan         ┆ 64%             ┆ 32%                │
-│ Vietnam        ┆ 90%             ┆ 46%                │
-│ European Union ┆ 39%             ┆ 20%                │
-│ China          ┆ 67%             ┆ 34%                │
-└────────────────┴─────────────────┴────────────────────┘
-```
-
-Additionally, I created two DataFrames: one for odd rows and one for even rows. These will help us style alternating rows with different colors in the final plot.
-
-```python
-mod2_expr = pl.col("index").mod(2).eq(0)
-odd_df = df.with_row_index().filter(mod2_expr)
-even_df = df.with_row_index().filter(mod2_expr.not_())
-```
-
 
 ## Constructing the ggplot Object
-With the processed DataFrames, we can now construct the base `ggplot()` object:
+With the processed DataFrame ready, we can now build the `ggplot()` object:
 ```python
 def plot_g() -> ggplot:
     return (
-        ggplot(data=df)
-        + coord_flip()
+        ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
         + geom_segment(
-            data=odd_df,
-            mapping=aes(y=y_col1_start, yend=y_col1_end, x=country, xend=country),
-            size=segment_size,
-            color=light_blue,
-            lineend="round",
-        )
-        + geom_segment(
-            data=even_df,
-            mapping=aes(y=y_col1_start, yend=y_col1_end, x=country, xend=country),
-            size=segment_size,
-            color=white,
-            lineend="round",
+            mapping=aes(x=x_col1_start, xend=x_col1_end, color="color_mod"),
+            **geom_segment_props,
         )
         # col2 segment
         + geom_segment(
-            data=odd_df,
-            mapping=aes(y=y_col2_start, yend=y_col2_end, x=country, xend=country),
-            size=segment_size,
-            color=light_blue,
-            lineend="round",
-        )
-        + geom_segment(
-            data=even_df,
-            mapping=aes(y=y_col2_start, yend=y_col2_end, x=country, xend=country),
-            size=segment_size,
-            color=white,
-            lineend="round",
+            mapping=aes(x=x_col2_start, xend=x_col2_end, color="color_mod"),
+            **geom_segment_props,
         )
         # col3 segment
         + geom_segment(
-            mapping=aes(y=y_col3_start, yend=y_col3_end, x=country, xend=country),
-            size=segment_size,
+            mapping=aes(x=x_col3_start, xend=x_col3_end),
             color=yellow,
-            lineend="round",
+            **geom_segment_props,
         )
         # col1 text
-        + geom_text(
-            aes(x=country, y=y_col1_text, label="country"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col1_text, label=country), **geom_text_props)
         # col2 text
-        + geom_text(
-            aes(x=country, y=y_col2_text, label="tariffs_charged"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col2_text, label=tariffs_charged), **geom_text_props)
         # col3 text
-        + geom_text(
-            aes(x=country, y=y_col3_text, label="reciprocal_tariffs"),
-            ha="left",
-            va="center",
-            size=body_text_size,
-            fontweight="bold",
-        )
+        + geom_text(aes(x=x_col3_text, label=reciprocal_tariffs), **geom_text_props)
+        # using "color_mod" column directly
+        + scale_color_identity()
         # expand extra space
-        + scale_x_discrete(expand=(0.02, 0, 0.12, 0))
+        + scale_y_discrete(
+            limits=df.select(country).reverse().to_series().to_list(),
+            expand=(0.02, 0, 0.14, 0),
+        )
         # logo
-        + watermark(logo_filename, 100, 2200) # <1>
+        + watermark(logo_filename, 100, 2235)
     )
 ```
-
 ### What’s happening here?
 
-1. [coord_flip()](https://plotnine.org/reference/coord_flip.html#plotnine.coord_flip): Swaps the axes so `country` appears on the y-axis.
-2. [geom_segment()](https://plotnine.org/reference/geom_segment.html#plotnine.geom_segment): Since I couldn’t find a way to apply border radius, I used `geom_segment()` with `lineend="round"` as the best available workaround. Thick lines serve as cell backgrounds.
-3. [geom_text()](https://plotnine.org/reference/geom_text.html#plotnine.geom_text): Adds text for each column.
-4. [scale_x_discrete()](https://plotnine.org/reference/scale_x_discrete.html#plotnine.scale_x_discrete): Adjusts padding to create extra space above and below the table.
-5. [watermark()](https://plotnine.org/reference/watermark.html#plotnine.watermark): Embeds a logo. Since there’s no native figure size parameter in `plotnine`, I manually scaled the output.
+1. [geom_segment()](https://plotnine.org/reference/geom_segment.html#plotnine.geom_segment): Since I couldn’t find a way to apply border radius, I used `geom_segment()` with `lineend="round"` as the best available workaround. Thick lines serve as cell backgrounds.
+2. [geom_text()](https://plotnine.org/reference/geom_text.html#plotnine.geom_text): Adds text for each column.
+3. [scale_color_identity()](https://plotnine.org/reference/scale_color_identity.html#plotnine.scale_color_identity): Uses the color values directly from the `color_mod` column, without applying a scale.
+4. [scale_x_discrete()](https://plotnine.org/reference/scale_x_discrete.html#plotnine.scale_x_discrete): Reorders the `country` axis and tweaks padding to add space above and below the table.
+5. [watermark()](https://plotnine.org/reference/watermark.html#plotnine.watermark): Embeds a logo. Since there’s no native figure size parameter in plotnine, I manually scaled the output.
 
 
 ## Custom Theme
@@ -534,16 +435,13 @@ We apply a tailored theme with `themify()` to refine the figure’s appearance:
 def themify(p: ggplot) -> plt.Figure:
     return (
         p
-        + theme_classic()
+        + theme_void()
         + theme(
+            legend_position="none",  # turns off the legend
             axis_text_x=element_blank(),
             axis_text_y=element_blank(),
             axis_title_x=element_blank(),
             axis_title_y=element_blank(),
-            axis_line_x=element_blank(),
-            axis_line_y=element_blank(),
-            axis_ticks_x=element_blank(),
-            axis_ticks_y=element_blank(),
             panel_background=element_rect(fill=dark_navy_blue),
             plot_background=element_rect(fill=dark_navy_blue),
             text=element_text(family=fontname_roboto),
@@ -551,18 +449,45 @@ def themify(p: ggplot) -> plt.Figure:
             figure_size=(6, 8),
         )
     ).draw(False)
-
 ```
 
 ## Adding the Title and Column Headers
 We use `ax_text()` from [HighlightText](https://github.com/znstrider/highlight_text) to manually position and style each line of text.
 ```python
 def add_ax_text(ax):
+    title_fontsize = 12
+    title_fontweight = "bold"
+    heading_fontsize = 8
+    heading_fontweight = "bold"
+    subheading_fontsize = 6
+    subheading_fontweight = "normal"
+
+    title_props = {
+        "color": gold,
+        "fontsize": title_fontsize,
+        "fontweight": title_fontweight,
+        "fontname": fontname_georgia,
+    }
+    heading_props = {
+        "color": white,
+        "fontsize": heading_fontsize,
+        "fontweight": heading_fontweight,
+        "fontname": fontname_georgia,
+    }
+    subheading_props = {
+        "color": white,
+        "fontsize": subheading_fontsize,
+        "fontweight": subheading_fontweight,
+        "fontname": fontname_georgia,
+    }
+
+    x_ref, y_ref = 25.5, 6  # ref point
+
     # title
     ax_text(
         s="<Reciprocal Tariffs>",
-        x=x_label + 7,
-        y=y_label + 20.9,
+        x=x_ref + 7,
+        y=y_ref + 20.9,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
@@ -572,8 +497,8 @@ def add_ax_text(ax):
     # col1
     ax_text(
         s="<Country>",
-        x=x_label + 4,
-        y=y_label + 19.5,
+        x=x_ref + 4,
+        y=y_ref + 19.5,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
@@ -583,50 +508,46 @@ def add_ax_text(ax):
     # col2
     ax_text(
         s="<Tariffs Charged>",
-        x=x_label + 42,
-        y=y_label + 20.8,
+        x=x_ref + 42,
+        y=y_ref + 20.8,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<to the U.S.A.>",
-        x=x_label + 42,
-        y=y_label + 20.4,
+        x=x_ref + 42,
+        y=y_ref + 20.4,
         fontsize=heading_fontsize,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<Including>",
-        x=x_label + 42,
-        y=y_label + 20.1,
+        x=x_ref + 42,
+        y=y_ref + 20.1,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[subheading_props],
     )
-
     ax_text(
         s="<Currency Manipulation>",
-        x=x_label + 42,
-        y=y_label + 19.8,
+        x=x_ref + 42,
+        y=y_ref + 19.8,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[subheading_props],
     )
-
     ax_text(
         s="<and Trade Barriers>",
-        x=x_label + 42,
-        y=y_label + 19.5,
+        x=x_ref + 42,
+        y=y_ref + 19.5,
         ax=ax,
         va="bottom",
         ha="center",
@@ -635,18 +556,17 @@ def add_ax_text(ax):
     # col3
     ax_text(
         s="<U.S.A. Discounted>",
-        x=x_label + 64,
-        y=y_label + 20,
+        x=x_ref + 64,
+        y=y_ref + 20,
         ax=ax,
         va="bottom",
         ha="center",
         highlight_textprops=[heading_props],
     )
-
     ax_text(
         s="<Reciprocal Tariffs>",
-        x=x_label + 64,
-        y=y_label + 19.6,
+        x=x_ref + 64,
+        y=y_ref + 19.6,
         ax=ax,
         va="bottom",
         ha="center",
