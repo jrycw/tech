@@ -73,7 +73,7 @@ df = (
     pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
     .with_row_index(offset=1)
     .with_columns(
-        pl.col("").spt.binarize("lightblue", "lightgray"),
+        pl.col("").spt.binarize("lightblue", "papayawhip"),
         pl.col("").spt.trinarize("one", "two", "three"),
         pl.col("").spt.bucketize([1, 2, 3, 4]),
     )
@@ -172,7 +172,7 @@ df = (
     pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
     .with_row_index(offset=1)
     .with_columns(
-        pl.col("").spt.binarize("lightblue", "lightgray"),
+        pl.col("").spt.binarize("lightblue", "papayawhip"),
         pl.col("").spt.trinarize("one", "two", "three"),
         pl.col("").spt.bucketize([1, 2, 3, 4]),
     )
@@ -183,21 +183,21 @@ This produces the following DataFrame:
 
 ```python
 shape: (9, 5)
-┌───────┬─────┬───────────┬────────────┬────────────┐
-│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │
-│ ---   ┆ --- ┆ ---       ┆ ---        ┆ ---        │
-│ u32   ┆ i64 ┆ str       ┆ str        ┆ i32        │
-╞═══════╪═════╪═══════════╪════════════╪════════════╡
-│ 1     ┆ 100 ┆ lightblue ┆ one        ┆ 1          │
-│ 2     ┆ 50  ┆ lightgray ┆ two        ┆ 2          │
-│ 3     ┆ 72  ┆ lightblue ┆ three      ┆ 3          │
-│ 4     ┆ 83  ┆ lightgray ┆ one        ┆ 4          │
-│ 5     ┆ 97  ┆ lightblue ┆ two        ┆ 1          │
-│ 6     ┆ 42  ┆ lightgray ┆ three      ┆ 2          │
-│ 7     ┆ 20  ┆ lightblue ┆ one        ┆ 3          │
-│ 8     ┆ 51  ┆ lightgray ┆ two        ┆ 4          │
-│ 9     ┆ 77  ┆ lightblue ┆ three      ┆ 1          │
-└───────┴─────┴───────────┴────────────┴────────────┘
+┌───────┬─────┬────────────┬────────────┬────────────┐
+│ index ┆ n   ┆ binarized  ┆ trinarized ┆ bucketized │
+│ ---   ┆ --- ┆ ---        ┆ ---        ┆ ---        │
+│ u32   ┆ i64 ┆ str        ┆ str        ┆ i32        │
+╞═══════╪═════╪════════════╪════════════╪════════════╡
+│ 1     ┆ 100 ┆ lightblue  ┆ one        ┆ 1          │
+│ 2     ┆ 50  ┆ papayawhip ┆ two        ┆ 2          │
+│ 3     ┆ 72  ┆ lightblue  ┆ three      ┆ 3          │
+│ 4     ┆ 83  ┆ papayawhip ┆ one        ┆ 4          │
+│ 5     ┆ 97  ┆ lightblue  ┆ two        ┆ 1          │
+│ 6     ┆ 42  ┆ papayawhip ┆ three      ┆ 2          │
+│ 7     ┆ 20  ┆ lightblue  ┆ one        ┆ 3          │
+│ 8     ┆ 51  ┆ papayawhip ┆ two        ┆ 4          │
+│ 9     ┆ 77  ┆ lightblue  ┆ three      ┆ 1          │
+└───────┴─────┴────────────┴────────────┴────────────┘
 ```
 Note: Since the custom logic is based on the row index rather than actual column values, you can safely use `pl.col("")` as a placeholder when calling the namespace methods.
 
