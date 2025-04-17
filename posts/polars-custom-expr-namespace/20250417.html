@@ -195,6 +195,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#trinarize-three-groups" id="toc-trinarize-three-groups" class="nav-link" data-scroll-target="#trinarize-three-groups"><code>trinarize</code>: Three Groups</a></li>
   <li><a href="#bucketize-n-groups" id="toc-bucketize-n-groups" class="nav-link" data-scroll-target="#bucketize-n-groups"><code>bucketize</code>: N Groups</a></li>
   <li><a href="#example-usage" id="toc-example-usage" class="nav-link" data-scroll-target="#example-usage">Example Usage</a></li>
+  <li><a href="#example-usage-1" id="toc-example-usage-1" class="nav-link" data-scroll-target="#example-usage-1">Example Usage</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul></li>
   </ul>
@@ -209,7 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
 <p>Here is the code snippet: <img src="code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Snippet"></p>
-<div id="283f3293" class="cell" data-execution_count="1">
+<div id="23fc3fca" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
@@ -269,9 +270,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -356,9 +357,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">"n"</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This produces the following DataFrame:</p>
@@ -378,6 +379,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ yellow    ┆ two        ┆ <span class="dv">4</span>          │</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ blue      ┆ three      ┆ <span class="dv">1</span>          │</span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴───────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="example-usage-1" class="level3">
+<h3 class="anchored" data-anchor-id="example-usage-1">Example Usage</h3>
+<p>Here’s a simple example that demonstrates how the custom namespace works in practice:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    df.with_row_index(offset<span class="op">=</span><span class="dv">1</span>).with_columns(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.binarize(<span class="st">"blue"</span>, <span class="st">"yellow"</span>),</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        pl.col(<span class="st">""</span>).spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>]),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This produces the following DataFrame:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>shape: (<span class="dv">9</span>, <span class="dv">5</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>┌───────┬─────┬───────────┬────────────┬────────────┐</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>│ <span class="op">---</span>   ┆ <span class="op">---</span> ┆ <span class="op">---</span>       ┆ <span class="op">---</span>        ┆ <span class="op">---</span>        │</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>│ u32   ┆ i64 ┆ <span class="bu">str</span>       ┆ <span class="bu">str</span>        ┆ i32        │</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>╞═══════╪═════╪═══════════╪════════════╪════════════╡</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">1</span>     ┆ <span class="dv">100</span> ┆ blue      ┆ one        ┆ <span class="dv">1</span>          │</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">2</span>     ┆ <span class="dv">50</span>  ┆ yellow    ┆ two        ┆ <span class="dv">2</span>          │</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">3</span>     ┆ <span class="dv">72</span>  ┆ blue      ┆ three      ┆ <span class="dv">3</span>          │</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">4</span>     ┆ <span class="dv">83</span>  ┆ yellow    ┆ one        ┆ <span class="dv">4</span>          │</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">5</span>     ┆ <span class="dv">97</span>  ┆ blue      ┆ two        ┆ <span class="dv">1</span>          │</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">6</span>     ┆ <span class="dv">42</span>  ┆ yellow    ┆ three      ┆ <span class="dv">2</span>          │</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">7</span>     ┆ <span class="dv">20</span>  ┆ blue      ┆ one        ┆ <span class="dv">3</span>          │</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">8</span>     ┆ <span class="dv">51</span>  ┆ yellow    ┆ two        ┆ <span class="dv">4</span>          │</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>│ <span class="dv">9</span>     ┆ <span class="dv">77</span>  ┆ blue      ┆ three      ┆ <span class="dv">1</span>          │</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>└───────┴─────┴───────────┴────────────┴────────────┘</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note: Since we’re not using the actual column values in the custom logic, you can simply use <code>pl.col("")</code> as a placeholder to trigger the namespace methods.</p>
 <p>Each new column shows how rows are grouped based on their index modulo 2, 3, or 4 respectively—making it easier to visualize patterns or apply styling.</p>
 </section>
 <section id="conclusion" class="level3">
