@@ -9,13 +9,15 @@ image: "code.png"
 Today I explored how to register a **custom expression namespace** in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—**colorizing rows based on their row index**.
 
 Here is the code snippet:
-![](code.png){fig-align="center" fig-alt="Cloned Snippet"}
+![](code.png){fig-align="center" fig-alt="Code Snippet"}
 ```{python}
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
 from typing import Any
+
 import polars as pl
+from great_tables import GT, loc, style
 
 
 @pl.api.register_expr_namespace("spt")
@@ -67,14 +69,20 @@ class DiscreteSplitter:
         return expr.alias(name)
 
 
-df = pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
-
-(
-    df.with_row_index(offset=1).with_columns(
-        pl.col("").spt.binarize("blue", "yellow"),
+df = (
+    pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
+    .with_row_index(offset=1)
+    .with_columns(
+        pl.col("").spt.binarize("lightblue", "lightgray"),
         pl.col("").spt.trinarize("one", "two", "three"),
         pl.col("").spt.bucketize([1, 2, 3, 4]),
     )
+)
+
+(
+    GT(df)
+    .tab_style(style=style.fill(pl.col("binarized")), locations=loc.body())
+    .opt_stylize(style=6)
 )
 ```
 
@@ -158,47 +166,13 @@ class DiscreteSplitter:
 ```
 
 ### Example Usage
-Here’s a simple example to demonstrate how the custom namespace works in practice:
-```python
-df = pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
-
-(
-    df.with_row_index(offset=1).with_columns(
-        pl.col("").spt.binarize("blue", "yellow"),
-        pl.col("").spt.trinarize("one", "two", "three"),
-        pl.col("").spt.bucketize([1, 2, 3, 4]),
-    )
-)
-```
-
-This produces the following DataFrame:
-```python
-shape: (9, 5)
-┌───────┬─────┬───────────┬────────────┬────────────┐
-│ index ┆ n   ┆ binarized ┆ trinarized ┆ bucketized │
-│ ---   ┆ --- ┆ ---       ┆ ---        ┆ ---        │
-│ u32   ┆ i64 ┆ str       ┆ str        ┆ i32        │
-╞═══════╪═════╪═══════════╪════════════╪════════════╡
-│ 1     ┆ 100 ┆ blue      ┆ one        ┆ 1          │
-│ 2     ┆ 50  ┆ yellow    ┆ two        ┆ 2          │
-│ 3     ┆ 72  ┆ blue      ┆ three      ┆ 3          │
-│ 4     ┆ 83  ┆ yellow    ┆ one        ┆ 4          │
-│ 5     ┆ 97  ┆ blue      ┆ two        ┆ 1          │
-│ 6     ┆ 42  ┆ yellow    ┆ three      ┆ 2          │
-│ 7     ┆ 20  ┆ blue      ┆ one        ┆ 3          │
-│ 8     ┆ 51  ┆ yellow    ┆ two        ┆ 4          │
-│ 9     ┆ 77  ┆ blue      ┆ three      ┆ 1          │
-└───────┴─────┴───────────┴────────────┴────────────┘
-```
-
-### Example Usage
 Here’s a simple example that demonstrates how the custom namespace works in practice:
 ```python
-df = pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
-
-(
-    df.with_row_index(offset=1).with_columns(
-        pl.col("").spt.binarize("blue", "yellow"),
+df = (
+    pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
+    .with_row_index(offset=1)
+    .with_columns(
+        pl.col("").spt.binarize("lightblue", "lightgray"),
         pl.col("").spt.trinarize("one", "two", "three"),
         pl.col("").spt.bucketize([1, 2, 3, 4]),
     )
@@ -214,21 +188,30 @@ shape: (9, 5)
 │ ---   ┆ --- ┆ ---       ┆ ---        ┆ ---        │
 │ u32   ┆ i64 ┆ str       ┆ str        ┆ i32        │
 ╞═══════╪═════╪═══════════╪════════════╪════════════╡
-│ 1     ┆ 100 ┆ blue      ┆ one        ┆ 1          │
-│ 2     ┆ 50  ┆ yellow    ┆ two        ┆ 2          │
-│ 3     ┆ 72  ┆ blue      ┆ three      ┆ 3          │
-│ 4     ┆ 83  ┆ yellow    ┆ one        ┆ 4          │
-│ 5     ┆ 97  ┆ blue      ┆ two        ┆ 1          │
-│ 6     ┆ 42  ┆ yellow    ┆ three      ┆ 2          │
-│ 7     ┆ 20  ┆ blue      ┆ one        ┆ 3          │
-│ 8     ┆ 51  ┆ yellow    ┆ two        ┆ 4          │
-│ 9     ┆ 77  ┆ blue      ┆ three      ┆ 1          │
+│ 1     ┆ 100 ┆ lightblue ┆ one        ┆ 1          │
+│ 2     ┆ 50  ┆ lightgray ┆ two        ┆ 2          │
+│ 3     ┆ 72  ┆ lightblue ┆ three      ┆ 3          │
+│ 4     ┆ 83  ┆ lightgray ┆ one        ┆ 4          │
+│ 5     ┆ 97  ┆ lightblue ┆ two        ┆ 1          │
+│ 6     ┆ 42  ┆ lightgray ┆ three      ┆ 2          │
+│ 7     ┆ 20  ┆ lightblue ┆ one        ┆ 3          │
+│ 8     ┆ 51  ┆ lightgray ┆ two        ┆ 4          │
+│ 9     ┆ 77  ┆ lightblue ┆ three      ┆ 1          │
 └───────┴─────┴───────────┴────────────┴────────────┘
 ```
+Note: Since the custom logic is based on the row index rather than actual column values, you can safely use `pl.col("")` as a placeholder when calling the namespace methods.
 
-Note: Since we're not using the actual column values in the custom logic, you can simply use `pl.col("")` as a placeholder to trigger the namespace methods.
+Each new column shows how rows are grouped using the row index modulo 2, 3, or 4—useful for highlighting patterns or applying styling.
 
-Each new column shows how rows are grouped based on their index modulo 2, 3, or 4 respectively—making it easier to visualize patterns or apply styling.
+For instance, you can use the `binarized` column with Great Tables like this:
+```python
+(
+    GT(df)
+    .tab_style(style=style.fill(pl.col("binarized")), locations=loc.body())
+    .opt_stylize(style=6)
+)
+```
+![](gt.png){fig-align="center" fig-alt="Table with alternating row colors"}
 
 ### Conclusion
 Registering a custom expression namespace in Polars is a powerful way to encapsulate and reuse logic across your codebase. In this post, we created a `DiscreteSplitter` class to simplify index-based grouping, enabling operations like `binarize`, `trinarize`, and `bucketize`. This approach keeps your expressions clean and composable, especially when generating tables or plots that require styling based on row position.
