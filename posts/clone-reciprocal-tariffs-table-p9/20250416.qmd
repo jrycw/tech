@@ -18,6 +18,8 @@ Below is the final figure:
 import matplotlib.pyplot as plt
 import polars as pl
 from highlight_text import ax_text
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from plotnine import (
     aes,
@@ -212,7 +214,7 @@ def plot_g() -> ggplot:
     )
 
 
-def themify(p: ggplot) -> plt.Figure:
+def themify(p: ggplot) -> Figure:
     return (
         p
         + theme_void()
@@ -231,7 +233,7 @@ def themify(p: ggplot) -> plt.Figure:
     ).draw(False)
 
 
-def add_ax_text(ax):
+def add_ax_text(ax: Axes) -> Axes:
     title_fontsize = 12
     title_fontweight = "bold"
     heading_fontsize = 8
@@ -432,7 +434,7 @@ def plot_g() -> ggplot:
 ## Custom Theme
 We apply a tailored theme with `themify()` to refine the figure’s appearance:
 ```python
-def themify(p: ggplot) -> plt.Figure:
+def themify(p: ggplot) -> Figure:
     return (
         p
         + theme_void()
@@ -454,7 +456,7 @@ def themify(p: ggplot) -> plt.Figure:
 ## Adding the Title and Column Headers
 We use `ax_text()` from [HighlightText](https://github.com/znstrider/highlight_text) to manually position and style each line of text.
 ```python
-def add_ax_text(ax):
+def add_ax_text(ax: Axes) -> Axes:
     title_fontsize = 12
     title_fontweight = "bold"
     heading_fontsize = 8

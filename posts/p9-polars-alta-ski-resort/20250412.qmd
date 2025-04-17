@@ -19,10 +19,12 @@ The final figure, shown below, visualizes temperature trends for the ski season 
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
+import matplotlib.pyplot as plt
 import polars as pl
 import polars.selectors as cs
 from highlight_text import ax_text
-import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from plotnine import (
     aes,
@@ -256,7 +258,7 @@ def points_to_inches(points):
     return points / 72
 
 
-def themify(p: ggplot) -> plt.Figure:
+def themify(p: ggplot) -> Figure:
     figsize = (160, 165)  # pts
     figsize_inches = [points_to_inches(dim) for dim in figsize]
 
@@ -277,7 +279,7 @@ def themify(p: ggplot) -> plt.Figure:
     ).draw(show=False)
 
 
-def add_ax_text(ax):
+def add_ax_text(ax: Axes) -> Axes:
     ax_text(
         s="<Alta Ski Resort>\n<Temperature trends by >\n<decade>< and ><2019>",
         x=-5,
@@ -698,7 +700,7 @@ def points_to_inches(points):
     return points / 72
 
 
-def themify(p: ggplot) -> plt.Figure:
+def themify(p: ggplot) -> Figure:
     figsize = (160, 165)  # pts
     figsize_inches = [points_to_inches(dim) for dim in figsize]
 
@@ -724,7 +726,7 @@ For the title, we use `ax_text()` from the [HighlightText](https://github.com/zn
 
 To add a source note, we simply use Matplotlib's `ax.text()`: 
 ```python
-def add_ax_text(ax):
+def add_ax_text(ax: Axes) -> Axes:
     ax_text(
         s="<Alta Ski Resort>\n<Temperature trends by >\n<decade>< and ><2019>",
         x=-5,
