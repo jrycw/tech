@@ -196,6 +196,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#bucketize-n-groups" id="toc-bucketize-n-groups" class="nav-link" data-scroll-target="#bucketize-n-groups"><code>bucketize</code>: N Groups</a></li>
   <li><a href="#example-usage" id="toc-example-usage" class="nav-link" data-scroll-target="#example-usage">Example Usage</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#remark" id="toc-remark" class="nav-link" data-scroll-target="#remark">Remark</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -209,7 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
 <p>Here is the code snippet: <img src="code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
-<div id="9835ef62" class="cell" data-execution_count="1">
+<div id="7ffb3e6f" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
@@ -404,6 +405,103 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
 <p>Registering a custom expression namespace in Polars is a powerful way to encapsulate and reuse logic across your codebase. In this post, we created a <code>DiscreteSplitter</code> class to simplify index-based grouping, enabling operations like <code>binarize</code>, <code>trinarize</code>, and <code>bucketize</code>. This approach keeps your expressions clean and composable, especially when generating tables or plots that require styling based on row position.</p>
 <p>It’s also worth noting that Polars supports similar registration for Series, LazyFrame, and DataFrame objects—check out the <a href="https://docs.pola.rs/api/python/stable/reference/api.html">official documentation</a> for more details.</p>
+</section>
+<section id="remark" class="level3">
+<h3 class="anchored" data-anchor-id="remark">Remark</h3>
+<p>Here’s a rough draft showing how to achieve a similar effect using the DataFrame namespace. I might revisit and refine this approach in the future.</p>
+<div id="67848b93" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Show full code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, loc, style</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="at">@pl.api.register_dataframe_namespace</span>(<span class="st">"spt"</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DiscreteSplitter:</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, df: pl.DataFrame) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._df <span class="op">=</span> df</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._mod_colname <span class="op">=</span> <span class="st">"mod"</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._mod_col <span class="op">=</span> pl.col(<span class="va">self</span>._mod_colname)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._idx_colname <span class="op">=</span> <span class="st">"index"</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._idx_col <span class="op">=</span> pl.col(<span class="va">self</span>._idx_colname)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_df(<span class="va">self</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._df.with_row_index(<span class="va">self</span>._idx_colname).with_columns(</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._idx_col.mod(n).alias(<span class="va">self</span>._mod_colname)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_final_df(<span class="va">self</span>, n: <span class="bu">int</span>, expr: pl.Expr) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>._get_df(n)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            .with_columns(expr)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            .drop([<span class="va">self</span>._idx_colname, <span class="va">self</span>._mod_colname])</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> binarize(</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"binarized"</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> (</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            pl.when(<span class="va">self</span>._mod_col.eq(<span class="dv">0</span>))</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit2))</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._df <span class="op">=</span> <span class="va">self</span>._get_final_df(n, expr)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._df</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> trinarize(</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lit1: <span class="bu">str</span>, lit2: <span class="bu">str</span>, lit3: <span class="bu">str</span>, name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"trinarized"</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> (</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>            pl.when(<span class="va">self</span>._mod_col.eq(<span class="dv">0</span>))</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit1))</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>            .when(<span class="va">self</span>._mod_col.eq(<span class="dv">1</span>))</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>            .then(pl.lit(lit2))</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>            .otherwise(pl.lit(lit3))</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            .alias(name)</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._df <span class="op">=</span> <span class="va">self</span>._get_final_df(n, expr)</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._df</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> bucketize(</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, lits: <span class="bu">list</span>[Any], name: <span class="bu">str</span> <span class="op">=</span> <span class="st">"bucketized"</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> <span class="bu">len</span>(lits)</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>        <span class="co"># first</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> pl.when(<span class="va">self</span>._mod_col.eq(<span class="dv">0</span>)).then(pl.lit(lits[<span class="dv">0</span>]))</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># middles</span></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, one_lit <span class="kw">in</span> <span class="bu">enumerate</span>(lits[<span class="dv">1</span>:<span class="op">-</span><span class="dv">1</span>], start<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>            expr <span class="op">=</span> expr.when(<span class="va">self</span>._mod_col.eq(i)).then(pl.lit(one_lit))</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>        <span class="co"># last</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.otherwise(pl.lit(lits[<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># alias</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.alias(name)</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._df <span class="op">=</span> <span class="va">self</span>._get_final_df(n, expr)</span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>._df</span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> (</span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>    pl.DataFrame({<span class="st">"n"</span>: [<span class="dv">100</span>, <span class="dv">50</span>, <span class="dv">72</span>, <span class="dv">83</span>, <span class="dv">97</span>, <span class="dv">42</span>, <span class="dv">20</span>, <span class="dv">51</span>, <span class="dv">77</span>]})</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>    .spt.binarize(<span class="st">"lightblue"</span>, <span class="st">"papayawhip"</span>)</span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>    .spt.trinarize(<span class="st">"one"</span>, <span class="st">"two"</span>, <span class="st">"three"</span>)</span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>    .spt.bucketize([<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>])</span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>    .with_row_index(offset<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
