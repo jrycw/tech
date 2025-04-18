@@ -218,6 +218,103 @@ Registering a custom expression namespace in Polars is a powerful way to encapsu
 
 It’s also worth noting that Polars supports similar registration for Series, LazyFrame, and DataFrame objects—check out the [official documentation](https://docs.pola.rs/api/python/stable/reference/api.html) for more details.
 
+
+### Remark
+Here's a rough draft showing how to achieve a similar effect using the DataFrame namespace. I might revisit and refine this approach in the future.
+```{python}
+# | code-fold: true
+# | eval: false
+# | code-summary: Show full code
+from typing import Any
+
+import polars as pl
+from great_tables import GT, loc, style
+
+
+@pl.api.register_dataframe_namespace("spt")
+class DiscreteSplitter:
+    def __init__(self, df: pl.DataFrame) -> None:
+        self._df = df
+        self._mod_colname = "mod"
+        self._mod_col = pl.col(self._mod_colname)
+        self._idx_colname = "index"
+        self._idx_col = pl.col(self._idx_colname)
+
+    def _get_df(self, n: int) -> pl.DataFrame:
+        return self._df.with_row_index(self._idx_colname).with_columns(
+            self._idx_col.mod(n).alias(self._mod_colname)
+        )
+
+    def _get_final_df(self, n: int, expr: pl.Expr) -> pl.DataFrame:
+        return (
+            self._get_df(n)
+            .with_columns(expr)
+            .drop([self._idx_colname, self._mod_colname])
+        )
+
+    def binarize(
+        self, lit1: str, lit2: str, name: str = "binarized"
+    ) -> pl.DataFrame:
+        n = 2
+
+        expr = (
+            pl.when(self._mod_col.eq(0))
+            .then(pl.lit(lit1))
+            .otherwise(pl.lit(lit2))
+            .alias(name)
+        )
+
+        self._df = self._get_final_df(n, expr)
+        return self._df
+
+    def trinarize(
+        self, lit1: str, lit2: str, lit3: str, name: str = "trinarized"
+    ) -> pl.DataFrame:
+        n = 3
+
+        expr = (
+            pl.when(self._mod_col.eq(0))
+            .then(pl.lit(lit1))
+            .when(self._mod_col.eq(1))
+            .then(pl.lit(lit2))
+            .otherwise(pl.lit(lit3))
+            .alias(name)
+        )
+
+        self._df = self._get_final_df(n, expr)
+        return self._df
+
+    def bucketize(
+        self, lits: list[Any], name: str = "bucketized"
+    ) -> pl.DataFrame:
+        n = len(lits)
+
+        # first
+        expr = pl.when(self._mod_col.eq(0)).then(pl.lit(lits[0]))
+
+        # middles
+        for i, one_lit in enumerate(lits[1:-1], start=1):
+            expr = expr.when(self._mod_col.eq(i)).then(pl.lit(one_lit))
+
+        # last
+        expr = expr.otherwise(pl.lit(lits[-1]))
+
+        # alias
+        expr = expr.alias(name)
+
+        self._df = self._get_final_df(n, expr)
+        return self._df
+
+
+df = (
+    pl.DataFrame({"n": [100, 50, 72, 83, 97, 42, 20, 51, 77]})
+    .spt.binarize("lightblue", "papayawhip")
+    .spt.trinarize("one", "two", "three")
+    .spt.bucketize([1, 2, 3, 4])
+    .with_row_index(offset=1)
+)
+```
+
 ::: {.callout-warning}
 # Disclaimer
 This post was drafted by me, with AI assistance to refine the content.
