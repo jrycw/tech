@@ -18,8 +18,6 @@ The final figure, shown below, visualizes temperature trends for the ski season 
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
-from functools import partial
-
 import matplotlib.pyplot as plt
 import polars as pl
 import polars.selectors as cs
@@ -29,7 +27,29 @@ from matplotlib import colormaps
 # https://github.com/mattharrison/datasets/raw/refs/heads/master/data/alta-noaa-1980-2019.csv
 data_path = "alta-noaa-1980-2019.csv"
 columns = ["DATE", "TOBS"]
-df = pl.scan_csv(data_path).select(columns).collect()
+idx_colname = "DAY_OF_SEASON"
+
+
+def tweak_df(data_path: str, columns: list[str], idx_colname: str = "DAY_OF_SEASON"):
+    return (
+        pl.scan_csv(data_path)
+        .select(columns)
+        .with_columns(
+            pl.col("DATE").str.to_datetime(),
+            pl.col("TOBS").interpolate(),
+        )
+        .sort("DATE")
+        .with_columns(
+            # Caveat: Cannot be placed in the previous `with_columns()`
+            # due to different statuses of `TOBS`.
+            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"),
+            get_season_expr(col="DATE", alias="SEASON"),
+        )
+        .with_columns(
+            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname)  #
+        )
+        .collect()
+    )
 
 
 def get_season_expr(col: str = "DATE", alias: str = "SEASON") -> pl.expr:
@@ -232,81 +252,51 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.Data
     return df_
 
 
-idx_colname = "DAY_OF_SEASON"
-
-data = (
-    df.with_columns(
-        pl.col("DATE").str.to_datetime(),
-        pl.col("TOBS").interpolate(),
-    )
-    .sort("DATE")
-    .with_columns(
-        # Caveat: Cannot be placed in the previous `with_columns()`
-        # due to different statuses of `TOBS`.
-        pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"),
-        get_season_expr(col="DATE", alias="SEASON"),
-    )
-    .with_columns(
-        add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname)
-    )
-    .pipe(partial(plot_temps, idx_colname=idx_colname))
-)
-```
-
-## Loading the Data
-To begin, we load the dataset, focusing on two key columns:  
-
-* **`DATE`**: The dates.
-* **`TOBS`**: The recorded temperature in Fahrenheit.
-```{python}
-# | code-fold: false
-from functools import partial
-
-import matplotlib.pyplot as plt
-import polars as pl
-import polars.selectors as cs
-from highlight_text import ax_text
-from matplotlib import colormaps
-
-data_path = "alta-noaa-1980-2019.csv"
-columns = ["DATE", "TOBS"]
-df = pl.scan_csv(data_path).select(columns).collect()
-print(df.head())
+df = tweak_df(data_path, columns, idx_colname)
+df.pipe(plot_temps, idx_colname)
 ```
 
 ## Data Processing Pipeline  
-Here’s the pipeline for generating the final figure:  
+Below is the data pipeline used to generate the DataFrame for the upcoming visualization stage:
 ```python
+data_path = "alta-noaa-1980-2019.csv"
+columns = ["DATE", "TOBS"]
 idx_colname = "DAY_OF_SEASON"
 
-data = (
-    df.with_columns(
-        pl.col("DATE").str.to_datetime(), # <1>
-        pl.col("TOBS").interpolate(), # <2>
+
+def tweak_df(data_path: str, columns: list[str], idx_colname: str = "DAY_OF_SEASON"):
+    return (
+        pl.scan_csv(data_path)
+        .select(columns) # <1>
+        .with_columns(
+            pl.col("DATE").str.to_datetime(), # <2>
+            pl.col("TOBS").interpolate(), # <3>
+        )
+        .sort("DATE")
+        .with_columns(
+            # Caveat: Cannot be placed in the previous `with_columns()`
+            # due to different statuses of `TOBS`.
+            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"), # <4>
+            get_season_expr(col="DATE", alias="SEASON"), # <5>
+        )
+        .with_columns(
+            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname) # <6>
+        )
+        .collect()
     )
-    .sort("DATE")
-    .with_columns(
-        # Caveat: Cannot be placed in the previous `with_columns()`
-        # due to different statuses of `TOBS`.
-        pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"), # <3>
-        get_season_expr(col="DATE", alias="SEASON"), # <4>
-    )
-    .with_columns(
-        add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname) # <5>
-    ) 
-    .pipe(partial(plot_temps, idx_colname=idx_colname)) # <6>
-)
+
+df = tweak_df(data_path, columns, idx_colname)
 ```
-1. Convert the `DATE` column to a datetime format.  
-2. Perform interpolation on the `TOBS` column.  
-3. Compute a 28-day rolling average for `TOBS`.  
-4. Use `get_season_expr()` to categorize each date into a `SEASON`.  
-5. Apply `add_day_of_season_expr()` to calculate `DAY_OF_SEASON`, representing days elapsed since the start of the season.  
-6. Use `plot_temps()` to generate the final visualization with Matplotlib.  
+1. Select the `DATE` column (dates) and `TOBS` column (recorded temperatures in Fahrenheit).
+2. Convert the `DATE` column to a datetime format.
+3. Perform interpolation on the `TOBS` column.
+4. Compute a 28-day rolling average for `TOBS`.
+5. Use `get_season_expr()` to categorize each date into a `SEASON`.
+6. Apply `add_day_of_season_expr()` to calculate `DAY_OF_SEASON`, representing days elapsed since the start of the season.
 
-The first three steps involve straightforward Polars expressions. In the following sections, we’ll dive deeper into steps 4 to 6.  
+The first three steps involve straightforward Polars expressions. In the following sections, we’ll dive deeper into steps 5 to 6.
 
-## Categorizing Dates into `Summer` and `Ski` Seasons  
+### Categorizing Dates into `Summer` and `Ski` Seasons
 To analyze seasonal trends, we classify dates into two categories:  
 
 * **`Summer`**: Covers May through October.  
@@ -339,7 +329,7 @@ In this function:
 
 By applying this function, we can add a `SEASON` column to a Polars DataFrame, ensuring each date is categorized correctly.
 
-## Calculating the Total Days for Each Season
+### Calculating the Total Days for Each Season
 Once we have the seasonal categories, we calculate `DAY_OF_SEASON`, which tracks the number of days elapsed within each season. This is achieved using the [pl.expr.over()](https://docs.pola.rs/api/python/dev/reference/expressions/api/polars.Expr.over.html) expression, which operates similarly to Pandas' `groupby().transform()`, applying transformations within groups.  
 
 ```python
@@ -352,8 +342,7 @@ def add_day_of_season_expr(
 ```
 
 ## Visualizing Temperature Trends with Matplotlib  
-With the data prepared, we move on to plotting. Since `plot_temps()` is quite long, we’ll break it down into several parts for easier explanation
-
+With the data prepared, we move on to plotting. Since `plot_temps()` is quite long, we’ll break it down into several parts for easier explanation.
 
 ### Setting Up the Figure  
 We start by defining some parameters and using [plt.subplot_mosaic()](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot_mosaic.html) to create the figure layout. This provides structured axes for different elements of the visualization.  
@@ -602,6 +591,12 @@ def plot_temps(
         color=grey,
     )
     return df_
+```
+
+## Rendering the Plot
+Finally, we render the plot using [pl.DataFrame.pipe()](https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pipe.html#polars.DataFrame.pipe):
+```python
+df.pipe(plot_temps, idx_colname)
 ```
 
 ## Wrapping Up  

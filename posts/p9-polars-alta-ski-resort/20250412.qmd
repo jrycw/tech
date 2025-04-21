@@ -43,7 +43,6 @@ from plotnine import (
     theme_classic,
 )
 
-
 # https://github.com/mattharrison/datasets/raw/refs/heads/master/data/alta-noaa-1980-2019.csv
 data_path = "alta-noaa-1980-2019.csv"
 columns = ["DATE", "TOBS"]
@@ -319,38 +318,42 @@ fig
 
 
 ## Data Processing Pipeline
-Below is the data pipeline used to generate the DataFrame for the upcoming visualization stage: 
+Below is the data pipeline used to generate the DataFrame for the upcoming visualization stage:
 ```python
+data_path = "alta-noaa-1980-2019.csv"
+columns = ["DATE", "TOBS"]
+idx_colname = "DAY_OF_SEASON"
+
+
 def tweak_df(data_path: str, columns: list[str], idx_colname: str = "DAY_OF_SEASON"):
     return (
         pl.scan_csv(data_path)
-        .select(columns)
+        .select(columns) # <1>
         .with_columns(
-            pl.col("DATE").str.to_datetime(), # <1>
-            pl.col("TOBS").interpolate(), # <2>
+            pl.col("DATE").str.to_datetime(), # <2>
+            pl.col("TOBS").interpolate(), # <3>
         )
         .sort("DATE")
         .with_columns(
             # Caveat: Cannot be placed in the previous `with_columns()`
             # due to different statuses of `TOBS`.
-            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"), # <3>
-            get_season_expr(col="DATE", alias="SEASON"), # <4>
+            pl.col("TOBS").rolling_mean(window_size=28, center=True).alias("TMEAN"), # <4>
+            get_season_expr(col="DATE", alias="SEASON"), # <5>
         )
         .with_columns(
-            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname) # <5>
+            add_day_of_season_expr(col="DATE", group_col="SEASON", alias=idx_colname) # <6>
         )
         .collect()
     )
 ```
-1. Convert the `DATE` column to a datetime format.  
-2. Perform interpolation on the `TOBS` column.  
-3. Compute a 28-day rolling average for `TOBS`.  
-4. Use `get_season_expr()` to categorize each date into a `SEASON`.  
-5. Apply `add_day_of_season_expr()` to calculate `DAY_OF_SEASON`, representing days elapsed since the start of the season.  
+1. Select the `DATE` column (dates) and `TOBS` column (recorded temperatures in Fahrenheit).
+2. Convert the `DATE` column to a datetime format.
+3. Perform interpolation on the `TOBS` column.
+4. Compute a 28-day rolling average for `TOBS`.
+5. Use `get_season_expr()` to categorize each date into a `SEASON`.
+6. Apply `add_day_of_season_expr()` to calculate `DAY_OF_SEASON`, representing days elapsed since the start of the season.
 
-
-The first three steps involve straightforward Polars expressions. In the following two sub-sections, we’ll dive deeper into steps 4 and 5.  
-
+The first three steps involve straightforward Polars expressions. In the following two sub-sections, we’ll dive deeper into steps 5 and 6.
 
 ### Categorizing Dates into `Summer` and `Ski` Seasons  
 To analyze seasonal trends, we classify dates into two categories:  
