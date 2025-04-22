@@ -18,7 +18,7 @@ Since the code is largely self-explanatory, I will highlight some tricks and cav
 5. The `column_labels_border_bottom_style=` parameter in [GT.tab_options()](https://posit-dev.github.io/great-tables/reference/GT.tab_options.html#great_tables.GT.tab_options) is key to hiding the line between the column labels and the table body.
 6. Logo embedding might seem a bit tricky if you're new to Great Tables; I suggest reading the [blog post](https://posit-dev.github.io/great-tables/blog/rendering-images/) that details how to render images anywhere in Great Tables.
 7. To enhance the overall visual effect, I added a row at the end of the table and filled it with the same background color.
-8. The original table featured two rings, but I was only able to implement the inner one. Ultimately, I chose to present the table without it. If you're interested in how I implemented the ring, the code is available in the comments below.
+8. The original table featured two rings, but I was only able to implement the inner one using [GT.opt_table_outline()](https://posit-dev.github.io/great-tables/reference/GT.opt_table_outline.html#great_tables.GT.opt_table_outline). I decided to leave it out for a cleaner appearance.
 9. While the color codes and font properties could be further enhanced, Great Tables successfully replicates the table's structure and style with only minor differences.
 
 ![](reciprocal_tariffs_gt.png){fig-align="center" fig-alt="Cloned Reciprocal Tariffs Table"}
@@ -195,7 +195,7 @@ df = (
     )
 )
 
-# inner_ring_color, inner_ring_style, inner_ring_weight = "orange", "dashed", "3px"
+# inner_ring_style, inner_ring_width, inner_ring_color = "dashed", "3px", "orange"
 
 (
     GT(df)
@@ -275,66 +275,12 @@ df = (
     # set the body background color to `dark_navy_blue` for the last row
     .tab_style(style=style.fill(color=dark_navy_blue), locations=loc.body(rows=[-1]))
     # need to adjust `window_size` to obtain a higher-quality figure
+    # .opt_table_outline(
+    #     style=inner_ring_style,
+    #     width=inner_ring_width,
+    #     color=inner_ring_color,
+    # )
     # .save("reciprocal_tariffs_gt.png", web_driver="firefox", window_size=(1200, 1000))
-    #
-    # =========================
-    # inner ring
-    # =========================
-    #
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="bottom",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.body(rows=[-1]),
-    # )
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="left",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.body(columns=["0"]),
-    # )
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="right",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.body(columns=["3"]),
-    # )
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="top",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.column_labels(),
-    # )
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="left",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.column_labels(columns=["0"]),
-    # )
-    # .tab_style(
-    #     style=style.borders(
-    #         sides="right",
-    #         color=inner_ring_color,
-    #         style=inner_ring_style,
-    #         weight=inner_ring_weight,
-    #     ),
-    #     locations=loc.column_labels(columns=["3"]),
-    # )
 )
 ```
 
