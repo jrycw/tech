@@ -74,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-d4d76bf8491c20bad77d141916dc28e1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-347ee2f26400bf612ace32794c18e5a3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-11a7bfe70c74b2bd54c5a1a89154e5cf.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -223,7 +223,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="278c25f1" class="cell" data-execution_count="1">
+<div id="d1db751a" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -284,7 +284,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(_df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    plt.rcParams[<span class="st">"font.family"</span>] <span class="op">=</span> <span class="st">"Roboto"</span></span>
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    figsize <span class="op">=</span> (<span class="dv">160</span>, <span class="dv">165</span>)  <span class="co"># pts</span></span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
@@ -340,7 +340,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ----- Plot -----</span></span>
 <span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axs[<span class="st">"plot"</span>]</span>
-<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>    season_temps <span class="op">=</span> df_.<span class="bu">filter</span>(pl.col(<span class="st">"SEASON"</span>).<span class="bu">str</span>.contains(<span class="st">"Ski"</span>)).pivot(</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>    season_temps <span class="op">=</span> _df.<span class="bu">filter</span>(pl.col(<span class="st">"SEASON"</span>).<span class="bu">str</span>.contains(<span class="st">"Ski"</span>)).pivot(</span>
 <span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>        <span class="st">"SEASON"</span>, index<span class="op">=</span>idx_colname, values<span class="op">=</span><span class="st">"TMEAN"</span>, aggregate_function<span class="op">=</span><span class="st">"first"</span></span>
 <span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>    season_temps_index <span class="op">=</span> season_temps[idx_colname]</span>
@@ -457,7 +457,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a>        fontweight<span class="op">=</span>source_fontweight,</span>
 <span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>grey,</span>
 <span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_</span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> _df</span>
 <span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> tweak_df(data_path, columns, idx_colname)</span>
@@ -570,7 +570,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="setting-up-the-figure" class="level3">
 <h3 class="anchored" data-anchor-id="setting-up-the-figure">Setting Up the Figure</h3>
 <p>We start by defining some parameters and using <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot_mosaic.html">plt.subplot_mosaic()</a> to create the figure layout. This provides structured axes for different elements of the visualization.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(_df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    plt.rcParams[<span class="st">"font.family"</span>] <span class="op">=</span> <span class="st">"Roboto"</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    figsize <span class="op">=</span> (<span class="dv">160</span>, <span class="dv">165</span>)  <span class="co"># pts</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -608,7 +608,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="adding-the-title">Adding the Title</h3>
 <p>For the title, we use <code>ax_text()</code> from the <a href="https://github.com/znstrider/highlight_text">HighlightText</a> library, which allows selective styling of text enclosed in <code>&lt; &gt;</code>. This lets us highlight key parts of the title, such as <code>&lt;Alta Ski Resort&gt;</code>, <code>&lt;Temperature trends by &gt;</code>, <code>&lt;decade&gt;</code>, <code>&lt; and &gt;</code>, and <code>&lt;2019&gt;</code>, with custom formatting.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -645,13 +645,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Using <code>ax.plot()</code> to draw a separate line for each <code>Ski</code> season.</li>
 </ol>
 <div class="sourceCode" id="annotated-cell-7"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ----- Plot -----</span></span>
 <span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> axs[<span class="st">"plot"</span>]</span>
-<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>    season_temps <span class="op">=</span> df_.<span class="bu">filter</span>(pl.col(<span class="st">"SEASON"</span>).<span class="bu">str</span>.contains(<span class="st">"Ski"</span>)).pivot(</span>
+<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>    season_temps <span class="op">=</span> _df.<span class="bu">filter</span>(pl.col(<span class="st">"SEASON"</span>).<span class="bu">str</span>.contains(<span class="st">"Ski"</span>)).pivot(</span>
 <span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"SEASON"</span>, index<span class="op">=</span>idx_colname, values<span class="op">=</span><span class="st">"TMEAN"</span>, aggregate_function<span class="op">=</span><span class="st">"first"</span></span>
 <span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="annotated-cell-7-11"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>    season_temps_index <span class="op">=</span> season_temps[idx_colname]</span>
@@ -671,7 +671,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="annotated-cell-7-25"><a href="#annotated-cell-7-25" aria-hidden="true" tabindex="-1"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>To illustrate long-term trends, we overlay four lines representing the average temperature trends for different decades, marking their start and end points with dots for emphasis.</p>
 <div class="sourceCode" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="annotated-cell-8-4"><a href="#annotated-cell-8-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="annotated-cell-8-5"><a href="#annotated-cell-8-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -729,7 +729,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="highlighting-the-2019-ski-season">Highlighting the 2019 Ski Season</h3>
 <p>To make <code>Ski 2019</code> stand out, we plot its trend in red and highlight its start and end points with dots, similar to the decade lines.</p>
 <div class="sourceCode" id="annotated-cell-9"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><span id="annotated-cell-9-1"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="annotated-cell-9-5"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -777,7 +777,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>Labels</strong>: Customizing the x-axis label for clarity.</li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -802,7 +802,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="adding-notes">Adding Notes</h3>
 <p>Finally, we use Matplotlib’s <code>ax.text()</code> to annotate the source of the data.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    df_: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pl.DataFrame:</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ...</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
@@ -818,7 +818,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        fontweight<span class="op">=</span>source_fontweight,</span>
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>grey,</span>
 <span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> _df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="rendering-the-plot" class="level2">
