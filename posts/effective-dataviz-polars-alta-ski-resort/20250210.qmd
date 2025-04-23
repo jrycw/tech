@@ -76,7 +76,7 @@ def add_day_of_season_expr(
     )
 
 
-def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.DataFrame:
+def plot_temps(_df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.DataFrame:
     plt.rcParams["font.family"] = "Roboto"
     figsize = (160, 165)  # pts
 
@@ -132,7 +132,7 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.Data
 
     # ----- Plot -----
     ax = axs["plot"]
-    season_temps = df_.filter(pl.col("SEASON").str.contains("Ski")).pivot(
+    season_temps = _df.filter(pl.col("SEASON").str.contains("Ski")).pivot(
         "SEASON", index=idx_colname, values="TMEAN", aggregate_function="first"
     )
     season_temps_index = season_temps[idx_colname]
@@ -249,7 +249,7 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.Data
         fontweight=source_fontweight,
         color=grey,
     )
-    return df_
+    return _df
 
 
 df = tweak_df(data_path, columns, idx_colname)
@@ -347,7 +347,7 @@ With the data prepared, we move on to plotting. Since `plot_temps()` is quite lo
 ### Setting Up the Figure  
 We start by defining some parameters and using [plt.subplot_mosaic()](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot_mosaic.html) to create the figure layout. This provides structured axes for different elements of the visualization.  
 ```python
-def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.DataFrame:
+def plot_temps(_df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> pl.DataFrame:
     plt.rcParams["font.family"] = "Roboto"
     figsize = (160, 165)  # pts
 
@@ -387,7 +387,7 @@ For the title, we use `ax_text()` from the [HighlightText](https://github.com/zn
 
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
@@ -423,13 +423,13 @@ Next, we generate the main plot by:
 
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
     # ----- Plot -----
     ax = axs["plot"]
-    season_temps = df_.filter(pl.col("SEASON").str.contains("Ski")).pivot(
+    season_temps = _df.filter(pl.col("SEASON").str.contains("Ski")).pivot(
         "SEASON", index=idx_colname, values="TMEAN", aggregate_function="first"
     ) # <1>
     season_temps_index = season_temps[idx_colname]
@@ -452,7 +452,7 @@ def plot_temps(
 To illustrate long-term trends, we overlay four lines representing the average temperature trends for different decades, marking their start and end points with dots for emphasis.
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
@@ -507,7 +507,7 @@ To make `Ski 2019` stand out, we plot its trend in red and highlight its start a
 
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
@@ -548,7 +548,7 @@ To enhance readability, we refine the visualization by adjusting:
 
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
@@ -574,7 +574,7 @@ def plot_temps(
 Finally, we use Matplotlib's `ax.text()` to annotate the source of the data.  
 ```python
 def plot_temps(
-    df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
+    _df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON"
 ) -> pl.DataFrame:
     ...
 
@@ -590,7 +590,7 @@ def plot_temps(
         fontweight=source_fontweight,
         color=grey,
     )
-    return df_
+    return _df
 ```
 
 ## Rendering the Plot
