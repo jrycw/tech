@@ -197,7 +197,6 @@ def plot_temps(_df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             alpha=0.2,
             size=0.5,
         )
-        + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
         # 4 blue lines
         + geom_line(
             mapping=aes(fill="factor(color)"),
@@ -233,13 +232,6 @@ def plot_temps(_df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             color=red,
             size=1,
         )
-        + labs(x=idx_colname, y="")
-        + scale_x_continuous(
-            breaks=[0, 50, 100, 150],
-            limits=(0, 200),
-            expand=(0, 10, 0, 15),
-        )
-        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
         # annotations for 4 blue lines
         + geom_text(
             mapping=aes(x="x", y="y", label="label"),
@@ -250,6 +242,14 @@ def plot_temps(_df: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             ha="left",
             va="center",
         )
+        + labs(x=idx_colname, y="")
+        + scale_x_continuous(
+            breaks=[0, 50, 100, 150],
+            limits=(0, 200),
+            expand=(0, 10, 0, 15),
+        )
+        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
+        + scale_color_cmap("Greys", guide=None)
     )
 
 
@@ -619,7 +619,6 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             alpha=0.2,
             size=0.5,
         )
-        + scale_color_cmap("Greys", guide=None, labels=[10, 32, 50])
         # 4 blue lines
         + geom_line(
             mapping=aes(fill="factor(color)"), # <3>
@@ -655,13 +654,6 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             color=red,
             size=1,
         )
-        + labs(x=idx_colname, y="")
-        + scale_x_continuous(
-            breaks=[0, 50, 100, 150],
-            limits=(0, 200),
-            expand=(0, 10, 0, 15),
-        )
-        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
         # annotations for 4 blue lines
         + geom_text(
             mapping=aes(x="x", y="y", label="label"), # <6>
@@ -672,6 +664,14 @@ def plot_temps(df_: pl.DataFrame, idx_colname: str = "DAY_OF_SEASON") -> ggplot:
             ha="left",
             va="center",
         )
+        + labs(x=idx_colname, y="")
+        + scale_x_continuous(
+            breaks=[0, 50, 100, 150],
+            limits=(0, 200),
+            expand=(0, 10, 0, 15),
+        )
+        + scale_y_continuous(breaks=[10, 32, 40], limits=(10, 70), expand=(0, 0))
+        + scale_color_cmap("Greys", guide=None)
     )
 ```
 
