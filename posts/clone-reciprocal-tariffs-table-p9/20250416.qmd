@@ -15,12 +15,8 @@ Below is the final figure:
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
-import matplotlib.pyplot as plt
 import polars as pl
-from highlight_text import ax_text
-from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-
 from plotnine import (
     aes,
     element_blank,
@@ -31,6 +27,7 @@ from plotnine import (
     ggplot,
     position_nudge,
     scale_color_identity,
+    scale_size_identity,
     scale_y_discrete,
     theme,
     theme_void,
@@ -150,18 +147,6 @@ x_col1_text = 5
 x_col2_text = x_col2_start + (x_col2_end - x_col2_start) / 3 + 1
 x_col3_text = x_col3_start + (x_col3_end - x_col3_start) / 3 + 1
 
-geom_segment_props = {
-    "size": 8,
-    "lineend": "round",
-}
-geom_text_props = {
-    "ha": "left",
-    "va": "center",
-    "position": position_nudge(y=-0.08),
-    "size": 10,
-    "fontweight": "bold",
-}
-
 
 def tweak_df() -> pl.DataFrame:
     return (
@@ -177,7 +162,109 @@ def tweak_df() -> pl.DataFrame:
     )
 
 
+def get_textdata_df(x_ref: float = 0.0, y_ref: float = 0.0) -> pl.DataFrame:
+    title_fontsize = 16
+    title_fontweight = "bold"
+    heading_fontsize = 8
+    heading_fontweight = "bold"
+    subheading_fontsize = 6
+    subheading_fontweight = "normal"
+
+    textdata_df = pl.DataFrame(
+        {
+            "label": [
+                "Reciprocal Tariffs",  # title
+                "Country",  # col1
+                "Tariffs Charged",  # col2
+                "to the U.S.A.",
+                "Including",
+                "Currency Manipulation",
+                "and Trade Barriers",
+                "U.S.A. Discounted",  # col3
+                "Reciprocal Tariffs",
+            ],
+            "x": [
+                x_ref + 34.0,
+                x_ref + 29.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 89.5,
+                x_ref + 89.5,
+            ],
+            "y": [
+                y_ref + 27,
+                y_ref + 25.5,
+                y_ref + 26.8,
+                y_ref + 26.4,
+                y_ref + 26.1,
+                y_ref + 25.8,
+                y_ref + 25.5,
+                y_ref + 26.0,
+                y_ref + 25.6,
+            ],
+            "color": [
+                gold,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+            ],
+            "fontsize": [
+                title_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+                subheading_fontsize,
+                subheading_fontsize,
+                subheading_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+            ],
+            "fontweight": [
+                title_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+                subheading_fontweight,
+                subheading_fontweight,
+                subheading_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+            ],
+            "fontname": [
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+            ],
+        }
+    )
+    return textdata_df
+
+
 def plot_g() -> ggplot:
+    geom_segment_props = {"size": 8, "lineend": "round"}
+
+    geom_text_props = {
+        "ha": "left",
+        "va": "center",
+        "position": position_nudge(y=-0.08),
+        "size": 10,
+        "fontweight": "bold",
+    }
+
     return (
         ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
@@ -207,8 +294,25 @@ def plot_g() -> ggplot:
         # expand extra space
         + scale_y_discrete(
             limits=df.select(country).reverse().to_series().to_list(),
-            expand=(0.02, 0, 0.14, 0),
+            expand=(0.02, 0, 0, 1.5),
         )
+        # title and headers
+        + geom_text(
+            data=textdata_df,
+            mapping=aes(
+                x="x",
+                y="y",
+                label="label",
+                color="color",
+                size="fontsize",
+                fontweight="fontweight",
+                fontname="fontname",
+            ),
+            va="bottom",
+            ha="center",
+        )
+        # using "size" column directly
+        + scale_size_identity()
         # logo
         + watermark(logo_filename, 100, 2235)
     )
@@ -233,137 +337,17 @@ def themify(p: ggplot) -> Figure:
     ).draw(False)
 
 
-def add_ax_text(ax: Axes) -> Axes:
-    title_fontsize = 12
-    title_fontweight = "bold"
-    heading_fontsize = 8
-    heading_fontweight = "bold"
-    subheading_fontsize = 6
-    subheading_fontweight = "normal"
-
-    title_props = {
-        "color": gold,
-        "fontsize": title_fontsize,
-        "fontweight": title_fontweight,
-        "fontname": fontname_georgia,
-    }
-    heading_props = {
-        "color": white,
-        "fontsize": heading_fontsize,
-        "fontweight": heading_fontweight,
-        "fontname": fontname_georgia,
-    }
-    subheading_props = {
-        "color": white,
-        "fontsize": subheading_fontsize,
-        "fontweight": subheading_fontweight,
-        "fontname": fontname_georgia,
-    }
-
-    x_ref, y_ref = 25.5, 6  # ref point
-
-    # title
-    ax_text(
-        s="<Reciprocal Tariffs>",
-        x=x_ref + 7,
-        y=y_ref + 20.9,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[title_props],
-    )
-    # col1
-    ax_text(
-        s="<Country>",
-        x=x_ref + 4,
-        y=y_ref + 19.5,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    # col2
-    ax_text(
-        s="<Tariffs Charged>",
-        x=x_ref + 42,
-        y=y_ref + 20.8,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<to the U.S.A.>",
-        x=x_ref + 42,
-        y=y_ref + 20.4,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<Including>",
-        x=x_ref + 42,
-        y=y_ref + 20.1,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    ax_text(
-        s="<Currency Manipulation>",
-        x=x_ref + 42,
-        y=y_ref + 19.8,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    ax_text(
-        s="<and Trade Barriers>",
-        x=x_ref + 42,
-        y=y_ref + 19.5,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    # col3
-    ax_text(
-        s="<U.S.A. Discounted>",
-        x=x_ref + 64,
-        y=y_ref + 20,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<Reciprocal Tariffs>",
-        x=x_ref + 64,
-        y=y_ref + 19.6,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    return ax
-
-
 df = tweak_df()
+textdata_df = get_textdata_df()
 p = plot_g()
 fig = themify(p)
-ax = fig.axes[0]
-ax = add_ax_text(ax)
 fig
 ```
 
 
-## Preparing the DataFrame
+## Preparing the DataFrames
+
+### Main DataFrame
 We start by extracting the data from a previous project. The `country` column is converted to a categorical type, which simplifies handling in plotnine. To enable alternating row colors in the final visualization, we also create a new column called `color_mod`.
 
 ```python
@@ -382,11 +366,118 @@ def tweak_df() -> pl.DataFrame:
 
 df = tweak_df()
 ```
+### Textdata DataFrame
+Next, we create another DataFrame that contains information for all the text elements, such as text color, font size, and font weight, for the title and headers.
+
+```python
+def get_textdata_df(
+    x_ref: float = 0.0, y_ref: float = 0.0
+) -> pl.DataFrame:
+    title_fontsize = 16
+    title_fontweight = "bold"
+    heading_fontsize = 8
+    heading_fontweight = "bold"
+    subheading_fontsize = 6
+    subheading_fontweight = "normal"
+
+    textdata_df = pl.DataFrame(
+        {
+            "label": [
+                "Reciprocal Tariffs",  # title
+                "Country",  # col1
+                "Tariffs Charged",  # col2
+                "to the U.S.A.",
+                "Including",
+                "Currency Manipulation",
+                "and Trade Barriers",
+                "U.S.A. Discounted",  # col3
+                "Reciprocal Tariffs",
+            ],
+            "x": [
+                x_ref + 34.0,
+                x_ref + 29.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 67.5,
+                x_ref + 89.5,
+                x_ref + 89.5,
+            ],
+            "y": [
+                y_ref + 27,
+                y_ref + 25.5,
+                y_ref + 26.8,
+                y_ref + 26.4,
+                y_ref + 26.1,
+                y_ref + 25.8,
+                y_ref + 25.5,
+                y_ref + 26.0,
+                y_ref + 25.6,
+            ],
+            "color": [
+                gold,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+                white,
+            ],
+            "fontsize": [
+                title_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+                subheading_fontsize,
+                subheading_fontsize,
+                subheading_fontsize,
+                heading_fontsize,
+                heading_fontsize,
+            ],
+            "fontweight": [
+                title_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+                subheading_fontweight,
+                subheading_fontweight,
+                subheading_fontweight,
+                heading_fontweight,
+                heading_fontweight,
+            ],
+            "fontname": [
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+                fontname_georgia,
+            ],
+        }
+    )
+    return textdata_df
+```
 
 ## Constructing the ggplot Object
-With the processed DataFrame ready, we can now build the `ggplot()` object:
+With the processed DataFrame ready, we can now build the [ggplot()](https://plotnine.org/reference/ggplot.html#plotnine.ggplot) object:
 ```python
 def plot_g() -> ggplot:
+    geom_segment_props = {"size": 8, "lineend": "round"}
+
+    geom_text_props = {
+        "ha": "left",
+        "va": "center",
+        "position": position_nudge(y=-0.08),
+        "size": 10,
+        "fontweight": "bold",
+    }
+
     return (
         ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
@@ -416,19 +507,39 @@ def plot_g() -> ggplot:
         # expand extra space
         + scale_y_discrete(
             limits=df.select(country).reverse().to_series().to_list(),
-            expand=(0.02, 0, 0.14, 0),
+            expand=(0.02, 0, 0, 1.5),
         )
+        # title and headers
+        + geom_text(
+            data=textdata_df, # <1>
+            mapping=aes(
+                x="x",
+                y="y",
+                label="label",
+                color="color",
+                size="fontsize",
+                fontweight="fontweight",
+                fontname="fontname",
+            ),
+            va="bottom",
+            ha="center",
+        )
+        # using "size" column directly
+        + scale_size_identity()
         # logo
         + watermark(logo_filename, 100, 2235)
     )
 ```
+1. The `data=` argument is set to `textdata_df`, which contains all the custom label and styling details for the title and column headers.
+
 ### What’s happening here?
 
 1. [geom_segment()](https://plotnine.org/reference/geom_segment.html#plotnine.geom_segment): Since I couldn’t find a way to apply border radius, I used `geom_segment()` with `lineend="round"` as the best available workaround. Thick lines serve as cell backgrounds.
 2. [geom_text()](https://plotnine.org/reference/geom_text.html#plotnine.geom_text): Adds text for each column.
 3. [scale_color_identity()](https://plotnine.org/reference/scale_color_identity.html#plotnine.scale_color_identity): Uses the color values directly from the `color_mod` column, without applying a scale.
-4. [scale_x_discrete()](https://plotnine.org/reference/scale_x_discrete.html#plotnine.scale_x_discrete): Reorders the `country` axis and tweaks padding to add space above and below the table.
-5. [watermark()](https://plotnine.org/reference/watermark.html#plotnine.watermark): Embeds a logo. Since there’s no native figure size parameter in plotnine, I manually scaled the output.
+4. [scale_y_discrete()](https://plotnine.org/reference/scale_y_discrete.html#plotnine.scale_y_discrete): Reorders the `country` axis and tweaks padding to add space above and below the table.
+5. [scale_size_identity()](https://plotnine.org/reference/scale_size_identity.html#plotnine.scale_size_identity): Similar to color scaling, this instructs plotnine to use the font sizes specified in the `fontsize` column without transformation.
+6. [watermark()](https://plotnine.org/reference/watermark.html#plotnine.watermark): Embeds a logo. Since there’s no native figure size parameter in plotnine, I manually scaled the output.
 
 
 ## Custom Theme
@@ -453,145 +564,20 @@ def themify(p: ggplot) -> Figure:
     ).draw(False)
 ```
 
-## Adding the Title and Column Headers
-We use `ax_text()` from [HighlightText](https://github.com/znstrider/highlight_text) to manually position and style each line of text.
-```python
-def add_ax_text(ax: Axes) -> Axes:
-    title_fontsize = 12
-    title_fontweight = "bold"
-    heading_fontsize = 8
-    heading_fontweight = "bold"
-    subheading_fontsize = 6
-    subheading_fontweight = "normal"
-
-    title_props = {
-        "color": gold,
-        "fontsize": title_fontsize,
-        "fontweight": title_fontweight,
-        "fontname": fontname_georgia,
-    }
-    heading_props = {
-        "color": white,
-        "fontsize": heading_fontsize,
-        "fontweight": heading_fontweight,
-        "fontname": fontname_georgia,
-    }
-    subheading_props = {
-        "color": white,
-        "fontsize": subheading_fontsize,
-        "fontweight": subheading_fontweight,
-        "fontname": fontname_georgia,
-    }
-
-    x_ref, y_ref = 25.5, 6  # ref point
-
-    # title
-    ax_text(
-        s="<Reciprocal Tariffs>",
-        x=x_ref + 7,
-        y=y_ref + 20.9,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[title_props],
-    )
-    # col1
-    ax_text(
-        s="<Country>",
-        x=x_ref + 4,
-        y=y_ref + 19.5,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    # col2
-    ax_text(
-        s="<Tariffs Charged>",
-        x=x_ref + 42,
-        y=y_ref + 20.8,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<to the U.S.A.>",
-        x=x_ref + 42,
-        y=y_ref + 20.4,
-        fontsize=heading_fontsize,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<Including>",
-        x=x_ref + 42,
-        y=y_ref + 20.1,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    ax_text(
-        s="<Currency Manipulation>",
-        x=x_ref + 42,
-        y=y_ref + 19.8,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    ax_text(
-        s="<and Trade Barriers>",
-        x=x_ref + 42,
-        y=y_ref + 19.5,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[subheading_props],
-    )
-    # col3
-    ax_text(
-        s="<U.S.A. Discounted>",
-        x=x_ref + 64,
-        y=y_ref + 20,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    ax_text(
-        s="<Reciprocal Tariffs>",
-        x=x_ref + 64,
-        y=y_ref + 19.6,
-        ax=ax,
-        va="bottom",
-        ha="center",
-        highlight_textprops=[heading_props],
-    )
-    return ax
-```
-Each line is added with a separate `ax_text()` call, which gives me more flexibility during alignment and styling. That said, I suspect there’s a cleaner way to do this.
-
 ## Final Rendering
 Now, let’s tie it all together:
 ```python
+df = tweak_df()
+textdata_df = get_textdata_df()
 p = plot_g()
 fig = themify(p)
-ax = fig.axes[0]
-ax = add_ax_text(ax)
 fig
 ```
 
 ## Closing Thoughts  
 This post showcases how plotnine can be used to create table-like visualizations. I’m genuinely impressed by its capabilities — it’s surprisingly fun to approach a table as a figure.
 
-That said, fine-tuning the layout and text positioning still feels a bit clunky at this stage. I hope to find a more structured and reliable way to handle that moving forward.
+Throughout this exploration, I learned a lot from [this repository](https://github.com/123-fake-st/2024_plotnine_contest), which won the Plotnine Contest 2024. It’s a fantastic example of what's possible with the library.
 
 It would be exciting to explore how plotnine and Great Tables might work together to enable even richer visual storytelling — I’m looking forward to diving into that next.
 
