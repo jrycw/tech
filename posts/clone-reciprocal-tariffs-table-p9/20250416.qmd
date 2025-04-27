@@ -137,18 +137,18 @@ gold = "#FFF8DE"  # logo
 fontname_georgia = "Georgia"  # title
 fontname_roboto = "Roboto"  # body
 
-# column width
-x_col1_start, x_col1_end = 5, 52.5
-x_col2_start, x_col2_end = 60, 75
-x_col3_start, x_col3_end = 82.5, 97.5
-
-# x-position for body text
-x_col1_text = 5
-x_col2_text = x_col2_start + (x_col2_end - x_col2_start) / 3 + 1
-x_col3_text = x_col3_start + (x_col3_end - x_col3_start) / 3 + 1
-
 
 def tweak_df() -> pl.DataFrame:
+    # column width
+    x_col1_start, x_col1_end = 5, 52.5
+    x_col2_start, x_col2_end = 60, 75
+    x_col3_start, x_col3_end = 82.5, 97.5
+
+    # x-position for body text
+    x_col1_text = 5
+    x_col2_text = x_col2_start + (x_col2_end - x_col2_start) / 3 + 1
+    x_col3_text = x_col3_start + (x_col3_end - x_col3_start) / 3 + 1
+
     return (
         pl.DataFrame(data)
         .with_row_index()
@@ -158,6 +158,15 @@ def tweak_df() -> pl.DataFrame:
             .then(pl.lit(light_blue))
             .otherwise(pl.lit(white))
             .alias("color_mod"),
+            pl.lit(x_col1_start).alias("x_col1_start"),
+            pl.lit(x_col1_end).alias("x_col1_end"),
+            pl.lit(x_col2_start).alias("x_col2_start"),
+            pl.lit(x_col2_end).alias("x_col2_end"),
+            pl.lit(x_col3_start).alias("x_col3_start"),
+            pl.lit(x_col3_end).alias("x_col3_end"),
+            pl.lit(x_col1_text).alias("x_col1_text"),
+            pl.lit(x_col2_text).alias("x_col2_text"),
+            pl.lit(x_col3_text).alias("x_col3_text"),
         )
     )
 
@@ -269,26 +278,26 @@ def plot_g() -> ggplot:
         ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
         + geom_segment(
-            mapping=aes(x=x_col1_start, xend=x_col1_end, color="color_mod"),
+            mapping=aes(x="x_col1_start", xend="x_col1_end", color="color_mod"),
             **geom_segment_props,
         )
         # col2 segment
         + geom_segment(
-            mapping=aes(x=x_col2_start, xend=x_col2_end, color="color_mod"),
+            mapping=aes(x="x_col2_start", xend="x_col2_end", color="color_mod"),
             **geom_segment_props,
         )
         # col3 segment
         + geom_segment(
-            mapping=aes(x=x_col3_start, xend=x_col3_end),
+            mapping=aes(x="x_col3_start", xend="x_col3_end"),
             color=yellow,
             **geom_segment_props,
         )
         # col1 text
-        + geom_text(aes(x=x_col1_text, label=country), **geom_text_props)
+        + geom_text(aes(x="x_col1_text", label=country), **geom_text_props)
         # col2 text
-        + geom_text(aes(x=x_col2_text, label=tariffs_charged), **geom_text_props)
+        + geom_text(aes(x="x_col2_text", label=tariffs_charged), **geom_text_props)
         # col3 text
-        + geom_text(aes(x=x_col3_text, label=reciprocal_tariffs), **geom_text_props)
+        + geom_text(aes(x="x_col3_text", label=reciprocal_tariffs), **geom_text_props)
         # using "color_mod" column directly
         + scale_color_identity()
         # expand extra space
@@ -348,10 +357,20 @@ fig
 ## Preparing the DataFrames
 
 ### Main DataFrame
-We start by extracting the data from a previous project. The `country` column is converted to a categorical type, which simplifies handling in plotnine. To enable alternating row colors in the final visualization, we also create a new column called `color_mod`.
+We start by extracting the data from a previous project. The `country` column is converted to a categorical type, which simplifies handling in plotnine. To enable alternating row colors in the final visualization, we also create a new column called `color_mod`. Additional columns are created to define the positions for the segments and text labels.
 
 ```python
 def tweak_df() -> pl.DataFrame:
+    # column width
+    x_col1_start, x_col1_end = 5, 52.5
+    x_col2_start, x_col2_end = 60, 75
+    x_col3_start, x_col3_end = 82.5, 97.5
+
+    # x-position for body text
+    x_col1_text = 5
+    x_col2_text = x_col2_start + (x_col2_end - x_col2_start) / 3 + 1
+    x_col3_text = x_col3_start + (x_col3_end - x_col3_start) / 3 + 1
+
     return (
         pl.DataFrame(data)
         .with_row_index()
@@ -361,6 +380,15 @@ def tweak_df() -> pl.DataFrame:
             .then(pl.lit(light_blue))
             .otherwise(pl.lit(white))
             .alias("color_mod"),
+            pl.lit(x_col1_start).alias("x_col1_start"),
+            pl.lit(x_col1_end).alias("x_col1_end"),
+            pl.lit(x_col2_start).alias("x_col2_start"),
+            pl.lit(x_col2_end).alias("x_col2_end"),
+            pl.lit(x_col3_start).alias("x_col3_start"),
+            pl.lit(x_col3_end).alias("x_col3_end"),
+            pl.lit(x_col1_text).alias("x_col1_text"),
+            pl.lit(x_col2_text).alias("x_col2_text"),
+            pl.lit(x_col3_text).alias("x_col3_text"),
         )
     )
 
@@ -484,26 +512,26 @@ def plot_g() -> ggplot:
         ggplot(data=df, mapping=aes(y=country, yend=country))
         # col1 segment
         + geom_segment(
-            mapping=aes(x=x_col1_start, xend=x_col1_end, color="color_mod"),
+            mapping=aes(x="x_col1_start", xend="x_col1_end", color="color_mod"),
             **geom_segment_props,
         )
         # col2 segment
         + geom_segment(
-            mapping=aes(x=x_col2_start, xend=x_col2_end, color="color_mod"),
+            mapping=aes(x="x_col2_start", xend="x_col2_end", color="color_mod"),
             **geom_segment_props,
         )
         # col3 segment
         + geom_segment(
-            mapping=aes(x=x_col3_start, xend=x_col3_end),
+            mapping=aes(x="x_col3_start", xend="x_col3_end"),
             color=yellow,
             **geom_segment_props,
         )
         # col1 text
-        + geom_text(aes(x=x_col1_text, label=country), **geom_text_props)
+        + geom_text(aes(x="x_col1_text", label=country), **geom_text_props)
         # col2 text
-        + geom_text(aes(x=x_col2_text, label=tariffs_charged), **geom_text_props)
+        + geom_text(aes(x="x_col2_text", label=tariffs_charged), **geom_text_props)
         # col3 text
-        + geom_text(aes(x=x_col3_text, label=reciprocal_tariffs), **geom_text_props)
+        + geom_text(aes(x="x_col3_text", label=reciprocal_tariffs), **geom_text_props)
         # using "color_mod" column directly
         + scale_color_identity()
         # expand extra space
