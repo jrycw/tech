@@ -9,8 +9,155 @@
 <link>https://tech.ycwu.space/</link>
 <atom:link href="https://tech.ycwu.space/index.xml" rel="self" type="application/rss+xml"/>
 <description>This is Jerry Wu&#39;s Tech&#39;n&#39;take.</description>
-<generator>quarto-1.6.43</generator>
-<lastBuildDate>Thu, 17 Apr 2025 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.7.30</generator>
+<lastBuildDate>Sun, 11 May 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Custom Row Selector in Great Tables</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/gt-row-selector/20250511.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While <a href="https://github.com/posit-dev/great-tables/issues/678">it</a> may or may not be adopted by the team, I thought it would be fun to document it here on the blog.</p>
+<p>I recently created a utility called <a href="https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row">every_n_row()</a>, designed to work with both Pandas and Polars DataFrames (support for <code>pyarrow</code> is still under investigation). With <code>every_n_row()</code>, we can easily target alternating rows—for example, select odd rows using <code>every_n_row(2)</code> and even rows using either <code>every_n_row(2, 1)</code> or <code>~every_n_row(2)</code>.</p>
+<div id="2e956632" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> great_tables <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> GT, every_n_row, loc, style</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> great_tables.data <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> countrypops</span>
+<span id="cb1-5"></span>
+<span id="cb1-6">df_pd <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> countrypops.sample(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>).loc[:, [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"country_name"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"year"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"population"</span>]]</span>
+<span id="cb1-7">df_pl <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pl.from_pandas(df_pd)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9">(</span>
+<span id="cb1-10">    GT(df_pd)</span>
+<span id="cb1-11">    .tab_style(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightblue"</span>), locations<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)))</span>
+<span id="cb1-12">    .tab_style(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"papayawhip"</span>), locations<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)))</span>
+<span id="cb1-13">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pink"</span>)</span>
+<span id="cb1-14">)</span>
+<span id="cb1-15"></span>
+<span id="cb1-16">(</span>
+<span id="cb1-17">    GT(df_pl)</span>
+<span id="cb1-18">    .tab_style(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightblue"</span>), locations<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)))</span>
+<span id="cb1-19">    .tab_style(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"papayawhip"</span>), locations<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=~</span>every_n_row(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)))</span>
+<span id="cb1-20">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pink"</span>)</span>
+<span id="cb1-21">)</span></code></pre></div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/gt-row-selector/every_n_row.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Selector: every_n_row"></p>
+</figure>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>python</category>
+  <category>pandas</category>
+  <category>polars</category>
+  <category>gt</category>
+  <guid>https://tech.ycwu.space/posts/gt-row-selector/20250511.html</guid>
+  <pubDate>Sun, 11 May 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/gt-row-selector/every_n_row.png" medium="image" type="image/png" height="112" width="144"/>
+</item>
 <item>
   <title>Polars Custom Expression Namespace</title>
   <dc:creator>Jerry Wu</dc:creator>
@@ -23,7 +170,7 @@
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
 <p>Here is the code snippet: <img src="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
-<div id="c286edde" class="cell" data-execution_count="1">
+<div id="6051c9e9" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -774,7 +921,7 @@ font-style: inherit;">6</span>)</span>
 <section id="remark" class="level3">
 <h3 class="anchored" data-anchor-id="remark">Remark</h3>
 <p>Here’s a rough draft showing how to achieve a similar effect using the DataFrame namespace. I might revisit and refine this approach in the future.</p>
-<div id="8594baa0" class="cell" data-execution_count="2">
+<div id="c9c46ab5" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="im" style="color: #00769E;
@@ -1218,7 +1365,7 @@ Disclaimer
 
 <p>This post presents a recreated visualization using Polars and plotnine, based on my <a href="../../posts/clone-reciprocal-tariffs-table/20250403.html">earlier work</a>.</p>
 <p>Below is the final figure: <img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table-p9/reciprocal_tariffs_p9.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Reciprocal Tariffs Table"></p>
-<div id="fa9a7dfa" class="cell" data-execution_count="1">
+<div id="ae5d0eb2" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -3131,7 +3278,7 @@ Disclaimer
 <p>It marks my first serious dive into plotnine—an impressive library with a bit of a learning curve.<br>
 I’ll walk through the journey I took to recreate the visualization. Some parts may overlap with the earlier post, but I believe that’s acceptable to keep this one self-contained.</p>
 <p>The final figure, shown below, visualizes temperature trends for the ski season in Alta over the past few decades. <img src="https://tech.ycwu.space/posts/p9-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center" alt="Alta ski resort"></p>
-<div id="02c0e11b" class="cell" data-execution_count="1">
+<div id="c264162c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -5754,7 +5901,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/access-axes-in-plotnine/p9_ht_ax_text.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="plotnine used in combination with HighlightText"></p>
 </figure>
 </div>
-<div id="881d01d9" class="cell" data-execution_count="1">
+<div id="05f97adf" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> highlight_text <span class="im" style="color: #00769E;
@@ -5889,7 +6036,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table/reciprocal_tariffs_gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Cloned Reciprocal Tariffs Table"></p>
 </figure>
 </div>
-<div id="36cc1d9c" class="cell" data-execution_count="1">
+<div id="df63ff67" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -6232,7 +6379,7 @@ background-color: null;
 font-weight: bold;
 font-style: inherit;">return</span> <span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">f"""</span><span class="ch" style="color: #20794D;
+font-style: inherit;">f"""</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-106"><span class="ss" style="color: #20794D;
@@ -6243,7 +6390,7 @@ font-style: inherit;">{</span>background_color1<span class="sc" style="color: #5
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">;border: None"&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">;border: None"&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-107"><span class="ss" style="color: #20794D;
@@ -6254,7 +6401,7 @@ font-style: inherit;">{</span>border_radius<span class="sc" style="color: #5E5E5
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-108"><span class="ss" style="color: #20794D;
@@ -6265,7 +6412,7 @@ font-style: inherit;">{</span>background_color2<span class="sc" style="color: #5
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">;"&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">;"&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-109"><span class="ss" style="color: #20794D;
@@ -6274,17 +6421,17 @@ font-style: inherit;">            &amp;nbsp;</span><span class="sc" style="color
 background-color: null;
 font-style: inherit;">{</span>x<span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">}</span><span class="ch" style="color: #20794D;
+font-style: inherit;">}</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-110"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">        &lt;/div&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">        &lt;/div&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-111"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">    &lt;/div&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">    &lt;/div&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-112"><span class="ss" style="color: #20794D;
@@ -6466,17 +6613,17 @@ background-color: null;
 font-style: inherit;">"country"</span>: html(</span>
 <span id="cb1-177">                <span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">f"""</span><span class="ch" style="color: #20794D;
+font-style: inherit;">f"""</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-178"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;br&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-179"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;div&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;div&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-180"><span class="ss" style="color: #20794D;
@@ -6487,7 +6634,7 @@ font-style: inherit;">{</span>logo<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">&amp;nbsp;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">&amp;nbsp;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-181"><span class="ss" style="color: #20794D;
@@ -6498,32 +6645,32 @@ font-style: inherit;">{</span>gold<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">; font-size: 40px;"&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">; font-size: 40px;"&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-182"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                        &amp;nbsp&amp;nbsp;Reciprocal Tariffs</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                        &amp;nbsp&amp;nbsp;Reciprocal Tariffs</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-183"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                    &lt;/span&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                    &lt;/span&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-184"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;/div&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;/div&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-185"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;br&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-186"><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;b&gt;Country&lt;/b&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;b&gt;Country&lt;/b&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-187"><span class="ss" style="color: #20794D;
@@ -6535,32 +6682,32 @@ background-color: null;
 font-style: inherit;">"tariffs_charged"</span>: html(</span>
 <span id="cb1-190">                <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"""</span><span class="ch" style="color: #20794D;
+font-style: inherit;">"""</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-191"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;b&gt;Tariffs Charged&lt;br&gt;to the U.S.A.&lt;/b&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;b&gt;Tariffs Charged&lt;br&gt;to the U.S.A.&lt;/b&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-192"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;br&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;br&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-193"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;span style="font-size: 12px;"&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;span style="font-size: 12px;"&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-194"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                    Including&lt;br&gt;Currency Manipulation&lt;br&gt;and Trade Barriers</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                    Including&lt;br&gt;Currency Manipulation&lt;br&gt;and Trade Barriers</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-195"><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">                &lt;/span&gt;</span><span class="ch" style="color: #20794D;
+font-style: inherit;">                &lt;/span&gt;</span><span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">\</span></span>
 <span id="cb1-196"><span class="st" style="color: #20794D;
@@ -6833,7 +6980,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll start by creating a <code>data</code> dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a <code>color_mapping</code> dictionary to store the palette information for styling.</p>
-<div id="2acd1c89" class="cell" data-execution_count="1">
+<div id="3507474b" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
@@ -6921,7 +7068,7 @@ font-style: inherit;">"papayawhip"</span>}</span></code></pre></div>
 <section id="pandas" class="level2">
 <h2 class="anchored" data-anchor-id="pandas">Pandas</h2>
 <p>First, we create a Pandas DataFrame called <code>df_pd</code> using <code>data</code> as the input:</p>
-<div id="4f85e344" class="cell" data-execution_count="2">
+<div id="66855721" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">df_pd <span class="op" style="color: #5E5E5E;
@@ -6943,7 +7090,7 @@ font-style: inherit;">print</span>(df_pd)</span></code></pre></div>
 <section id="using-an-existing-column" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column">Using an Existing Column</h3>
 <p>In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the <a href="https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column">from_column()</a> function provided by Great Tables to apply colors to the table body:</p>
-<div id="f9470cde" class="cell" data-execution_count="3">
+<div id="37358d94" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df_pd)</span>
 <span id="cb4-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -6975,7 +7122,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-functions" class="level3">
 <h3 class="anchored" data-anchor-id="using-functions">Using Functions</h3>
 <p>In cases where colors need to be determined dynamically based on conditions, the <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when">pd.Series.case_when()</a> function can be very useful. The following example categorizes the values of the <code>col1</code> column into three different colors:</p>
-<div id="4edd853d" class="cell" data-execution_count="4">
+<div id="43d9d655" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -7048,7 +7195,7 @@ font-style: inherit;">"pink"</span>)</span>
 <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" aria-controls="tabset-1-1" aria-selected="true">pd.Series.map()</a></li><li class="nav-item"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" aria-controls="tabset-1-2" aria-selected="false">pd.Series.replace()</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" aria-labelledby="tabset-1-1-tab">
-<div id="850b2443" class="cell" data-execution_count="5">
+<div id="24514452" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">(</span>
 <span id="cb6-2">    GT(df_pd)</span>
 <span id="cb6-3">    .tab_style(</span>
@@ -7086,7 +7233,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" aria-labelledby="tabset-1-2-tab">
-<div id="d4db9329" class="cell" data-execution_count="6">
+<div id="1c1b73d1" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">(</span>
 <span id="cb7-2">    GT(df_pd)</span>
 <span id="cb7-3">    .tab_style(</span>
@@ -7124,7 +7271,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <p>Alternatively, if you prefer sticking with the same approach, <code>pd.Series.case_when()</code> still works:</p>
-<div id="42d523a1" class="cell" data-execution_count="7">
+<div id="6bb6a85a" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -7191,7 +7338,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="polars" class="level2">
 <h2 class="anchored" data-anchor-id="polars">Polars</h2>
 <p>Just like before, let’s start by creating a Polars DataFrame named <code>df_pl</code> using <code>data</code> as input:</p>
-<div id="6fad4e7a" class="cell" data-execution_count="8">
+<div id="103b303f" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">df_pl<span class="op" style="color: #5E5E5E;
@@ -7219,7 +7366,7 @@ font-style: inherit;">print</span>(df_pl)</span></code></pre></div>
 <section id="using-an-existing-column-1" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column-1">Using an Existing Column</h3>
 <p>If the DataFrame already contains a column specifying colors, we can apply them directly with <code>from_column()</code>:</p>
-<div id="b6154e19" class="cell" data-execution_count="9">
+<div id="8d2ba3cb" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">(</span>
 <span id="cb11-2">    GT(df_pl)</span>
 <span id="cb11-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -7248,7 +7395,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb11-6">)</span></code></pre></div>
 </div>
 <p>As another option, we can reference the <code>color</code> column using a Polars expression:</p>
-<div id="85bf85c2" class="cell" data-execution_count="10">
+<div id="4c0f6d63" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">(</span>
 <span id="cb12-2">    GT(df_pl)</span>
 <span id="cb12-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -7280,7 +7427,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-conditional-logic-with-polars-expressions" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-logic-with-polars-expressions">Using Conditional Logic with Polars Expressions</h3>
 <p>For cases where colors need to be assigned dynamically, <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when()</a> provides a structured way to define conditions. The example below assigns colors based on the values in <code>col1</code>:</p>
-<div id="7050202f" class="cell" data-execution_count="11">
+<div id="4ac0db9e" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -7342,7 +7489,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb13-15">)</span></code></pre></div>
 </div>
 <p>For categorical-like columns (e.g., <code>col2</code>), predefined mappings can be applied efficiently using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace">pl.Expr.replace()</a>:</p>
-<div id="0d3af6d2" class="cell" data-execution_count="12">
+<div id="e567d32a" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">(</span>
 <span id="cb14-2">    GT(df_pl)</span>
 <span id="cb14-3">    .tab_style(</span>
@@ -7374,7 +7521,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb14-9">)</span></code></pre></div>
 </div>
 <p>Alternatively, if you prefer the conditional approach, <code>pl.when()</code> can still be used:</p>
-<div id="1590c10a" class="cell" data-execution_count="13">
+<div id="0673a0fd" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -7480,7 +7627,7 @@ Disclaimer
 <p><img src="https://tech.ycwu.space/posts/effective-dataviz-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="38dd1c4c" class="cell" data-execution_count="1">
+<div id="e1c3ed78" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -9542,7 +9689,7 @@ Disclaimer
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll use the built-in dataset <code>gtcars</code> to create a Polars DataFrame. First, we’ll select the columns <code>mfr</code>, <code>drivetrain</code>, <code>year</code>, and <code>hp</code> to create a small pivoted table named <code>df_mini</code>. Then, we’ll pass <code>df_mini</code> to the <code>GT</code> object and use <code>GT.tab_stub()</code>, setting <code>drivetrain</code> as <code>rowname_col=</code> and <code>mfr</code> as <code>groupname_col=</code> to create the table <code>gt</code>, as shown below:</p>
-<div id="073ba45a" class="cell" data-execution_count="1">
+<div id="f72162ac" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -9639,52 +9786,52 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <span id="cb1-16">gt</span></code></pre></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<div id="uaoggfynfa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="xaudnzfsxl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#uaoggfynfa table {
+#xaudnzfsxl table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#uaoggfynfa thead, tbody, tfoot, tr, td, th { border-style: none; }
+#xaudnzfsxl thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#uaoggfynfa p { margin: 0; padding: 0; }
- #uaoggfynfa .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #uaoggfynfa .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #uaoggfynfa .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #uaoggfynfa .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #uaoggfynfa .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #uaoggfynfa .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #uaoggfynfa .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #uaoggfynfa .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #uaoggfynfa .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #uaoggfynfa .gt_column_spanner_outer:first-child { padding-left: 0; }
- #uaoggfynfa .gt_column_spanner_outer:last-child { padding-right: 0; }
- #uaoggfynfa .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #uaoggfynfa .gt_spanner_row { border-bottom-style: hidden; }
- #uaoggfynfa .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #uaoggfynfa .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #uaoggfynfa .gt_from_md> :first-child { margin-top: 0; }
- #uaoggfynfa .gt_from_md> :last-child { margin-bottom: 0; }
- #uaoggfynfa .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #uaoggfynfa .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #uaoggfynfa .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #uaoggfynfa .gt_row_group_first td { border-top-width: 2px; }
- #uaoggfynfa .gt_row_group_first th { border-top-width: 2px; }
- #uaoggfynfa .gt_striped { background-color: #F4F4F4; }
- #uaoggfynfa .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #uaoggfynfa .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #uaoggfynfa .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #uaoggfynfa .gt_left { text-align: left; }
- #uaoggfynfa .gt_center { text-align: center; }
- #uaoggfynfa .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #uaoggfynfa .gt_font_normal { font-weight: normal; }
- #uaoggfynfa .gt_font_bold { font-weight: bold; }
- #uaoggfynfa .gt_font_italic { font-style: italic; }
- #uaoggfynfa .gt_super { font-size: 65%; }
- #uaoggfynfa .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #uaoggfynfa .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#xaudnzfsxl p { margin: 0; padding: 0; }
+ #xaudnzfsxl .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #xaudnzfsxl .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #xaudnzfsxl .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #xaudnzfsxl .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #xaudnzfsxl .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xaudnzfsxl .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #xaudnzfsxl .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xaudnzfsxl .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #xaudnzfsxl .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #xaudnzfsxl .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #xaudnzfsxl .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #xaudnzfsxl .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #xaudnzfsxl .gt_spanner_row { border-bottom-style: hidden; }
+ #xaudnzfsxl .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #xaudnzfsxl .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #xaudnzfsxl .gt_from_md> :first-child { margin-top: 0; }
+ #xaudnzfsxl .gt_from_md> :last-child { margin-bottom: 0; }
+ #xaudnzfsxl .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #xaudnzfsxl .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #xaudnzfsxl .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #xaudnzfsxl .gt_row_group_first td { border-top-width: 2px; }
+ #xaudnzfsxl .gt_row_group_first th { border-top-width: 2px; }
+ #xaudnzfsxl .gt_striped { background-color: #F4F4F4; }
+ #xaudnzfsxl .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #xaudnzfsxl .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xaudnzfsxl .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xaudnzfsxl .gt_left { text-align: left; }
+ #xaudnzfsxl .gt_center { text-align: center; }
+ #xaudnzfsxl .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #xaudnzfsxl .gt_font_normal { font-weight: normal; }
+ #xaudnzfsxl .gt_font_bold { font-weight: bold; }
+ #xaudnzfsxl .gt_font_italic { font-style: italic; }
+ #xaudnzfsxl .gt_super { font-size: 65%; }
+ #xaudnzfsxl .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #xaudnzfsxl .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -9765,7 +9912,7 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <section id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column" class="level2">
 <h2 class="anchored" data-anchor-id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column">Using a For-Loop: Repeatedly Call <code>GT.tab_style()</code> for Each Column</h2>
 <p>The most intuitive way is to call <code>GT.tab_style()</code> for each column. Here’s how:</p>
-<div id="2351e8f8" class="cell" data-execution_count="2">
+<div id="2d6328ca" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="annotated-cell-2" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target">gt1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> gt</span>
@@ -9806,52 +9953,52 @@ font-style: inherit;">650</span>))</span>
 </dl>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="adlhojahuz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="ckkppemlza" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#adlhojahuz table {
+#ckkppemlza table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#adlhojahuz thead, tbody, tfoot, tr, td, th { border-style: none; }
+#ckkppemlza thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#adlhojahuz p { margin: 0; padding: 0; }
- #adlhojahuz .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #adlhojahuz .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #adlhojahuz .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #adlhojahuz .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #adlhojahuz .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #adlhojahuz .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #adlhojahuz .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #adlhojahuz .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #adlhojahuz .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #adlhojahuz .gt_column_spanner_outer:first-child { padding-left: 0; }
- #adlhojahuz .gt_column_spanner_outer:last-child { padding-right: 0; }
- #adlhojahuz .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #adlhojahuz .gt_spanner_row { border-bottom-style: hidden; }
- #adlhojahuz .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #adlhojahuz .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #adlhojahuz .gt_from_md> :first-child { margin-top: 0; }
- #adlhojahuz .gt_from_md> :last-child { margin-bottom: 0; }
- #adlhojahuz .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #adlhojahuz .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #adlhojahuz .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #adlhojahuz .gt_row_group_first td { border-top-width: 2px; }
- #adlhojahuz .gt_row_group_first th { border-top-width: 2px; }
- #adlhojahuz .gt_striped { background-color: #F4F4F4; }
- #adlhojahuz .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #adlhojahuz .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #adlhojahuz .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #adlhojahuz .gt_left { text-align: left; }
- #adlhojahuz .gt_center { text-align: center; }
- #adlhojahuz .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #adlhojahuz .gt_font_normal { font-weight: normal; }
- #adlhojahuz .gt_font_bold { font-weight: bold; }
- #adlhojahuz .gt_font_italic { font-style: italic; }
- #adlhojahuz .gt_super { font-size: 65%; }
- #adlhojahuz .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #adlhojahuz .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#ckkppemlza p { margin: 0; padding: 0; }
+ #ckkppemlza .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #ckkppemlza .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #ckkppemlza .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #ckkppemlza .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #ckkppemlza .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ckkppemlza .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #ckkppemlza .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #ckkppemlza .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #ckkppemlza .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #ckkppemlza .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #ckkppemlza .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #ckkppemlza .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #ckkppemlza .gt_spanner_row { border-bottom-style: hidden; }
+ #ckkppemlza .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #ckkppemlza .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #ckkppemlza .gt_from_md> :first-child { margin-top: 0; }
+ #ckkppemlza .gt_from_md> :last-child { margin-bottom: 0; }
+ #ckkppemlza .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #ckkppemlza .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #ckkppemlza .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #ckkppemlza .gt_row_group_first td { border-top-width: 2px; }
+ #ckkppemlza .gt_row_group_first th { border-top-width: 2px; }
+ #ckkppemlza .gt_striped { background-color: #F4F4F4; }
+ #ckkppemlza .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #ckkppemlza .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #ckkppemlza .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #ckkppemlza .gt_left { text-align: left; }
+ #ckkppemlza .gt_center { text-align: center; }
+ #ckkppemlza .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #ckkppemlza .gt_font_normal { font-weight: normal; }
+ #ckkppemlza .gt_font_bold { font-weight: bold; }
+ #ckkppemlza .gt_font_italic { font-style: italic; }
+ #ckkppemlza .gt_super { font-size: 65%; }
+ #ckkppemlza .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #ckkppemlza .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -9930,7 +10077,7 @@ font-style: inherit;">650</span>))</span>
 <section id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects" class="level2">
 <h2 class="anchored" data-anchor-id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects">Utilizing the <code>locations=</code> Parameter in <code>GT.tab_style()</code>: Pass a List of <code>loc.body()</code> Objects</h2>
 <p>A more concise method is to pass a list of <code>loc.body()</code> objects to the <code>locations=</code> parameter in <code>GT.tab_style()</code>, as shown below:</p>
-<div id="41ee941d" class="cell" data-execution_count="3">
+<div id="e6acd0ec" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">(</span>
 <span id="cb2-2">    gt.tab_style(</span>
 <span id="cb2-3">        style<span class="op" style="color: #5E5E5E;
@@ -9961,52 +10108,52 @@ font-style: inherit;">in</span> year_cols</span>
 <span id="cb2-8">    )</span>
 <span id="cb2-9">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<div id="oriwnvulei" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="mknjfssrws" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#oriwnvulei table {
+#mknjfssrws table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#oriwnvulei thead, tbody, tfoot, tr, td, th { border-style: none; }
+#mknjfssrws thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#oriwnvulei p { margin: 0; padding: 0; }
- #oriwnvulei .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #oriwnvulei .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #oriwnvulei .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #oriwnvulei .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #oriwnvulei .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #oriwnvulei .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #oriwnvulei .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #oriwnvulei .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #oriwnvulei .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #oriwnvulei .gt_column_spanner_outer:first-child { padding-left: 0; }
- #oriwnvulei .gt_column_spanner_outer:last-child { padding-right: 0; }
- #oriwnvulei .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #oriwnvulei .gt_spanner_row { border-bottom-style: hidden; }
- #oriwnvulei .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #oriwnvulei .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #oriwnvulei .gt_from_md> :first-child { margin-top: 0; }
- #oriwnvulei .gt_from_md> :last-child { margin-bottom: 0; }
- #oriwnvulei .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #oriwnvulei .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #oriwnvulei .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #oriwnvulei .gt_row_group_first td { border-top-width: 2px; }
- #oriwnvulei .gt_row_group_first th { border-top-width: 2px; }
- #oriwnvulei .gt_striped { background-color: #F4F4F4; }
- #oriwnvulei .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #oriwnvulei .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #oriwnvulei .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #oriwnvulei .gt_left { text-align: left; }
- #oriwnvulei .gt_center { text-align: center; }
- #oriwnvulei .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #oriwnvulei .gt_font_normal { font-weight: normal; }
- #oriwnvulei .gt_font_bold { font-weight: bold; }
- #oriwnvulei .gt_font_italic { font-style: italic; }
- #oriwnvulei .gt_super { font-size: 65%; }
- #oriwnvulei .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #oriwnvulei .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#mknjfssrws p { margin: 0; padding: 0; }
+ #mknjfssrws .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #mknjfssrws .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #mknjfssrws .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #mknjfssrws .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #mknjfssrws .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #mknjfssrws .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #mknjfssrws .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #mknjfssrws .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #mknjfssrws .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #mknjfssrws .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #mknjfssrws .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #mknjfssrws .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #mknjfssrws .gt_spanner_row { border-bottom-style: hidden; }
+ #mknjfssrws .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #mknjfssrws .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #mknjfssrws .gt_from_md> :first-child { margin-top: 0; }
+ #mknjfssrws .gt_from_md> :last-child { margin-bottom: 0; }
+ #mknjfssrws .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #mknjfssrws .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #mknjfssrws .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #mknjfssrws .gt_row_group_first td { border-top-width: 2px; }
+ #mknjfssrws .gt_row_group_first th { border-top-width: 2px; }
+ #mknjfssrws .gt_striped { background-color: #F4F4F4; }
+ #mknjfssrws .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #mknjfssrws .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #mknjfssrws .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #mknjfssrws .gt_left { text-align: left; }
+ #mknjfssrws .gt_center { text-align: center; }
+ #mknjfssrws .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #mknjfssrws .gt_font_normal { font-weight: normal; }
+ #mknjfssrws .gt_font_bold { font-weight: bold; }
+ #mknjfssrws .gt_font_italic { font-style: italic; }
+ #mknjfssrws .gt_super { font-size: 65%; }
+ #mknjfssrws .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #mknjfssrws .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -10085,7 +10232,7 @@ font-style: inherit;">in</span> year_cols</span>
 <section id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling" class="level2">
 <h2 class="anchored" data-anchor-id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling">Leveraging the <code>mask=</code> Parameter in <code>loc.body()</code>: Use Polars Expressions for Streamlined Styling</h2>
 <p>The most modern approach (<code>0.16.0</code>) is to pass a Polars expression to the <code>mask=</code> parameter in <code>loc.body()</code>, as illustrated here:</p>
-<div id="b7a06c79" class="cell" data-execution_count="4">
+<div id="c24c7390" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    gt.tab_style(</span>
 <span id="cb3-3">        style<span class="op" style="color: #5E5E5E;
@@ -10105,52 +10252,52 @@ font-style: inherit;">650</span>))</span>
 <span id="cb3-5">    )</span>
 <span id="cb3-6">)</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-<div id="qevpndcgjv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="dfmbnuvoyw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#qevpndcgjv table {
+#dfmbnuvoyw table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#qevpndcgjv thead, tbody, tfoot, tr, td, th { border-style: none; }
+#dfmbnuvoyw thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#qevpndcgjv p { margin: 0; padding: 0; }
- #qevpndcgjv .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #qevpndcgjv .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #qevpndcgjv .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #qevpndcgjv .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #qevpndcgjv .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #qevpndcgjv .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #qevpndcgjv .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #qevpndcgjv .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #qevpndcgjv .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #qevpndcgjv .gt_column_spanner_outer:first-child { padding-left: 0; }
- #qevpndcgjv .gt_column_spanner_outer:last-child { padding-right: 0; }
- #qevpndcgjv .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #qevpndcgjv .gt_spanner_row { border-bottom-style: hidden; }
- #qevpndcgjv .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #qevpndcgjv .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #qevpndcgjv .gt_from_md> :first-child { margin-top: 0; }
- #qevpndcgjv .gt_from_md> :last-child { margin-bottom: 0; }
- #qevpndcgjv .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #qevpndcgjv .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #qevpndcgjv .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #qevpndcgjv .gt_row_group_first td { border-top-width: 2px; }
- #qevpndcgjv .gt_row_group_first th { border-top-width: 2px; }
- #qevpndcgjv .gt_striped { background-color: #F4F4F4; }
- #qevpndcgjv .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #qevpndcgjv .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #qevpndcgjv .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #qevpndcgjv .gt_left { text-align: left; }
- #qevpndcgjv .gt_center { text-align: center; }
- #qevpndcgjv .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #qevpndcgjv .gt_font_normal { font-weight: normal; }
- #qevpndcgjv .gt_font_bold { font-weight: bold; }
- #qevpndcgjv .gt_font_italic { font-style: italic; }
- #qevpndcgjv .gt_super { font-size: 65%; }
- #qevpndcgjv .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #qevpndcgjv .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#dfmbnuvoyw p { margin: 0; padding: 0; }
+ #dfmbnuvoyw .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #dfmbnuvoyw .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #dfmbnuvoyw .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #dfmbnuvoyw .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #dfmbnuvoyw .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #dfmbnuvoyw .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #dfmbnuvoyw .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #dfmbnuvoyw .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #dfmbnuvoyw .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #dfmbnuvoyw .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #dfmbnuvoyw .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #dfmbnuvoyw .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #dfmbnuvoyw .gt_spanner_row { border-bottom-style: hidden; }
+ #dfmbnuvoyw .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #dfmbnuvoyw .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #dfmbnuvoyw .gt_from_md> :first-child { margin-top: 0; }
+ #dfmbnuvoyw .gt_from_md> :last-child { margin-bottom: 0; }
+ #dfmbnuvoyw .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #dfmbnuvoyw .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #dfmbnuvoyw .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #dfmbnuvoyw .gt_row_group_first td { border-top-width: 2px; }
+ #dfmbnuvoyw .gt_row_group_first th { border-top-width: 2px; }
+ #dfmbnuvoyw .gt_striped { background-color: #F4F4F4; }
+ #dfmbnuvoyw .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #dfmbnuvoyw .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #dfmbnuvoyw .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #dfmbnuvoyw .gt_left { text-align: left; }
+ #dfmbnuvoyw .gt_center { text-align: center; }
+ #dfmbnuvoyw .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #dfmbnuvoyw .gt_font_normal { font-weight: normal; }
+ #dfmbnuvoyw .gt_font_bold { font-weight: bold; }
+ #dfmbnuvoyw .gt_font_italic { font-style: italic; }
+ #dfmbnuvoyw .gt_super { font-size: 65%; }
+ #dfmbnuvoyw .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #dfmbnuvoyw .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">

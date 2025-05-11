@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jerry Wu">
-<meta name="dcterms.date" content="2025-04-11">
+<meta name="dcterms.date" content="2025-05-11">
 
-<title>How to Access the Axes in Plotnine – Tech’n’Take</title>
+<title>Custom Row Selector in Great Tables – Tech’n’Take</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -152,11 +152,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">How to Access the Axes in Plotnine</h1>
+      <h1 class="title">Custom Row Selector in Great Tables</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
-                <div class="quarto-category">matplotlib</div>
-                <div class="quarto-category">plotnine</div>
+                <div class="quarto-category">pandas</div>
+                <div class="quarto-category">polars</div>
+                <div class="quarto-category">gt</div>
               </div>
                   </div>
   </div>
@@ -174,7 +175,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">April 11, 2025</p>
+        <p class="date">May 11, 2025</p>
       </div>
     </div>
     
@@ -195,32 +196,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>This is a short post documenting my experience trying to retrieve the <code>Axes</code> from <a href="https://plotnine.org/">plotnine</a>.</p>
-<p>The idea was inspired by <a href="https://github.com/nrennie/2024-plotnine-contest">this code</a> and <a href="https://www.youtube.com/watch?v=NBGJuaBF2rc">this video</a> I came across, but the original solution didn’t quite work for me. Fortunately, I found that we can access the list of <code>Axes</code> directly using either <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.axes.html"><code>fig.axes</code></a> or <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.get_axes.html#matplotlib.figure.Figure.get_axes"><code>fig.get_axes()</code></a>.</p>
-<p>In the example below, I adapt a snippet from the <a href="https://plotnine.org/reference/geom_smooth.html#examples">plotnine documentation</a> to demonstrate how to highlight text in color using <a href="https://github.com/znstrider/highlight_text">HighlightText</a>.</p>
+<p>This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While <a href="https://github.com/posit-dev/great-tables/issues/678">it</a> may or may not be adopted by the team, I thought it would be fun to document it here on the blog.</p>
+<p>I recently created a utility called <a href="https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row">every_n_row()</a>, designed to work with both Pandas and Polars DataFrames (support for <code>pyarrow</code> is still under investigation). With <code>every_n_row()</code>, we can easily target alternating rows—for example, select odd rows using <code>every_n_row(2)</code> and even rows using either <code>every_n_row(2, 1)</code> or <code>~every_n_row(2)</code>.</p>
+<div id="2e956632" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, every_n_row, loc, style</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables.data <span class="im">import</span> countrypops</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> countrypops.sample(<span class="dv">5</span>).loc[:, [<span class="st">"country_name"</span>, <span class="st">"year"</span>, <span class="st">"population"</span>]]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>df_pl <span class="op">=</span> pl.from_pandas(df_pd)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    GT(df_pd)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(<span class="st">"lightblue"</span>), locations<span class="op">=</span>loc.body(rows<span class="op">=</span>every_n_row(<span class="dv">2</span>)))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(<span class="st">"papayawhip"</span>), locations<span class="op">=</span>loc.body(rows<span class="op">=</span>every_n_row(<span class="dv">2</span>, <span class="dv">1</span>)))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">3</span>, color<span class="op">=</span><span class="st">"pink"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    GT(df_pl)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(<span class="st">"lightblue"</span>), locations<span class="op">=</span>loc.body(rows<span class="op">=</span>every_n_row(<span class="dv">2</span>)))</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(<span class="st">"papayawhip"</span>), locations<span class="op">=</span>loc.body(rows<span class="op">=~</span>every_n_row(<span class="dv">2</span>)))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">3</span>, color<span class="op">=</span><span class="st">"pink"</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="p9_ht_ax_text.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="plotnine used in combination with HighlightText"></p>
+<p><img src="every_n_row.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Selector: every_n_row"></p>
 </figure>
-</div>
-<div id="05f97adf" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> highlight_text <span class="im">as</span> ht</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine <span class="im">import</span> aes, geom_point, ggplot, labs, theme_matplotlib, theme_set</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> plotnine.data <span class="im">import</span> mpg</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>theme_set(theme_matplotlib())</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> (</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    ggplot(mpg, aes(x<span class="op">=</span><span class="st">"displ"</span>, y<span class="op">=</span><span class="st">"hwy"</span>))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> geom_point()</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> labs(x<span class="op">=</span><span class="st">"displacement"</span>, y<span class="op">=</span><span class="st">"horsepower"</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> p.draw()</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.axes[<span class="dv">0</span>]  <span class="co"># or via fig.get_axes()[0]</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ht_ax_text <span class="op">=</span> <span class="st">'Color highlighted by &lt;HighlightText::{"color": "#E58606"}&gt;'</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>ht.ax_text(<span class="dv">4</span>, <span class="dv">40</span>, ht_ax_text, vsep<span class="op">=</span><span class="dv">3</span>, fontsize<span class="op">=</span><span class="dv">9</span>, va<span class="op">=</span><span class="st">"top"</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>fig</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
