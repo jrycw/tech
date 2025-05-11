@@ -1,0 +1,42 @@
+---
+title: "Custom Row Selector in Great Tables"
+html-table-processing: none
+date: "2025-05-11"
+categories: [python, pandas, polars, gt]
+jupyter: python3
+image: "every_n_row.png"
+---
+This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While [it](https://github.com/posit-dev/great-tables/issues/678) may or may not be adopted by the team, I thought it would be fun to document it here on the blog.
+
+I recently created a utility called [every_n_row()](https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row), designed to work with both Pandas and Polars DataFrames (support for `pyarrow` is still under investigation). With `every_n_row()`, we can easily target alternating rows—for example, select odd rows using `every_n_row(2)` and even rows using either `every_n_row(2, 1)` or `~every_n_row(2)`.
+```{python}
+# | eval: false
+import polars as pl
+
+from great_tables import GT, every_n_row, loc, style
+from great_tables.data import countrypops
+
+df_pd = countrypops.sample(5).loc[:, ["country_name", "year", "population"]]
+df_pl = pl.from_pandas(df_pd)
+
+(
+    GT(df_pd)
+    .tab_style(style=style.fill("lightblue"), locations=loc.body(rows=every_n_row(2)))
+    .tab_style(style=style.fill("papayawhip"), locations=loc.body(rows=every_n_row(2, 1)))
+    .opt_stylize(style=3, color="pink")
+)
+
+(
+    GT(df_pl)
+    .tab_style(style=style.fill("lightblue"), locations=loc.body(rows=every_n_row(2)))
+    .tab_style(style=style.fill("papayawhip"), locations=loc.body(rows=~every_n_row(2)))
+    .opt_stylize(style=3, color="pink")
+)
+```
+
+![](every_n_row.png){fig-align="center" fig-alt="Row Selector: every_n_row"}
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
