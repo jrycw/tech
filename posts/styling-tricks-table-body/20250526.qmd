@@ -1,0 +1,83 @@
+---
+title: "Styling tricks in Great Tables"
+html-table-processing: none
+date: "2025-05-26"
+categories: [python, pandas, polars, gt]
+jupyter: python3
+image: "table_body.png"
+---
+
+This post highlights a powerful yet underused feature in Great Tables: using existing columns to style the table body via [from_column()](https://posit-dev.github.io/great-tables/reference/from_column.html).
+
+Let’s say you have the following Polars DataFrame `df`:
+```{python}
+import polars as pl
+from great_tables import GT, from_column, loc, style
+from great_tables.data import films
+
+
+df_style = pl.DataFrame(
+    {
+        "color": ["papayawhip", "lightblue", "lightgreen"],
+        "size": ["small", "x-large", "medium"],
+        "weight": ["normal", "bold", "lighter"],
+        "align": ["right", "center", "left"],
+    }
+)
+
+columns = ["year", "title", "run_time"]
+
+df = pl.concat(
+    [
+        pl.from_pandas(films.head(3).loc[:, columns]),
+        df_style,
+    ],
+    how="horizontal",
+)
+
+print(df)
+```
+
+The `color`, `size`, `weight`, and `align` columns contain style-related metadata. We can use `from_column()` to map this metadata to four styling options provided by Great Tables—[style.fill()](https://posit-dev.github.io/great-tables/reference/style.fill.html), [style.text()](https://posit-dev.github.io/great-tables/reference/style.text.html), [style.borders()](https://posit-dev.github.io/great-tables/reference/style.borders.html), and [style.css()](https://posit-dev.github.io/great-tables/reference/style.css.html)—all of which are built on the internal `CellStyle` class.
+
+```{python}
+(
+    GT(df)
+    .tab_style(
+        style=[
+            style.fill(color=from_column("color")),
+            style.text(
+                size=from_column("size"),
+                weight=from_column("weight"),
+                align=from_column("align"),
+            ),
+        ],
+        locations=loc.body(columns),
+    )
+    .cols_hide(df_style.columns)
+    .opt_stylize(style=6, color="gray")
+)
+```
+
+**One last note:** `from_column()` works with both Pandas and Polars DataFrames. For Polars users, you can also pass expressions directly without wrapping them in `from_column()`. The following code produces the same styled table as shown above:
+```{python}
+# | eval: false
+(
+    GT(df)
+    .tab_style(
+        style=[
+            style.fill(color=pl.col("color")),
+            style.text(
+                size=pl.col("size"), weight=pl.col("weight"), align=pl.col("align")
+            ),
+        ],
+        locations=loc.body(columns),
+    )
+    .cols_hide(df_style.columns)
+    .opt_stylize(style=6, color="gray")
+)
+```
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
