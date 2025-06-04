@@ -215,7 +215,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>otherwise</code>: A fallback expression used in <code>.otherwise()</code> if no conditions match.</li>
 </ul>
 <p>The given example demonstrates how <code>case_when()</code> can simplify conditional logic compared to the more verbose <code>pl.when().then().otherwise()</code> chain.</p>
-<div id="762b03c1" class="cell" data-execution_count="1">
+<div id="182bd9c5" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> cache</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Any</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -279,26 +279,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="co">    │ 4   ┆ large  │</span></span>
 <span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="co">    └─────┴────────┘</span></span>
 <span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    case0, <span class="op">*</span>cases <span class="op">=</span> caselist</span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    first_when, first_then <span class="op">=</span> case0</span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    <span class="co"># first</span></span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    expr <span class="op">=</span> pl.when(first_when).then(first_then)</span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># middles</span></span>
-<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> when, then <span class="kw">in</span> cases:</span>
-<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.when(when).then(then)</span>
-<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># last</span></span>
-<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    expr <span class="op">=</span> expr.otherwise(otherwise)</span>
-<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> expr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    (first_when, first_then), <span class="op">*</span>cases <span class="op">=</span> caselist</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    <span class="co"># first</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    expr <span class="op">=</span> pl.when(first_when).then(first_then)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    <span class="co"># middles</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> when, then <span class="kw">in</span> cases:</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>        expr <span class="op">=</span> expr.when(when).then(then)</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># last</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    expr <span class="op">=</span> expr.otherwise(otherwise)</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> expr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="custom-expression-namespace" class="level2">
 <h2 class="anchored" data-anchor-id="custom-expression-namespace">Custom Expression Namespace</h2>
 <p>With <code>case_when()</code> in place, we can refactor the <code>DiscreteSplitter</code> expression namespace like this:</p>
-<div id="2e82eb14" class="cell" data-execution_count="2">
+<div id="6d5ec547" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="at">@cache</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _mod_expr(n: <span class="bu">int</span>) <span class="op">-&gt;</span> pl.Expr:</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pl.int_range(pl.<span class="bu">len</span>(), dtype<span class="op">=</span>pl.UInt32).mod(n)</span>
@@ -363,7 +362,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="custom-dataframe-namespace">Custom DataFrame Namespace</h2>
 <p>Instead of relying on <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>, we can also use <code>_mod_expr()</code> directly to enable similar categorization.</p>
 <p>Here’s how the <code>DiscreteSplitter</code> can be implemented as a custom DataFrame namespace:</p>
-<div id="300aad6e" class="cell" data-execution_count="3">
+<div id="dec3b960" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="at">@pl.api.register_dataframe_namespace</span>(<span class="st">"spt"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DiscreteSplitter:</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, df: pl.DataFrame) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
