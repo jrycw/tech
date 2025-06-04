@@ -198,7 +198,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This post demonstrates how to clone the Reciprocal Tariffs table that President Donald Trump announced on April 2 on <a href="https://truthsocial.com/@realDonaldTrump/114270398531479278">Truth Social</a>.</p>
 <p>Since the code is largely self-explanatory, I will highlight some tricks and caveats I encountered while building the table:</p>
 <ol type="1">
-<li>The <code>reciprocal_tariffs</code> dictionary was extracted with the help of AI.</li>
+<li>The <code>data</code> dictionary was extracted with the help of AI.</li>
 <li>The border radius was one of the trickiest aspects of the table—it took some time to figure out how to fill the gap between the rounded corners and the rectangle. Fortunately, I drew inspiration from the Great Tables example, <a href="https://posit-dev.github.io/great-tables/examples/">Highest Paid Athletes in 2023</a>. The solution was to use two <code>&lt;div&gt;</code> tags, which allowed me to assign distinct colors to the inside and outside of the border.</li>
 <li>I created four empty columns—<code>["0", "1", "2", "3"]</code>—to serve as borders. This allowed for easier adjustment of border properties such as color and width. An interesting feature of <a href="https://posit-dev.github.io/great-tables/reference/GT.cols_width.html#great_tables.GT.cols_width">GT.cols_width()</a> is that you can set column widths using percentages, and the total doesn’t need to add up to exactly 100%—it just works. This is especially handy when experimenting with different table designs, as it lets you estimate widths without worrying about precise calculations.</li>
 <li>I added a “mod” column to help distinguish whether a row’s index is odd or even. This made it possible to combine <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html">pl.when().then().otherwise()</a> with <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html">pl.Expr.map_elements()</a>. Although <code>pl.Expr.map_elements()</code> is generally considered an anti-pattern in Polars, I believe it fits my use case well.</li>
@@ -213,7 +213,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="reciprocal_tariffs_gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Cloned Reciprocal Tariffs Table"></p>
 </figure>
 </div>
-<div id="c630db3d" class="cell" data-execution_count="1">
+<div id="7d11de4b" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
