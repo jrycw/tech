@@ -89,8 +89,7 @@ def case_when(
     │ 4   ┆ large  │
     └─────┴────────┘
     """
-    case0, *cases = caselist
-    first_when, first_then = case0
+    (first_when, first_then), *cases = caselist
 
     # first
     expr = pl.when(first_when).then(first_then)
