@@ -199,7 +199,9 @@ df = (
 
 (
     GT(df)
-    .cols_align("center", columns=["tariffs_charged", "reciprocal_tariffs"])
+    .cols_align(
+        "center", columns=["tariffs_charged", "reciprocal_tariffs"]
+    )
     .cols_label(
         {
             "country": html(
@@ -244,36 +246,48 @@ df = (
             "reciprocal_tariffs": "18%",
         }
     )
+    # For labels and body:
     # set the background color of the labels and body to `dark_navy_blue`
     .tab_style(
         style=style.fill(color=dark_navy_blue),
         locations=[loc.column_labels(), loc.body()],
     )
+    # For body:
     # set the border color of the body to `dark_navy_blue`
+    # set the font, weight and size
     .tab_style(
-        style=style.borders(sides="all", color=dark_navy_blue),
+        style=[
+            style.borders(sides="all", color=dark_navy_blue),
+            style.text(
+                font=google_font(name="Trajan Pro"),
+                weight="bold",
+                size="xx-large",
+            ),
+        ],
         locations=loc.body(),
     )
-    # set the font for the body text
+    # For labels:
+    # set the font, weight, size and color
+    # center-align the labels
     .tab_style(
-        style=style.text(
-            font=google_font(name="Trajan Pro"), weight="bold", size="xx-large"
-        ),
-        locations=loc.body(),
-    )
-    # set the font for the labels
-    .tab_style(
-        style=style.text(font=google_font(name="Georgia"), weight="bold", size="large"),
+        style=[
+            style.text(
+                font=google_font(name="Georgia"),
+                weight="bold",
+                size="large",
+                color=white,
+            ),
+            style.css("text-align: center;"),
+        ],
         locations=loc.column_labels(),
     )
-    # set the text color of the labels to `white`
-    .tab_style(style=style.text(color=white), locations=loc.column_labels())
-    # center-align the labels
-    .tab_style(style=style.css("text-align: center;"), locations=loc.column_labels())
     # hide the bottom line of the label section
     .tab_options(column_labels_border_bottom_style="hidden")
     # set the body background color to `dark_navy_blue` for the last row
-    .tab_style(style=style.fill(color=dark_navy_blue), locations=loc.body(rows=[-1]))
+    .tab_style(
+        style=style.fill(color=dark_navy_blue),
+        locations=loc.body(rows=[-1]),
+    )
     # .opt_table_outline(
     #     style=inner_ring_style,
     #     width=inner_ring_width,
