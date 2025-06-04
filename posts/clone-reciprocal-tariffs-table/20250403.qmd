@@ -11,7 +11,7 @@ This post demonstrates how to clone the Reciprocal Tariffs table that President 
 
 Since the code is largely self-explanatory, I will highlight some tricks and caveats I encountered while building the table:
 
-1. The `reciprocal_tariffs` dictionary was extracted with the help of AI.
+1. The `data` dictionary was extracted with the help of AI.
 2. The border radius was one of the trickiest aspects of the table—it took some time to figure out how to fill the gap between the rounded corners and the rectangle. Fortunately, I drew inspiration from the Great Tables example, [Highest Paid Athletes in 2023](https://posit-dev.github.io/great-tables/examples/). The solution was to use two `<div>` tags, which allowed me to assign distinct colors to the inside and outside of the border.
 3. I created four empty columns—`["0", "1", "2", "3"]`—to serve as borders. This allowed for easier adjustment of border properties such as color and width. An interesting feature of [GT.cols_width()](https://posit-dev.github.io/great-tables/reference/GT.cols_width.html#great_tables.GT.cols_width) is that you can set column widths using percentages, and the total doesn’t need to add up to exactly 100%—it just works. This is especially handy when experimenting with different table designs, as it lets you estimate widths without worrying about precise calculations.
 4. I added a "mod" column to help distinguish whether a row’s index is odd or even. This made it possible to combine [pl.when().then().otherwise()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html) with [pl.Expr.map_elements()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.map_elements.html). Although `pl.Expr.map_elements()` is generally considered an anti-pattern in Polars, I believe it fits my use case well.
@@ -37,7 +37,7 @@ from great_tables import GT, google_font, html, loc, style, vals
 # 800px-Seal_of_the_President_of_the_United_States.svg.png"
 logo = vals.fmt_image("logo.png", height=150)[0]
 
-reciprocal_tariffs = {
+data = {
     "country": [
         "China",
         "European Union",
@@ -157,7 +157,7 @@ def change_border_radius_expr(
 
 
 df = (
-    pl.DataFrame(reciprocal_tariffs)
+    pl.DataFrame(data)
     .with_row_index("mod")
     .with_columns(pl.col("mod").mod(2), *[pl.lit("").alias(str(i)) for i in range(4)])
     .with_columns(
