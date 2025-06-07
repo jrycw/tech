@@ -224,7 +224,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll start by creating a <code>data</code> dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a <code>color_mapping</code> dictionary to store the palette information for styling.</p>
-<div id="461c26fc" class="cell" data-execution_count="1">
+<div id="78121cc2" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, from_column, loc, style</span>
@@ -242,7 +242,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="pandas" class="level2">
 <h2 class="anchored" data-anchor-id="pandas">Pandas</h2>
 <p>First, we create a Pandas DataFrame called <code>df_pd</code> using <code>data</code> as the input:</p>
-<div id="162b9194" class="cell" data-execution_count="2">
+<div id="348abec0" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_pd <span class="op">=</span> pd.DataFrame(data)</span>
@@ -260,7 +260,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="using-an-existing-column" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column">Using an Existing Column</h3>
 <p>In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the <a href="https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column">from_column()</a> function provided by Great Tables to apply colors to the table body:</p>
-<div id="2e926fbf" class="cell" data-execution_count="3">
+<div id="c60eddb6" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pd)</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(color<span class="op">=</span>from_column(<span class="st">"color"</span>)), locations<span class="op">=</span>loc.body())</span>
@@ -272,7 +272,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="using-functions" class="level3">
 <h3 class="anchored" data-anchor-id="using-functions">Using Functions</h3>
 <p>In cases where colors need to be determined dynamically based on conditions, the <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when">pd.Series.case_when()</a> function can be very useful. The following example categorizes the values of the <code>col1</code> column into three different colors:</p>
-<div id="dfb670ce" class="cell" data-execution_count="4">
+<div id="90226363" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> color_selector(df_):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_[<span class="st">"col1"</span>].case_when(</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        [</span>
@@ -295,7 +295,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">pd.Series.map()</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">pd.Series.replace()</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
-<div id="c7c22d78" class="cell" data-execution_count="5">
+<div id="fecf2e37" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pd)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(</span>
@@ -308,7 +308,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
-<div id="37481c3d" class="cell" data-execution_count="6">
+<div id="81924bf0" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pd)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(</span>
@@ -323,7 +323,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Alternatively, if you prefer sticking with the same approach, <code>pd.Series.case_when()</code> still works:</p>
-<div id="900fc001" class="cell" data-execution_count="7">
+<div id="292a08ca" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> color_selector(df_):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_[<span class="st">"col2"</span>].case_when(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        [</span>
@@ -346,7 +346,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="polars" class="level2">
 <h2 class="anchored" data-anchor-id="polars">Polars</h2>
 <p>Just like before, let’s start by creating a Polars DataFrame named <code>df_pl</code> using <code>data</code> as input:</p>
-<div id="7795b533" class="cell" data-execution_count="8">
+<div id="71b436c6" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df_pl<span class="op">=</span> pl.DataFrame(data)</span>
@@ -370,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="using-an-existing-column-1" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column-1">Using an Existing Column</h3>
 <p>If the DataFrame already contains a column specifying colors, we can apply them directly with <code>from_column()</code>:</p>
-<div id="fc2d3dbc" class="cell" data-execution_count="9">
+<div id="fb97207f" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pl)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(color<span class="op">=</span>from_column(<span class="st">"color"</span>)), locations<span class="op">=</span>loc.body())</span>
@@ -379,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>As another option, we can reference the <code>color</code> column using a Polars expression:</p>
-<div id="4bec352f" class="cell" data-execution_count="10">
+<div id="a25af78c" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pl)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(style<span class="op">=</span>style.fill(color<span class="op">=</span>pl.col(<span class="st">"color"</span>)), locations<span class="op">=</span>loc.body())</span>
@@ -391,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="using-conditional-logic-with-polars-expressions" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-logic-with-polars-expressions">Using Conditional Logic with Polars Expressions</h3>
 <p>For cases where colors need to be assigned dynamically, <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when()</a> provides a structured way to define conditions. The example below assigns colors based on the values in <code>col1</code>:</p>
-<div id="6c9c5bee" class="cell" data-execution_count="11">
+<div id="5c27ef90" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>color_selector_expr <span class="op">=</span> (</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    pl.when(pl.col(<span class="st">"col1"</span>).lt(<span class="dv">3</span>))  <span class="co"># &lt;3</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .then(pl.lit(<span class="st">"lightgrey"</span>))</span>
@@ -409,7 +409,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>For categorical-like columns (e.g., <code>col2</code>), predefined mappings can be applied efficiently using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace">pl.Expr.replace()</a>:</p>
-<div id="c78f1902" class="cell" data-execution_count="12">
+<div id="801a7cd9" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    GT(df_pl)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(</span>
@@ -421,7 +421,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Alternatively, if you prefer the conditional approach, <code>pl.when()</code> can still be used:</p>
-<div id="3222d1a1" class="cell" data-execution_count="13">
+<div id="e318d93f" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>color_selector_expr <span class="op">=</span> (</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    pl.when(pl.col(<span class="st">"col2"</span>).eq(pl.lit(<span class="st">"x"</span>)))</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .then(pl.lit(<span class="st">"lightgrey"</span>))</span>
