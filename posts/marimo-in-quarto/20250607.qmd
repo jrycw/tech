@@ -38,15 +38,12 @@ style_widget = mo.ui.slider(1, 6, label="Select Style Number")
 mo.output.append(style_widget)
 
 _colors = ["blue", "cyan", "pink", "green", "red", "gray"]
-color_widget = mo.ui.dropdown(
-    options=_colors, value=_colors[0], label="Select Style color"
+color_widget = mo.ui.radio(
+    options=_colors, value=_colors[0], label="Select Style Color"
 )
 mo.output.append(color_widget)
 
-_row_striping = {"True": True, "False": False}
-row_striping_widget = mo.ui.radio(
-    options=_row_striping, value="True", label="Add Row Striping?"
-)
+row_striping_widget = mo.ui.switch(value=True, label="Add Row Striping?")
 mo.output.append(row_striping_widget)
 ```
 
@@ -64,7 +61,6 @@ Check out the full marimo code below.
 # | code-fold: true
 # | eval: false
 # | code-summary: Show full code
-import polars as pl
 import marimo
 
 __generated_with = "0.13.15"
@@ -97,15 +93,12 @@ def _(mo):
     mo.output.append(style_widget)
 
     _colors = ["blue", "cyan", "pink", "green", "red", "gray"]
-    color_widget = mo.ui.dropdown(
-        options=_colors, value=_colors[0], label="Select Style color"
+    color_widget = mo.ui.radio(
+        options=_colors, value=_colors[0], label="Select Style Color"
     )
     mo.output.append(color_widget)
 
-    _row_striping = {"True": True, "False": False}
-    row_striping_widget = mo.ui.radio(
-        options=_row_striping, value="True", label="Add Row Striping?"
-    )
+    row_striping_widget = mo.ui.switch(value=True, label="Add Row Striping?")
     mo.output.append(row_striping_widget)
     return color_widget, row_striping_widget, style_widget
 
