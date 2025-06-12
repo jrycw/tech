@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jerry Wu">
-<meta name="dcterms.date" content="2025-06-07">
+<meta name="dcterms.date" content="2025-06-12">
 
-<title>Marimo in Quarto – Tech’n’Take</title>
+<title>Great Tables with Marimo in Quarto – Tech’n’Take</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -160,9 +160,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Marimo in Quarto</h1>
+      <h1 class="title">Great Tables with Marimo in Quarto</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
+                <div class="quarto-category">gt</div>
                 <div class="quarto-category">marimo</div>
               </div>
                   </div>
@@ -181,7 +182,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">June 7, 2025</p>
+        <p class="date">June 12, 2025</p>
       </div>
     </div>
     
@@ -192,14 +193,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#marimo" id="toc-marimo" class="nav-link active" data-scroll-target="#marimo">marimo</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -221,14 +216,13 @@ Give It a Sec – WASM Magic Happening
 <p>The widgets may take a few moments to load, as they rely on WebAssembly under the hood.</p>
 </div>
 </div>
-<p>This post demonstrates that Polars, Great Tables, and marimo can successfully run within a Quarto environment (as shown in this post). The example uses a table styler selector from Great Tables—and I’m honestly surprised it works!</p>
-<section id="marimo" class="level2">
-<h2 class="anchored" data-anchor-id="marimo">marimo</h2>
+<p>This is a follow-up to my <a href="../../posts/marimo-in-quarto/20250607.html">previous post</a>.</p>
+<p>Here, I demonstrate how MMrimo widgets can be embedded in Great Tables by wrapping them with the <code>html()</code> function provided by the library. This allows interactive widgets to control the table’s appearance in a Quarto environment via WASM — a surprisingly powerful capability, in my opinion.</p>
 <marimo-island data-app-id="main" data-cell-id="Hbol" data-reactive="true">
     <marimo-cell-output>
     <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;No module named 'polars'&quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: null, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
     </marimo-cell-output>
-    <marimo-cell-code hidden="">import%20marimo%20as%20mo%0Aimport%20polars%20as%20pl%0Afrom%20great_tables%20import%20GT%2C%20loc%2C%20style</marimo-cell-code>
+    <marimo-cell-code hidden="">import%20marimo%20as%20mo%0Aimport%20polars%20as%20pl%0Afrom%20great_tables%20import%20GT%2C%20html%2C%20style%2C%20loc</marimo-cell-code>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="MJUe" data-reactive="true">
     <marimo-cell-output>
@@ -240,16 +234,16 @@ Give It a Sec – WASM Magic Happening
     <marimo-cell-output>
     <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
     </marimo-cell-output>
-    <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Select%20Style%20Number%22)%0Amo.output.append(style_widget)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Select%20Style%20Color%22%0A)%0Amo.output.append(color_widget)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Add%20Row%20Striping%3F%22)%0Amo.output.append(row_striping_widget)</marimo-cell-code>
+    <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Style%20Number%22)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Style%20Color%22%2C%20inline%3DTrue%0A)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Row%20Striping%3F%22)%0A%0Agt%20%3D%20(%0A%20%20%20%20GT(df)%0A%20%20%20%20.tab_header(html(style_widget)%2C%20html(color_widget))%0A%20%20%20%20.tab_source_note(html(row_striping_widget))%0A%20%20%20%20.opt_align_table_header(%22left%22)%0A)</marimo-cell-code>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="bkHC" data-reactive="true">
     <marimo-cell-output>
     <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
     </marimo-cell-output>
-    <marimo-cell-code hidden="">GT(df).opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
+    <marimo-cell-code hidden="">gt.opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
 </marimo-island>
 <p>Check out the full marimo code below.</p>
-<div id="47ce20f7" class="cell" data-execution_count="1">
+<div id="69269b1c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
@@ -262,9 +256,9 @@ Give It a Sec – WASM Magic Happening
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _():</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> marimo <span class="im">as</span> mo</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> great_tables <span class="im">import</span> GT, loc, style</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> great_tables <span class="im">import</span> GT, html, style, loc</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> GT, mo, pl</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> GT, html, mo, pl</span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
@@ -279,33 +273,37 @@ Give It a Sec – WASM Magic Happening
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(mo):</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    style_widget <span class="op">=</span> mo.ui.slider(<span class="dv">1</span>, <span class="dv">6</span>, label<span class="op">=</span><span class="st">"Select Style Number"</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    mo.output.append(style_widget)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    _colors <span class="op">=</span> [<span class="st">"blue"</span>, <span class="st">"cyan"</span>, <span class="st">"pink"</span>, <span class="st">"green"</span>, <span class="st">"red"</span>, <span class="st">"gray"</span>]</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    color_widget <span class="op">=</span> mo.ui.radio(</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        options<span class="op">=</span>_colors, value<span class="op">=</span>_colors[<span class="dv">0</span>], label<span class="op">=</span><span class="st">"Select Style Color"</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    mo.output.append(color_widget)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(GT, df, html, mo):</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    style_widget <span class="op">=</span> mo.ui.slider(<span class="dv">1</span>, <span class="dv">6</span>, label<span class="op">=</span><span class="st">"Style Number"</span>)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    _colors <span class="op">=</span> [<span class="st">"blue"</span>, <span class="st">"cyan"</span>, <span class="st">"pink"</span>, <span class="st">"green"</span>, <span class="st">"red"</span>, <span class="st">"gray"</span>]</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    color_widget <span class="op">=</span> mo.ui.radio(</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        options<span class="op">=</span>_colors, value<span class="op">=</span>_colors[<span class="dv">0</span>], label<span class="op">=</span><span class="st">"Style Color"</span>, inline<span class="op">=</span><span class="va">True</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    row_striping_widget <span class="op">=</span> mo.ui.switch(value<span class="op">=</span><span class="va">True</span>, label<span class="op">=</span><span class="st">"Row Striping?"</span>)</span>
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    row_striping_widget <span class="op">=</span> mo.ui.switch(value<span class="op">=</span><span class="va">True</span>, label<span class="op">=</span><span class="st">"Add Row Striping?"</span>)</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    mo.output.append(row_striping_widget)</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> color_widget, row_striping_widget, style_widget</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(GT, color_widget, df, row_striping_widget, style_widget):</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    GT(df).opt_stylize(</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>style_widget.value,</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color_widget.value,</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        add_row_striping<span class="op">=</span>row_striping_widget.value,</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    app.run()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    gt <span class="op">=</span> (</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        GT(df)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        .tab_header(html(style_widget), html(color_widget))</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        .tab_source_note(html(row_striping_widget))</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        .opt_align_table_header(<span class="st">"left"</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> color_widget, gt, row_striping_widget, style_widget</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(color_widget, gt, row_striping_widget, style_widget):</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    gt.opt_stylize(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>style_widget.value,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color_widget.value,</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        add_row_striping<span class="op">=</span>row_striping_widget.value,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    app.run()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
@@ -323,7 +321,6 @@ Disclaimer
 </div>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
