@@ -11,76 +11,9 @@ filters:
 
 This post demonstrates how to send emails using [Resend](https://resend.com/) from within a marimo app.
 
-::: {.callout-note}
-# Give It a Sec – WASM Magic Happening
-The widgets may take a few moments to load, as they rely on WebAssembly under the hood.
-::: 
+![](resend_via_marimo.png){fig-align="center" fig-alt="Resend via marimo"}
 
-## marimo
-```python {.marimo}
-import marimo as mo
-import os
-from html import escape
-import polars as pl
-import resend
-```
-
-```python {.marimo}
-def send_email(d: dict[str, str]) -> None:
-    """
-    https://resend.com/docs/send-with-python
-    """
-    resend.api_key = d["RESEND_API_KEY"]
-    from_ = d["from_"]
-    to = [mail.strip() for mail in d["to"].split(",")]
-    subject = d["subject"]
-    html_ = escape(d["content"]).replace("\n", "<br>")
-
-    params: resend.Emails.SendParams = {
-        "from": from_,
-        "to": to,
-        "subject": subject,
-        "html": html_,
-    }
-
-    email = resend.Emails.send(params)
-```
-
-```python {.marimo}
-#| echo: false
-# Create a form with multiple eleme
-form = (
-    mo.md(
-        """
-    **marimo mail**
-    {RESEND_API_KEY}
-
-    {from_}
-
-    {to}
-
-    {subject}
-
-    {content}
-"""
-    )
-    .batch(
-        RESEND_API_KEY=mo.ui.text(
-            label="RESEND_API_KEY", kind="password", full_width=True
-        ),
-        from_=mo.ui.text(label="From", kind="email", full_width=True),
-        to=mo.ui.text(label="To", kind="email", full_width=True),
-        subject=mo.ui.text(label="Subject", full_width=True),
-        content=mo.ui.text_area(full_width=True),
-    )
-    .form(show_clear_button=True, on_change=send_email)
-)
-form
-```
-
-One challenge I ran into was figuring out how to securely set environment variables in marimo WASM environment—especially when it’s rendered inside a Quarto document.
-
-Since the app resets every time the page reloads, everything starts from scratch. I needed to find a reliable way to set environment variables safely on each reload.
+It seems the app runs fine locally but doesn't work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.
 
 Check out the full marimo code below.
 ```{python}
