@@ -104,19 +104,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.14.7/dist/main.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.14.7/dist/style.css" rel="stylesheet" crossorigin="anonymous">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&amp;family=Lora&amp;family=PT+Sans:wght@400;700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
-</head><body class="nav-fixed quarto-light"><marimo-filename hidden=""></marimo-filename>
 
 
 <link rel="stylesheet" href="../../styles.css">
+</head>
 
-
-
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
@@ -192,14 +185,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#marimo" id="toc-marimo" class="nav-link active" data-scroll-target="#marimo">marimo</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -209,43 +196,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>This post demonstrates how to send emails using <a href="https://resend.com/">Resend</a> from within a marimo app.</p>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="resend_via_marimo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Resend via marimo"></p>
+</figure>
 </div>
-<div class="callout-title-container flex-fill">
-Give It a Sec – WASM Magic Happening
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The widgets may take a few moments to load, as they rely on WebAssembly under the hood.</p>
-</div>
-</div>
-<section id="marimo" class="level2">
-<h2 class="anchored" data-anchor-id="marimo">marimo</h2>
-<marimo-island data-app-id="main" data-cell-id="Hbol" data-reactive="true">
-    <marimo-cell-output>
-    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;No module named 'polars'&quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: null, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">import%20marimo%20as%20mo%0Aimport%20os%0Afrom%20html%20import%20escape%0Aimport%20polars%20as%20pl%0Aimport%20resend</marimo-cell-code>
-</marimo-island>
-<marimo-island data-app-id="main" data-cell-id="MJUe" data-reactive="true">
-    <marimo-cell-output>
-    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">def%20send_email(d%3A%20dict%5Bstr%2C%20str%5D)%20-%3E%20None%3A%0A%20%20%20%20%22%22%22%0A%20%20%20%20https%3A%2F%2Fresend.com%2Fdocs%2Fsend-with-python%0A%20%20%20%20%22%22%22%0A%20%20%20%20resend.api_key%20%3D%20d%5B%22RESEND_API_KEY%22%5D%0A%20%20%20%20from_%20%3D%20d%5B%22from_%22%5D%0A%20%20%20%20to%20%3D%20%5Bmail.strip()%20for%20mail%20in%20d%5B%22to%22%5D.split(%22%2C%22)%5D%0A%20%20%20%20subject%20%3D%20d%5B%22subject%22%5D%0A%20%20%20%20html_%20%3D%20escape(d%5B%22content%22%5D).replace(%22%5Cn%22%2C%20%22%3Cbr%3E%22)%0A%0A%20%20%20%20params%3A%20resend.Emails.SendParams%20%3D%20%7B%0A%20%20%20%20%20%20%20%20%22from%22%3A%20from_%2C%0A%20%20%20%20%20%20%20%20%22to%22%3A%20to%2C%0A%20%20%20%20%20%20%20%20%22subject%22%3A%20subject%2C%0A%20%20%20%20%20%20%20%20%22html%22%3A%20html_%2C%0A%20%20%20%20%7D%0A%0A%20%20%20%20email%20%3D%20resend.Emails.send(params)</marimo-cell-code>
-</marimo-island>
-<marimo-island data-app-id="main" data-cell-id="vblA" data-reactive="true">
-    <marimo-cell-output>
-    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">%23%20Create%20a%20form%20with%20multiple%20eleme%0Aform%20%3D%20(%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20**marimo%20mail**%0A%20%20%20%20%7BRESEND_API_KEY%7D%0A%0A%20%20%20%20%7Bfrom_%7D%0A%0A%20%20%20%20%7Bto%7D%0A%0A%20%20%20%20%7Bsubject%7D%0A%0A%20%20%20%20%7Bcontent%7D%0A%22%22%22%0A%20%20%20%20)%0A%20%20%20%20.batch(%0A%20%20%20%20%20%20%20%20RESEND_API_KEY%3Dmo.ui.text(%0A%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22RESEND_API_KEY%22%2C%20kind%3D%22password%22%2C%20full_width%3DTrue%0A%20%20%20%20%20%20%20%20)%2C%0A%20%20%20%20%20%20%20%20from_%3Dmo.ui.text(label%3D%22From%22%2C%20kind%3D%22email%22%2C%20full_width%3DTrue)%2C%0A%20%20%20%20%20%20%20%20to%3Dmo.ui.text(label%3D%22To%22%2C%20kind%3D%22email%22%2C%20full_width%3DTrue)%2C%0A%20%20%20%20%20%20%20%20subject%3Dmo.ui.text(label%3D%22Subject%22%2C%20full_width%3DTrue)%2C%0A%20%20%20%20%20%20%20%20content%3Dmo.ui.text_area(full_width%3DTrue)%2C%0A%20%20%20%20)%0A%20%20%20%20.form(show_clear_button%3DTrue%2C%20on_change%3Dsend_email)%0A)%0Aform</marimo-cell-code>
-</marimo-island>
-<p>One challenge I ran into was figuring out how to securely set environment variables in marimo WASM environment—especially when it’s rendered inside a Quarto document.</p>
-<p>Since the app resets every time the page reloads, everything starts from scratch. I needed to find a reliable way to set environment variables safely on each reload.</p>
+<p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
 <p>Check out the full marimo code below.</p>
-<div id="8ece55b2" class="cell" data-execution_count="1">
+<div id="bbbcc669" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
@@ -339,7 +297,6 @@ Disclaimer
 </div>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
