@@ -1,0 +1,242 @@
+---
+title: "Interactive Django Deployment Checklist with marimo"
+html-table-processing: none
+date: "2025-06-25"
+categories: [python, marimo, gt, django]
+jupyter: python3
+image: "marimo_django_deployment_checklist.png"
+filters:
+    - marimo-team/marimo
+---
+I love Django—it covers pretty much everything I need in a web environment. However, when it comes time to deploy a project to production, there are always a bunch of pre-deployment checks, and I can never seem to remember them all. I find myself constantly revisiting the official Django deployment checklist page.
+
+Today I realized I don’t need all the detailed information every time—just a simple reminder list is enough. So, I built an interactive Django deployment checklist using Great Tables in marimo and hosted it on [marimo.app](https://marimo.app/?slug=loep4h). Now I can interact with it whenever I need a quick double-check.
+
+::: {.callout-note}
+# Give It a Sec – WASM Magic Happening
+The widgets may take a few moments to load, as they rely on WebAssembly under the hood.
+::: 
+
+### marimo
+1. I asked AI to generate a checklist and wrapped it in a Polars `DataFrame` called `df`.
+2. I created 10 [switch widgets](https://docs.marimo.io/api/inputs/switch/) and stacked them into an [array widget](https://docs.marimo.io/api/inputs/array/) named `status_widgets` to represent the status of each checklist item.
+3. I extracted the HTML representation of each widget via its `_repr_html_()` method and inserted it as a new `"Status"` column in `df`, which I then wrapped in a Great Tables [GT](https://posit-dev.github.io/great-tables/reference/GT.html#great_tables.GT) object.
+4. I added two source notes using [GT.tab_source_note()](https://posit-dev.github.io/great-tables/reference/GT.tab_source_note.html#great_tables.GT.tab_source_note)—one to display progress, and another for a visual progress bar.
+5. Finally, I gave the table a nice header with [GT.tab_header()](https://posit-dev.github.io/great-tables/reference/GT.tab_header.html#great_tables.GT.tab_header) and applied some styling using [GT.opt_stylize()](https://posit-dev.github.io/great-tables/reference/GT.opt_stylize.html#great_tables.GT.opt_stylize).
+
+
+```python {.marimo}
+import marimo as mo
+import polars as pl
+from great_tables import GT, html, md
+```
+
+```python {.marimo}
+tasks = [
+    "Set DEBUG = False",
+    "Configure ALLOWED_HOSTS",
+    "Set up a secret key",
+    "Collect static files",
+    "Apply database migrations",
+    "Set up gunicorn or uWSGI",
+    "Configure reverse proxy (e.g., Nginx)",
+    "Secure the database",
+    "Set up HTTPS (SSL)",
+    "Configure logging & monitoring",
+]
+
+notes = [
+    "Never deploy with DEBUG = True ⚠️",
+    "Include your domain(s) or IP address 🌐",
+    "Use a strong, secure key from an environment variable 🔐",
+    "Run `python manage.py collectstatic` 📦",
+    "Run `python manage.py migrate` 🗃️",
+    "Use as a WSGI server in production 🔄",
+    "Serve static/media files and forward to WSGI server 🧭",
+    "Use strong credentials, disable remote root login 🛡️",
+    "Use Let's Encrypt or your own certificate 🔒",
+    "Track errors and app performance 📊",
+]
+
+n_row = len(tasks)
+status = ["☐"] * n_row
+data = {"Status": status, "Task": tasks, "Notes": notes}
+
+df = pl.DataFrame(data)
+```
+
+```python {.marimo}
+status_widget = mo.ui.switch()
+status_widgets = mo.ui.array([status_widget] * n_row)
+```
+
+```python {.marimo}
+def create_bar(
+    x: float,
+    max_width: int,
+    height: int,
+    background_color1: str,
+    background_color2: str,
+) -> str:
+    width = round(max_width * x, 2)
+    px_width = f"{width}px"
+    return f"""\
+    <div style="width: {max_width}px; background-color: {background_color1};">\
+        <div style="height:{height}px;width:{px_width};background-color:{background_color2};"></div>\
+    </div>\
+```
+
+```python {.marimo}
+#| echo: false
+done_count = sum(s.value for s in status_widgets)
+
+gt = (
+    GT(
+        df.with_columns(
+            pl.Series(
+                [status._repr_html_() for status in status_widgets]
+            ).alias("Status")
+        )
+    )
+    .tab_source_note(f"{done_count} / {n_row}")
+    .tab_source_note(
+        html(
+            create_bar(
+                done_count / n_row,
+                max_width=800,
+                height=20,
+                background_color1="lightgray",
+                background_color2="#66CDAA",
+            )
+        )
+    )
+    .tab_header("✅ Django Deployment Checklist")
+    .opt_stylize(color="cyan", style=4)
+)
+gt
+```
+
+Check out the full marimo code below.
+```{python}
+# | code-fold: true
+# | eval: false
+# | code-summary: Show full code
+import marimo
+
+__generated_with = "0.14.7"
+app = marimo.App(width="medium")
+
+
+@app.cell
+def _():
+    import marimo as mo
+    return (mo,)
+
+
+@app.cell
+def _():
+    import polars as pl
+    from great_tables import GT, html, md
+    return GT, html, pl
+
+
+@app.cell
+def _(pl):
+    tasks = [
+        "Set DEBUG = False",
+        "Configure ALLOWED_HOSTS",
+        "Set up a secret key",
+        "Collect static files",
+        "Apply database migrations",
+        "Set up gunicorn or uWSGI",
+        "Configure reverse proxy (e.g., Nginx)",
+        "Secure the database",
+        "Set up HTTPS (SSL)",
+        "Configure logging & monitoring",
+    ]
+
+    notes = [
+        "Never deploy with DEBUG = True ⚠️",
+        "Include your domain(s) or IP address 🌐",
+        "Use a strong, secure key from an environment variable 🔐",
+        "Run `python manage.py collectstatic` 📦",
+        "Run `python manage.py migrate` 🗃️",
+        "Use as a WSGI server in production 🔄",
+        "Serve static/media files and forward to WSGI server 🧭",
+        "Use strong credentials, disable remote root login 🛡️",
+        "Use Let's Encrypt or your own certificate 🔒",
+        "Track errors and app performance 📊",
+    ]
+
+    n_row = len(tasks)
+    status = ["☐"] * n_row
+    data = {"Status": status, "Task": tasks, "Notes": notes}
+
+    df = pl.DataFrame(data)
+    return df, n_row
+
+
+@app.cell
+def _(mo, n_row):
+    status_widget = mo.ui.switch()
+    status_widgets = mo.ui.array([status_widget] * n_row)
+    return (status_widgets,)
+
+
+@app.function
+def create_bar(
+    x: float,
+    max_width: int,
+    height: int,
+    background_color1: str,
+    background_color2: str,
+) -> str:
+    width = round(max_width * x, 2)
+    px_width = f"{width}px"
+    return f"""\
+    <div style="width: {max_width}px; background-color: {background_color1};">\
+        <div style="height:{height}px;width:{px_width};background-color:{background_color2};"></div>\
+    </div>\
+    """
+
+
+@app.cell
+def _(GT, df, html, n_row, pl, status_widgets):
+    done_count = sum(s.value for s in status_widgets)
+
+    gt = (
+        GT(
+            df.with_columns(
+                pl.Series(
+                    [status._repr_html_() for status in status_widgets]
+                ).alias("Status")
+            )
+        )
+        .tab_source_note(f"{done_count} / {n_row}")
+        .tab_source_note(
+            html(
+                create_bar(
+                    done_count / n_row,
+                    max_width=800,
+                    height=20,
+                    background_color1="lightgray",
+                    background_color2="#66CDAA",
+                )
+            )
+        )
+        .tab_header("✅ Django Deployment Checklist")
+        .opt_stylize(color="cyan", style=4)
+    )
+    gt
+    return
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+::: {.callout-warning}
+# Disclaimer
+1. This table is for demonstration purposes only. You should customize it based on your own needs.
+2. This post was drafted by me, with AI assistance to refine the content.
+::: 
