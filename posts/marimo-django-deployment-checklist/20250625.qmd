@@ -14,12 +14,12 @@ Today I realized I don’t need all the detailed information every time—just a
 
 ![](marimo_django_deployment_checklist.png){fig-align="center" fig-alt="Django deployment checklist"}
 
+### marimo
 ::: {.callout-note}
 # Give It a Sec – WASM Magic Happening
 The widgets may take a few moments to load, as they rely on WebAssembly under the hood.
 ::: 
 
-### marimo
 1. I asked AI to generate a checklist and wrapped it in a Polars `DataFrame` called `df`.
 2. I created 10 [switch widgets](https://docs.marimo.io/api/inputs/switch/) and stacked them into an [array widget](https://docs.marimo.io/api/inputs/array/) named `status_widgets` to represent the status of each checklist item.
 3. I extracted the HTML representation of each widget via its `_repr_html_()` method and inserted it as a new `"Status"` column in `df`, which I then wrapped in a Great Tables [GT](https://posit-dev.github.io/great-tables/reference/GT.html#great_tables.GT) object.
