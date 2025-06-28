@@ -14,9 +14,9 @@ This post demonstrates how to build a “time machine” that lets you easily na
 
 Check out the full marimo code below.
 ```{python}
-# | code-fold: true
-# | eval: false
-# | code-summary: Show full code
+#| code-fold: true
+#| eval: false
+#| code-summary: Show full code
 import marimo
 
 __generated_with = "0.14.7"
@@ -289,8 +289,8 @@ To begin, we need a way to retrieve all attributes and functions provided by Gre
 
 
 ```{python}
-# | code-fold: true
-# | code-summary: Show code
+#| code-fold: true
+#| code-summary: Show code
 def get_allowed_member_names() -> list[str]:
     return [
         "fmt",
@@ -353,8 +353,8 @@ def get_allowed_member_names() -> list[str]:
 `lazify` is a decorator that records each method call on `WigGT` (as long as the method exists in Great Tables). These calls are stored and deferred until we're ready to "collect" and render the full table.
 
 ```{python}
-# | code-fold: true
-# | code-summary: Show code
+#| code-fold: true
+#| code-summary: Show code
 def lazify(cls: GT) -> GT:
     def add_to_pipeline(func: Callable[..., GT]) -> callable:
         @wraps(func)
@@ -383,8 +383,8 @@ Here are a few key design choices:
 
 
 ```{python}
-# | code-fold: true
-# | code-summary: Show code
+#| code-fold: true
+#| code-summary: Show code
 @lazify
 class WigGT:
     def __init__(self, *args, widget, **kwargs):
@@ -465,15 +465,15 @@ Because all method calls are deferred, we can't determine the total number of st
 ::: 
 
 ```{python}
-# | code-fold: false
-# | code-summary: Show code
+#| code-fold: false
+#| code-summary: Show code
 time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
 ```
 
 Next, we use [an example from the Great Tables documentation](https://posit-dev.github.io/great-tables/examples/) to build a total of seven tables: one original, and six more via chained method calls.
 ```{python}
-# | code-fold: false
-# | code-summary: Show code
+#| code-fold: false
+#| code-summary: Show code
 lazy_wig_gt = (
     WigGT(airquality.head(10).assign(Year=1973), widget=time_widget)
     .opt_stylize(color="pink", style=2)
@@ -499,17 +499,17 @@ At first, you’ll see a slider widget embedded in the table’s source note, bu
 
 We need to finalize the process by calling `.collect()`, which triggers execution of the stored method calls. Once `.collect()` is called, the slider becomes functional — try dragging it to observe the table at each stage of construction!
 ```{python}
-# | code-fold: false
-# | code-summary: Show code
+#| code-fold: false
+#| code-summary: Show code
 wig_gt = lazy_wig_gt.collect()
 wig_gt
 ```
 
 Lastly, you can retrieve all built tables using the `.tables` property.
 ```{python}
-# | code-fold: false
-# | code-summary: Show code
-# | output: false
+#| code-fold: false
+#| code-summary: Show code
+#| output: false
 wig_gt.tables
 ```
 

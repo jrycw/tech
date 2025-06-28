@@ -23,9 +23,9 @@ The `case_when()` function accepts two arguments:
 
 The given example demonstrates how `case_when()` can simplify conditional logic compared to the more verbose `pl.when().then().otherwise()` chain.
 ```{python}
-# | code-fold: false
-# | eval: false
-# | code-summary: Show code for `case_when()`
+#| code-fold: false
+#| eval: false
+#| code-summary: Show code for `case_when()`
 from functools import cache
 from typing import Any
 
@@ -108,9 +108,9 @@ def case_when(
 ## Custom Expression Namespace
 With `case_when()` in place, we can refactor the `DiscreteSplitter` expression namespace like this:
 ```{python}
-# | code-fold: false
-# | eval: false
-# | code-summary: Show code
+#| code-fold: false
+#| eval: false
+#| code-summary: Show code
 @cache
 def _mod_expr(n: int) -> pl.Expr:
     return pl.int_range(pl.len(), dtype=pl.UInt32).mod(n)
@@ -182,9 +182,9 @@ Instead of relying on [pl.DataFrame.with_row_index()](https://docs.pola.rs/api/p
 
 Here’s how the `DiscreteSplitter` can be implemented as a custom DataFrame namespace:
 ```{python}
-# | code-fold: false
-# | eval: false
-# | code-summary: Show full code
+#| code-fold: false
+#| eval: false
+#| code-summary: Show full code
 @pl.api.register_dataframe_namespace("spt")
 class DiscreteSplitter:
     def __init__(self, df: pl.DataFrame) -> None:

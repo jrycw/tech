@@ -35,7 +35,7 @@ color_mapping = {"x": "lightgrey", "y": "lightblue", "z": "papayawhip"}
 ## Pandas
 First, we create a Pandas DataFrame called `df_pd` using `data` as the input:
 ```{python}
-# | code-fold: True
+#| code-fold: True
 df_pd = pd.DataFrame(data)
 print(df_pd)
 ```
@@ -43,7 +43,7 @@ print(df_pd)
 ### Using an Existing Column  
 In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the [from_column()](https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column) function provided by Great Tables to apply colors to the table body:  
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pd)
     .tab_style(style=style.fill(color=from_column("color")), locations=loc.body())
@@ -55,7 +55,7 @@ In this straightforward scenario, the DataFrame already contains a predefined co
 ### Using Functions  
 In cases where colors need to be determined dynamically based on conditions, the [pd.Series.case_when()](https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when) function can be very useful. The following example categorizes the values of the `col1` column into three different colors:  
 ```{python}
-# | eval : False
+#| eval : False
 def color_selector(df_):
     return df_["col1"].case_when(
         [
@@ -80,7 +80,7 @@ For categorical-like columns (e.g., `col2`), a simple value-to-color mapping may
 
 ### pd.Series.map()
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pd)
     .tab_style(
@@ -95,7 +95,7 @@ For categorical-like columns (e.g., `col2`), a simple value-to-color mapping may
 ### pd.Series.replace()
 
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pd)
     .tab_style(
@@ -110,7 +110,7 @@ For categorical-like columns (e.g., `col2`), a simple value-to-color mapping may
 
 Alternatively, if you prefer sticking with the same approach, `pd.Series.case_when()` still works:
 ```{python}
-# | eval : False
+#| eval : False
 def color_selector(df_):
     return df_["col2"].case_when(
         [
@@ -133,7 +133,7 @@ def color_selector(df_):
 ## Polars  
 Just like before, let's start by creating a Polars DataFrame named `df_pl` using `data` as input:  
 ```{python}
-# | code-fold: True
+#| code-fold: True
 df_pl= pl.DataFrame(data)
 print(df_pl)
 ```
@@ -141,7 +141,7 @@ print(df_pl)
 ### Using an Existing Column  
 If the DataFrame already contains a column specifying colors, we can apply them directly with `from_column()`:  
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pl)
     .tab_style(style=style.fill(color=from_column("color")), locations=loc.body())
@@ -152,7 +152,7 @@ If the DataFrame already contains a column specifying colors, we can apply them 
 
 As another option, we can reference the `color` column using a Polars expression:  
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pl)
     .tab_style(style=style.fill(color=pl.col("color")), locations=loc.body())
@@ -165,7 +165,7 @@ As another option, we can reference the `color` column using a Polars expression
 ### Using Conditional Logic with Polars Expressions  
 For cases where colors need to be assigned dynamically, [pl.when()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when) provides a structured way to define conditions. The example below assigns colors based on the values in `col1`:  
 ```{python}
-# | eval : False
+#| eval : False
 color_selector_expr = (
     pl.when(pl.col("col1").lt(3))  # <3
     .then(pl.lit("lightgrey"))
@@ -186,7 +186,7 @@ color_selector_expr = (
 For categorical-like columns (e.g., `col2`), predefined mappings can be applied efficiently using [pl.Expr.replace()](https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace):  
 
 ```{python}
-# | eval : False
+#| eval : False
 (
     GT(df_pl)
     .tab_style(
@@ -200,7 +200,7 @@ For categorical-like columns (e.g., `col2`), predefined mappings can be applied 
 
 Alternatively, if you prefer the conditional approach, `pl.when()` can still be used:
 ```{python}
-# | eval : False
+#| eval : False
 color_selector_expr = (
     pl.when(pl.col("col2").eq(pl.lit("x")))
     .then(pl.lit("lightgrey"))
