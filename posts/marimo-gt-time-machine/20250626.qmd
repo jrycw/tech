@@ -12,6 +12,386 @@ This post demonstrates how to build a “time machine” that lets you easily na
 
 ![](marimo_gt_time_machine.png){fig-align="center" fig-alt="Time Machine for Great Tables"}
 
+
+## Building the Time Machine Core
+The goal is to create a `WigGT` object that behaves like a `GT` object from Great Tables. As we progressively build the table, we maintain two versions:
+
+* The original (non-interactive) table
+* An interactive version that includes a marimo widget (in this case, a slider)
+
+This setup allows us to move back and forth through the table-building steps and see how each method transforms the output — effectively creating a table "time machine."
+
+Let’s break it down.
+
+```python {.marimo}
+#| echo: false
+import marimo as mo
+import copy
+import inspect
+from functools import wraps
+from typing import Callable, Self
+
+import pandas as pd
+from great_tables import GT, html
+from great_tables.data import airquality
+```
+
+### Getting the Allowed Method Names
+First, we need a list of Great Tables methods that should be wrapped and recorded. For now, this list is constructed manually, but ideally, Great Tables could expose this for easier third-party use.
+
+```python
+def get_allowed_member_names() -> list[str]:
+    return ["fmt", "fmt_number", ...]
+```
+
+```python {.marimo}
+def get_allowed_member_names() -> list[str]:
+    return [
+        "fmt",
+        "fmt_number",
+        "fmt_integer",
+        "fmt_percent",
+        "fmt_scientific",
+        "fmt_currency",
+        "fmt_bytes",
+        "fmt_roman",
+        "fmt_date",
+        "fmt_time",
+        "fmt_datetime",
+        "fmt_markdown",
+        "fmt_image",
+        "fmt_icon",
+        "fmt_flag",
+        "fmt_units",
+        "fmt_nanoplot",
+        "data_color",
+        "sub_missing",
+        "sub_zero",
+        "opt_stylize",
+        "opt_align_table_header",
+        "opt_all_caps",
+        "opt_footnote_marks",
+        "opt_row_striping",
+        "opt_vertical_padding",
+        "opt_horizontal_padding",
+        "opt_table_outline",
+        "opt_table_font",
+        "cols_align",
+        "cols_width",
+        "cols_label",
+        "cols_move",
+        "cols_move_to_start",
+        "cols_move_to_end",
+        "cols_hide",
+        "cols_unhide",
+        "tab_header",
+        "tab_source_note",
+        "tab_spanner",
+        "tab_stubhead",
+        "tab_style",
+        "tab_options",
+        "row_group_order",
+        "tab_stub",
+        "with_id",
+        "with_locale",
+        "save",
+        "show",
+        "as_raw_html",
+        "write_raw_html",
+        "as_latex",
+        "pipe",
+    ]
+```
+
+### The `lazify` Decorator
+The `lazify` decorator wraps each method call and stores it in a pipeline. This allows us to defer execution until we're ready to materialize the final table using `.collect()`. Only the selected methods from Great Tables will be decorated.
+
+```python
+def lazify(cls: GT) -> GT:
+    def add_to_pipeline(func: Callable[..., GT]) -> callable:
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            def inner(self):
+                return func(self, *args, **kwargs)
+
+            # container for storing callable objects
+            self._pipeline.append(inner)
+            return self
+
+        wrapper.__signature__ = inspect.signature(func)
+        return wrapper
+
+    for member_name in get_allowed_member_names():
+        setattr(cls, member_name, add_to_pipeline(getattr(GT, member_name)))
+    return cls
+```
+
+```python {.marimo}
+def lazify(cls: GT) -> GT:
+    def add_to_pipeline(func: Callable[..., GT]) -> callable:
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            def inner(self):
+                return func(self, *args, **kwargs)
+
+            # container for storing callable objects
+            self._pipeline.append(inner)
+            return self
+
+        wrapper.__signature__ = inspect.signature(func)
+        return wrapper
+
+    for member_name in get_allowed_member_names():
+        setattr(cls, member_name, add_to_pipeline(getattr(GT, member_name)))
+    return cls
+```
+
+### Designing the `WigGT` Class
+Here are the main ideas behind the design:
+
+1. Original tables are stored in `self._tables`, accessible via the `.tables` property.
+2. Interactive versions with embedded marimo widgets are stored in `self._wtables`. These aren’t exposed directly — interaction is done through the marimo UI.
+3. The rendering method follows [marimo’s convention](https://docs.marimo.io/guides/integrating_with_marimo/displaying_objects/), trying `_display_`, then `_repr_html_`, and finally `_mime_`, in that order.
+
+With this setup, `WigGT` tracks the full transformation pipeline and allows easy replay of each step through a slider.
+
+```python
+@lazify
+class WigGT:
+    def __init__(self, *args, widget, **kwargs):
+        self._args = args
+        self._widget = widget
+        self._kwargs = kwargs
+        self.set_to_init()
+
+    @property
+    def tables(self) -> list[GT]:
+        return list(self._tables)  # return a new list
+
+    def _widgetify(self, obj: GT) -> GT:
+        return obj.tab_source_note(html(self._widget))
+
+    def collect(self) -> Self:
+        if not self._is_collect:
+            new_obj = self._tables[0]  # don't use self._wtables[0]
+            for f in self._pipeline:
+                new_obj = f(self=copy.copy(new_obj))
+                self._tables.append(new_obj)
+                self._wtables.append(self._widgetify(new_obj))
+            self._is_collect = True
+        return self
+
+    def _repr_html_(self) -> str:
+        try:
+            obj = self._wtables[self._widget.value]
+        except IndexError:
+            obj = self._wtables[-1]
+
+        if hasattr(obj, "_display_"):
+            render_method = "_display_"
+        elif hasattr(obj, "_repr_html_"):
+            render_method = "_repr_html_"
+        elif hasattr(obj, "_mime_"):
+            render_method = "_mime_"
+        else:
+            raise AttributeError(
+                "The object does not have a valid render method."
+            )
+        return getattr(obj, render_method)()  # remember to invoke
+
+    def set_to_init(self) -> None:
+        if not getattr(self, "_pipeline", None):
+            self._pipeline: list[callable] = []
+        else:
+            self._pipeline.clear()
+
+        if not getattr(self, "_tables", None):
+            self._tables = []
+        else:
+            self._tables.clear()
+
+        if not getattr(self, "_wtables", None):
+            self._wtables = []
+        else:
+            self._wtables.clear()
+
+        obj = self._make_gt()
+        self._tables.append(obj)
+        self._wtables.append(self._widgetify(obj))
+        self._is_collect = False
+
+    def _make_gt(self) -> GT:
+        return GT(*self._args, **self._kwargs)
+```
+
+```python {.marimo}
+@lazify
+class WigGT:
+    def __init__(self, *args, widget, **kwargs):
+        self._args = args
+        self._widget = widget
+        self._kwargs = kwargs
+        self.set_to_init()
+
+    @property
+    def tables(self) -> list[GT]:
+        return list(self._tables)  # return a new list
+
+    def _widgetify(self, obj: GT) -> GT:
+        return obj.tab_source_note(html(self._widget))
+
+    def collect(self) -> Self:
+        if not self._is_collect:
+            new_obj = self._tables[0]  # don't use self._wtables[0]
+            for f in self._pipeline:
+                new_obj = f(self=copy.copy(new_obj))
+                self._tables.append(new_obj)
+                self._wtables.append(self._widgetify(new_obj))
+            self._is_collect = True
+        return self
+
+    def _repr_html_(self) -> str:
+        try:
+            obj = self._wtables[self._widget.value]
+        except IndexError:
+            obj = self._wtables[-1]
+
+        if hasattr(obj, "_display_"):
+            render_method = "_display_"
+        elif hasattr(obj, "_repr_html_"):
+            render_method = "_repr_html_"
+        elif hasattr(obj, "_mime_"):
+            render_method = "_mime_"
+        else:
+            raise AttributeError(
+                "The object does not have a valid render method."
+            )
+        return getattr(obj, render_method)()  # remember to invoke
+
+    def set_to_init(self) -> None:
+        if not getattr(self, "_pipeline", None):
+            self._pipeline: list[callable] = []
+        else:
+            self._pipeline.clear()
+
+        if not getattr(self, "_tables", None):
+            self._tables = []
+        else:
+            self._tables.clear()
+
+        if not getattr(self, "_wtables", None):
+            self._wtables = []
+        else:
+            self._wtables.clear()
+
+        obj = self._make_gt()
+        self._tables.append(obj)
+        self._wtables.append(self._widgetify(obj))
+        self._is_collect = False
+
+    def _make_gt(self) -> GT:
+        return GT(*self._args, **self._kwargs)
+```
+
+
+## marimo
+::: {.callout-note}
+# Give It a Sec – WASM Magic Happening
+The widgets may take a few moments to load, as they rely on WebAssembly under the hood.
+:::
+Now we’re ready to **time travel** through the table-building process!
+
+### Step 1: Create a Slider to Navigate Table States
+We begin by creating a slider that represents each step in the build pipeline.
+
+* Step `0` is the original `GT` object.
+* Step `1` applies the first method call, and so on.
+
+::: {.callout-warning}
+# Slider Range Limitation
+Because all method calls are deferred, we can't determine the total number of steps ahead of time. This means the developer needs to manually specify a reasonable range for the slider. If the selected index exceeds the available range, the last table will be shown by default.
+:::
+
+```python
+time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
+```
+
+```python {.marimo}
+time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
+```
+
+### Step 2: Build the Lazy Table Sequence
+Next, we use an example from the [Great Tables documentation](https://posit-dev.github.io/great-tables/examples/) to create a lazy `WigGT` object. This will internally store each method call but won’t execute them just yet.
+
+You’ll see a slider widget embedded in the table’s source note — but it won’t be functional until we finalize the process.
+```python
+lazy_wig_gt = (
+    WigGT(airquality.head(10).assign(Year=1973), widget=time_widget)
+    .opt_stylize(color="pink", style=2)
+    .tab_header(
+        title="New York Air Quality Measurements",
+        subtitle="Daily measurements in New York City (May 1-10, 1973)",
+    )
+    .tab_spanner(label="Time", columns=["Year", "Month", "Day"])
+    .tab_spanner(
+        label="Measurement", columns=["Ozone", "Solar_R", "Wind", "Temp"]
+    )
+    .cols_move_to_start(columns=["Year", "Month", "Day"])
+    .cols_label(
+        Ozone=html("Ozone,<br>ppbV"),
+        Solar_R=html("Solar R.,<br>cal/m<sup>2</sup>"),
+        Wind=html("Wind,<br>mph"),
+        Temp=html("Temp,<br>&deg;F"),
+    )
+)
+lazy_wig_gt
+```
+
+```python {.marimo}
+lazy_wig_gt = (
+    WigGT(airquality.head(10).assign(Year=1973), widget=time_widget)
+    .opt_stylize(color="pink", style=2)
+    .tab_header(
+        title="New York Air Quality Measurements",
+        subtitle="Daily measurements in New York City (May 1-10, 1973)",
+    )
+    .tab_spanner(label="Time", columns=["Year", "Month", "Day"])
+    .tab_spanner(
+        label="Measurement", columns=["Ozone", "Solar_R", "Wind", "Temp"]
+    )
+    .cols_move_to_start(columns=["Year", "Month", "Day"])
+    .cols_label(
+        Ozone=html("Ozone,<br>ppbV"),
+        Solar_R=html("Solar R.,<br>cal/m<sup>2</sup>"),
+        Wind=html("Wind,<br>mph"),
+        Temp=html("Temp,<br>&deg;F"),
+    )
+)
+lazy_wig_gt
+```
+
+### Step 3: Trigger Execution with `.collect()`
+To make the slider work, we call `.collect()` on the `WigGT` instance. This executes the stored methods and generates a list of tables, one for each step.
+
+Once collected, you can interactively slide through each version of the table!construction!
+```python
+wig_gt = lazy_wig_gt.collect()
+wig_gt
+```
+
+```python {.marimo}
+wig_gt = lazy_wig_gt.collect()
+wig_gt
+```
+
+
+### Step 4: Access All Built Tables
+Finally, you can retrieve all constructed tables using the `.tables` property, which returns a list of `GT` objects.
+```python
+wig_gt.tables
+```
+
+### Full marimo code
 Check out the full marimo code below.
 ```{python}
 #| code-fold: true
@@ -19,7 +399,7 @@ Check out the full marimo code below.
 #| code-summary: Show full code
 import marimo
 
-__generated_with = "0.14.7"
+__generated_with = "0.14.8"
 app = marimo.App(width="medium")
 
 
@@ -242,279 +622,12 @@ def _(wig_gt):
     return
 
 
-@app.cell
-def _():
-    return
-
-
 if __name__ == "__main__":
     app.run()
 ```
 
 
-### marimo
-::: {.callout-note}
-# Interactivity Temporarily Unavailable
-It looks like the `quarto-marimo` plugin is currently experiencing some issues, so this post isn’t interactive for now. I’ll update it to be interactive once the issue is resolved.
-
-In the meantime, you can view the interactive version on marimo.app via [this link](https://marimo.app/l/de67qq).
-::: 
-
-Our goal is to build an object called `WigGT` that behaves like a `GT` object from Great Tables. As we build the table, we maintain two versions:
-
-* the original (non-interactive) table, and
-* an interactive version enhanced with a marimo widget (a slider, in this case).
-
-The result is an easy way to move back and forth through the stages of table construction using Great Tables.
-
-Let’s dive in!
-
-```{python}
-#| echo: false
-import marimo as mo
-import copy
-import inspect
-from functools import wraps
-from typing import Callable, Self
-
-import pandas as pd
-from great_tables import GT, html
-from great_tables.data import airquality
-```
-
-
-
-#### `get_allowed_member_names()`
-To begin, we need a way to retrieve all attributes and functions provided by Great Tables. For now, I manually constructed the list, but it would be great if Great Tables exposed this information for easier third-party integration.
-
-
-```{python}
-#| code-fold: true
-#| code-summary: Show code
-def get_allowed_member_names() -> list[str]:
-    return [
-        "fmt",
-        "fmt_number",
-        "fmt_integer",
-        "fmt_percent",
-        "fmt_scientific",
-        "fmt_currency",
-        "fmt_bytes",
-        "fmt_roman",
-        "fmt_date",
-        "fmt_time",
-        "fmt_datetime",
-        "fmt_markdown",
-        "fmt_image",
-        "fmt_icon",
-        "fmt_flag",
-        "fmt_units",
-        "fmt_nanoplot",
-        "data_color",
-        "sub_missing",
-        "sub_zero",
-        "opt_stylize",
-        "opt_align_table_header",
-        "opt_all_caps",
-        "opt_footnote_marks",
-        "opt_row_striping",
-        "opt_vertical_padding",
-        "opt_horizontal_padding",
-        "opt_table_outline",
-        "opt_table_font",
-        "cols_align",
-        "cols_width",
-        "cols_label",
-        "cols_move",
-        "cols_move_to_start",
-        "cols_move_to_end",
-        "cols_hide",
-        "cols_unhide",
-        "tab_header",
-        "tab_source_note",
-        "tab_spanner",
-        "tab_stubhead",
-        "tab_style",
-        "tab_options",
-        "row_group_order",
-        "tab_stub",
-        "with_id",
-        "with_locale",
-        "save",
-        "show",
-        "as_raw_html",
-        "write_raw_html",
-        "as_latex",
-        "pipe",
-    ]
-```
-
-#### `lazify` decorator
-`lazify` is a decorator that records each method call on `WigGT` (as long as the method exists in Great Tables). These calls are stored and deferred until we're ready to "collect" and render the full table.
-
-```{python}
-#| code-fold: true
-#| code-summary: Show code
-def lazify(cls: GT) -> GT:
-    def add_to_pipeline(func: Callable[..., GT]) -> callable:
-        @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            def inner(self):
-                return func(self, *args, **kwargs)
-
-            # container for storing callable objects
-            self._pipeline.append(inner)
-            return self
-
-        wrapper.__signature__ = inspect.signature(func)
-        return wrapper
-
-    for member_name in get_allowed_member_names():
-        setattr(cls, member_name, add_to_pipeline(getattr(GT, member_name)))
-    return cls
-```
-
-#### `WigGT`
-Here are a few key design choices:
-
-1. We keep the original (non-interactive) tables in `self._tables`, and provide a public `.tables` API to retrieve them.
-2. Interactive tables (with widgets) are stored in `self._wtables`, but no public API is provided. Interaction is intended to occur via marimo's slider widget.
-3. The HTML rendering logic follows [marimo's display conventions](https://docs.marimo.io/guides/integrating_with_marimo/displaying_objects/), preferring `_display_`, then `_repr_html_`, and finally `_mime_`.
-
-
-```{python}
-#| code-fold: true
-#| code-summary: Show code
-@lazify
-class WigGT:
-    def __init__(self, *args, widget, **kwargs):
-        self._args = args
-        self._widget = widget
-        self._kwargs = kwargs
-        self.set_to_init()
-
-    @property
-    def tables(self) -> list[GT]:
-        return list(self._tables)  # return a new list
-
-    def _widgetify(self, obj: GT) -> GT:
-        return obj.tab_source_note(html(self._widget))
-
-    def collect(self) -> Self:
-        if not self._is_collect:
-            new_obj = self._tables[0]  # don't use self._wtables[0]
-            for f in self._pipeline:
-                new_obj = f(self=copy.copy(new_obj))
-                self._tables.append(new_obj)
-                self._wtables.append(self._widgetify(new_obj))
-            self._is_collect = True
-        return self
-
-    def _repr_html_(self) -> str:
-        try:
-            obj = self._wtables[self._widget.value]
-        except IndexError:
-            obj = self._wtables[-1]
-
-        if hasattr(obj, "_display_"):
-            render_method = "_display_"
-        elif hasattr(obj, "_repr_html_"):
-            render_method = "_repr_html_"
-        elif hasattr(obj, "_mime_"):
-            render_method = "_mime_"
-        else:
-            raise AttributeError(
-                "The object does not have a valid render method."
-            )
-        return getattr(obj, render_method)()  # remember to invoke
-
-    def set_to_init(self) -> None:
-        if not getattr(self, "_pipeline", None):
-            self._pipeline: list[callable] = []
-        else:
-            self._pipeline.clear()
-
-        if not getattr(self, "_tables", None):
-            self._tables = []
-        else:
-            self._tables.clear()
-
-        if not getattr(self, "_wtables", None):
-            self._wtables = []
-        else:
-            self._wtables.clear()
-
-        obj = self._make_gt()
-        self._tables.append(obj)
-        self._wtables.append(self._widgetify(obj))
-        self._is_collect = False
-
-    def _make_gt(self) -> GT:
-        return GT(*self._args, **self._kwargs)
-```
-
-
-### How to use
-Now we're ready to time travel!
-
-First, we create a slider to represent each step in the table-building process. Step 0 is the original `GT` object; step 1 applies the first function, and so on.
-
-::: {.callout-warning}
-# Slider Range Limitation
-Because all method calls are deferred, we can't determine the total number of steps ahead of time. This means the developer needs to manually specify a reasonable range for the slider. If the selected index exceeds the available range, the last table will be shown by default.
-::: 
-
-```{python}
-#| code-fold: false
-#| code-summary: Show code
-time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
-```
-
-Next, we use [an example from the Great Tables documentation](https://posit-dev.github.io/great-tables/examples/) to build a total of seven tables: one original, and six more via chained method calls.
-```{python}
-#| code-fold: false
-#| code-summary: Show code
-lazy_wig_gt = (
-    WigGT(airquality.head(10).assign(Year=1973), widget=time_widget)
-    .opt_stylize(color="pink", style=2)
-    .tab_header(
-        title="New York Air Quality Measurements",
-        subtitle="Daily measurements in New York City (May 1-10, 1973)",
-    )
-    .tab_spanner(label="Time", columns=["Year", "Month", "Day"])
-    .tab_spanner(
-        label="Measurement", columns=["Ozone", "Solar_R", "Wind", "Temp"]
-    )
-    .cols_move_to_start(columns=["Year", "Month", "Day"])
-    .cols_label(
-        Ozone=html("Ozone,<br>ppbV"),
-        Solar_R=html("Solar R.,<br>cal/m<sup>2</sup>"),
-        Wind=html("Wind,<br>mph"),
-        Temp=html("Temp,<br>&deg;F"),
-    )
-)
-lazy_wig_gt
-```
-At first, you’ll see a slider widget embedded in the table’s source note, but it won’t work yet.
-
-We need to finalize the process by calling `.collect()`, which triggers execution of the stored method calls. Once `.collect()` is called, the slider becomes functional — try dragging it to observe the table at each stage of construction!
-```{python}
-#| code-fold: false
-#| code-summary: Show code
-wig_gt = lazy_wig_gt.collect()
-wig_gt
-```
-
-Lastly, you can retrieve all built tables using the `.tables` property.
-```{python}
-#| code-fold: false
-#| code-summary: Show code
-#| output: false
-wig_gt.tables
-```
-
-
-### In Closing
+## In Closing
 marimo has turned out to be far more powerful than I expected — I’ve had a lot of fun experimenting with it.
 
 I highly recommend checking out their [YouTube channel](https://www.youtube.com/@marimo-team), which is full of high-quality content across many Python topics.
