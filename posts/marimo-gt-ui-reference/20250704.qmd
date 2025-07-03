@@ -231,9 +231,11 @@ gt = (
 
 ```python {.marimo}
 #| echo: false
-gt.opt_stylize(
-    style=style_widget.value, color=color_widget.value
-).opt_align_table_header("left").cols_width({"widget": "20%"})
+(
+    gt.opt_stylize(style=style_widget.value, color=color_widget.value)
+    .opt_align_table_header("left")
+    .cols_width({"widget": "20%"})
+)
 ```
 
 One interesting discovery: the new state of the [mo.ui.run_button](https://docs.marimo.io/api/inputs/run_button/) doesn’t persist as expected. This may be resolved by more effectively using marimo’s [reactive state](https://docs.marimo.io/guides/state/?h=state), which I plan to explore further.
@@ -473,9 +475,11 @@ def _(GT, color_widget, df, html, style_widget):
 
 @app.cell
 def _(color_widget, gt, style_widget):
-    gt.opt_stylize(
-        style=style_widget.value, color=color_widget.value
-    ).opt_align_table_header("left").cols_width({"widget": "20%"})
+    (
+        gt.opt_stylize(style=style_widget.value, color=color_widget.value)
+        .opt_align_table_header("left")
+        .cols_width({"widget": "20%"})
+    )
     return
 
 
