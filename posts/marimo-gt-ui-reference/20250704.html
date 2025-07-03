@@ -263,11 +263,11 @@ Give It a Sec – WASM Magic Happening
     <marimo-cell-output>
     <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
     </marimo-cell-output>
-    <marimo-cell-code hidden="">gt.opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%20color%3Dcolor_widget.value%0A).opt_align_table_header(%22left%22).cols_width(%7B%22widget%22%3A%20%2220%25%22%7D)</marimo-cell-code>
+    <marimo-cell-code hidden="">(%0A%20%20%20%20gt.opt_stylize(style%3Dstyle_widget.value%2C%20color%3Dcolor_widget.value)%0A%20%20%20%20.opt_align_table_header(%22left%22)%0A%20%20%20%20.cols_width(%7B%22widget%22%3A%20%2220%25%22%7D)%0A)</marimo-cell-code>
 </marimo-island>
 <p>One interesting discovery: the new state of the <a href="https://docs.marimo.io/api/inputs/run_button/">mo.ui.run_button</a> doesn’t persist as expected. This may be resolved by more effectively using marimo’s <a href="https://docs.marimo.io/guides/state/?h=state">reactive state</a>, which I plan to explore further.</p>
 <p>Check out the full marimo code below.</p>
-<div id="28684a4c" class="cell" data-execution_count="1">
+<div id="57c98c15" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
@@ -499,14 +499,16 @@ Give It a Sec – WASM Magic Happening
 <span id="cb1-227"><a href="#cb1-227" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-228"><a href="#cb1-228" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
 <span id="cb1-229"><a href="#cb1-229" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(color_widget, gt, style_widget):</span>
-<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>    gt.opt_stylize(</span>
-<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>style_widget.value, color<span class="op">=</span>color_widget.value</span>
-<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a>    ).opt_align_table_header(<span class="st">"left"</span>).cols_width({<span class="st">"widget"</span>: <span class="st">"20%"</span>})</span>
-<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span></span>
-<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
-<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a>    app.run()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-230"><a href="#cb1-230" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb1-231"><a href="#cb1-231" aria-hidden="true" tabindex="-1"></a>        gt.opt_stylize(style<span class="op">=</span>style_widget.value, color<span class="op">=</span>color_widget.value)</span>
+<span id="cb1-232"><a href="#cb1-232" aria-hidden="true" tabindex="-1"></a>        .opt_align_table_header(<span class="st">"left"</span>)</span>
+<span id="cb1-233"><a href="#cb1-233" aria-hidden="true" tabindex="-1"></a>        .cols_width({<span class="st">"widget"</span>: <span class="st">"20%"</span>})</span>
+<span id="cb1-234"><a href="#cb1-234" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-235"><a href="#cb1-235" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span></span>
+<span id="cb1-236"><a href="#cb1-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-237"><a href="#cb1-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-238"><a href="#cb1-238" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb1-239"><a href="#cb1-239" aria-hidden="true" tabindex="-1"></a>    app.run()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
