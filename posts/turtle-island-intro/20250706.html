@@ -200,7 +200,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><strong><code>case_when()</code></strong> – A cleaner and more readable way to construct chained conditional logic in Polars.</li>
 <li><strong><code>make_index()</code></strong> – Creates a virtual row index as a Polars expression, without materializing it as a column.</li>
-<li><strong><code>bucketize()</code></strong> – Assigns labels to rows in a round-robin manner based on their index.</li>
+<li><strong><code>bucketize_lit()</code></strong> – Assigns literal values to rows in a round-robin pattern based on their index.</li>
+<li><strong><code>bucketize()</code></strong> – A more general version of <code>bucketize_lit()</code> that cycles through multiple Polars expressions, enabling advanced use cases with dynamic column values.</li>
 <li><strong><code>is_every_nth_row()</code></strong> – Identifies every <em>n</em>-th row using a modulo operation on the row index.</li>
 <li><strong><code>move_cols_to_start()</code></strong> – Reorders selected columns to appear at the beginning of the DataFrame.</li>
 <li><strong><code>move_cols_to_end()</code></strong> – Reorders selected columns to appear at the end of the DataFrame.</li>
@@ -208,7 +209,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong><code>make_tooltip()</code></strong> – Creates HTML tooltips from <code>label</code> and <code>tooltip</code> columns for hoverable text display.</li>
 </ul>
 <p>Here’s a quick example that uses <code>ti.is_every_nth_row()</code> to build a Polars expression suitable for styling tables interactively with Great Tables:</p>
-<div id="daab3379" class="cell" data-execution_count="1">
+<div id="c19fcc3f" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, loc, style</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables.data <span class="im">import</span> countrypops</span>
