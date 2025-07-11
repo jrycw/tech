@@ -294,6 +294,68 @@ df = (
 )
 ```
 
+## Remark
+*Added on July 11, 2025*
+
+I've been actively developing the [**Turtle Island**](https://github.com/jrycw/turtle-island) library and found this example to be a great opportunity to test its usability.
+
+I was genuinely surprised by how well `ti.case_when()` and `ti.is_every_nth_row()` worked together to refactor the code into a more concise and expressive form. Since `ti.is_every_nth_row()` returns an expression, we aren't actually creating a new column in the DataFrame—it's more like adding a virtual column.
+
+This experience has further strengthened my confidence in the design and practical value of **Turtle Island**.
+```{python}
+#| code-fold: true
+#| eval: false
+#| code-summary: If using **Turtle Island**
+import turtle_island as ti
+
+# "country" and "tariffs_charged" columns
+country_tariffs_charged_expr = ti.case_when(
+    caselist=[
+        (
+            ti.is_every_nth_row(2),
+            change_border_radius_expr(
+                pl.col("country", "tariffs_charged"),
+                pl.String,
+                "5px",
+                dark_navy_blue,
+                light_blue,
+            ),
+        )
+    ],
+    otherwise=change_border_radius_expr(
+        pl.col("country", "tariffs_charged"),
+        pl.String,
+        "5px",
+        dark_navy_blue,
+        white,
+    ),
+)
+
+# "reciprocal_tariffs" column
+reciprocal_tariffs_expr = change_border_radius_expr(
+    pl.col("reciprocal_tariffs"),
+    pl.String,
+    "5px",
+    dark_navy_blue,
+    yellow,
+)
+
+df = (
+    pl.DataFrame(data)
+    .with_columns(
+        country_tariffs_charged_expr,
+        reciprocal_tariffs_expr,
+        *[pl.lit("").alias(str(i)) for i in range(4)],
+    )
+    .select(["0", "country", "1", "tariffs_charged", "2", "reciprocal_tariffs", "3"])
+    # add a row at the end of the table
+    .pipe(
+        lambda df_: pl.concat(
+            [df_, pl.DataFrame({col: "" for col in df_.columns})], how="vertical"
+        )
+    )
+)
+```
 ::: {.callout-warning}
 # Disclaimer
 1. This table is intended as a self-practice project, and the data in the table may not be 100% accurate. Please refer to the [original source](https://truthsocial.com/@realDonaldTrump/114270398531479278) if you require verified data.
