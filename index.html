@@ -38,10 +38,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-770bd962c4398ac06464385c43b58b60.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-24e94cb365da759bf75321ba7d94b37f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-1e815c4c50043f7e8fc9161d15dcdabb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-24e94cb365da759bf75321ba7d94b37f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -132,7 +136,169 @@ window.Quarto = {
 <link rel="stylesheet" href="styles.css">
 <link rel="alternate" type="application/rss+xml" title="Tech'n'Take" href="index.xml" data-external="1"></head>
 
-<body class="nav-fixed quarto-light">
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
@@ -167,6 +333,7 @@ window.Quarto = {
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -205,9 +372,10 @@ window.Quarto = {
 
 
 
+
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDdGk=" data-listing-date-sort="1751760000000" data-listing-file-modified-sort="1752237350716" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="256">
+<div class="quarto-post image-right" data-index="0" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDdGk=" data-listing-date-sort="1751760000000" data-listing-file-modified-sort="1752377594931" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="256">
 <div class="thumbnail"><a href="./posts/turtle-island-intro/20250706.html" class="no-external">
 
 <img loading="lazy" src="./posts/turtle-island-intro/turtle_island_table_styling.png" class="thumbnail-image">
@@ -241,7 +409,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3Q=" data-listing-date-sort="1751587200000" data-listing-file-modified-sort="1752237350708" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3898">
+<div class="quarto-post image-right" data-index="1" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3Q=" data-listing-date-sort="1751587200000" data-listing-file-modified-sort="1752377594922" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3898">
 <div class="thumbnail"><a href="./posts/marimo-gt-ui-reference/20250704.html" class="no-external">
 
 <img loading="lazy" src="./posts/marimo-gt-ui-reference/marimo_gt_ui_refrence.png" class="thumbnail-image">
@@ -275,7 +443,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3Q=" data-listing-date-sort="1750896000000" data-listing-file-modified-sort="1752237350708" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25" data-listing-word-count-sort="4978">
+<div class="quarto-post image-right" data-index="2" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3Q=" data-listing-date-sort="1750896000000" data-listing-file-modified-sort="1752377594922" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25" data-listing-word-count-sort="4978">
 <div class="thumbnail"><a href="./posts/marimo-gt-time-machine/20250626.html" class="no-external">
 
 <img loading="lazy" src="./posts/marimo-gt-time-machine/marimo_gt_time_machine.png" class="thumbnail-image">
@@ -309,41 +477,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDcmVzZW5k" data-listing-date-sort="1750809600000" data-listing-file-modified-sort="1752237350715" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="527">
-<div class="thumbnail"><a href="./posts/resend-via-marimo/20250625.html" class="no-external">
-
-<img loading="lazy" src="./posts/resend-via-marimo/resend_via_marimo.png" class="thumbnail-image">
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/resend-via-marimo/20250625.html" class="no-external">Send Email via marimo</a>
-</h3>
-<div class="listing-categories">
-
-<div class="listing-category" onclick="window.quartoListingCategory('cHl0aG9u'); return false;">python</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('bWFyaW1v'); return false;">marimo</div>
-
-<div class="listing-category" onclick="window.quartoListingCategory('cmVzZW5k'); return false;">resend</div>
-
-</div>
-<div class="delink listing-description"><a href="./posts/resend-via-marimo/20250625.html" class="no-external">
-This post demonstrates how to send emails using Resend from within a marimo app.
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/resend-via-marimo/20250625.html" class="no-external">
-<div class="listing-date">
-Jun 25, 2025
-</div>
-<div class="listing-author">
-Jerry Wu
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3QlMkNkamFuZ28=" data-listing-date-sort="1750809600000" data-listing-file-modified-sort="1752237350707" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1574">
+<div class="quarto-post image-right" data-index="3" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDZ3QlMkNkamFuZ28=" data-listing-date-sort="1750809600000" data-listing-file-modified-sort="1752377594921" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1574">
 <div class="thumbnail"><a href="./posts/marimo-django-deployment-checklist/20250625.html" class="no-external">
 
 <img loading="lazy" src="./posts/marimo-django-deployment-checklist/marimo_django_deployment_checklist.png" class="thumbnail-image">
@@ -379,7 +513,41 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="cHl0aG9uJTJDZ3QlMkNtYXJpbW8=" data-listing-date-sort="1749686400000" data-listing-file-modified-sort="1752237350706" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="468">
+<div class="quarto-post image-right" data-index="4" data-categories="cHl0aG9uJTJDbWFyaW1vJTJDcmVzZW5k" data-listing-date-sort="1750809600000" data-listing-file-modified-sort="1752377594929" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="527">
+<div class="thumbnail"><a href="./posts/resend-via-marimo/20250625.html" class="no-external">
+
+<img loading="lazy" src="./posts/resend-via-marimo/resend_via_marimo.png" class="thumbnail-image">
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/resend-via-marimo/20250625.html" class="no-external">Send Email via marimo</a>
+</h3>
+<div class="listing-categories">
+
+<div class="listing-category" onclick="window.quartoListingCategory('cHl0aG9u'); return false;">python</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('bWFyaW1v'); return false;">marimo</div>
+
+<div class="listing-category" onclick="window.quartoListingCategory('cmVzZW5k'); return false;">resend</div>
+
+</div>
+<div class="delink listing-description"><a href="./posts/resend-via-marimo/20250625.html" class="no-external">
+This post demonstrates how to send emails using Resend from within a marimo app.
+</a></div>
+</div>
+<div class="metadata">
+<a href="./posts/resend-via-marimo/20250625.html" class="no-external">
+<div class="listing-date">
+Jun 25, 2025
+</div>
+<div class="listing-author">
+Jerry Wu
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="cHl0aG9uJTJDZ3QlMkNtYXJpbW8=" data-listing-date-sort="1749686400000" data-listing-file-modified-sort="1752377594920" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="468">
 <div class="thumbnail"><a href="./posts/gt-marimo-in-quarto/20250612.html" class="no-external">
 
 <img loading="lazy" src="./posts/gt-marimo-in-quarto/gt_marimo_in_quarto.png" class="thumbnail-image">
@@ -413,7 +581,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="cHl0aG9uJTJDbWFyaW1v" data-listing-date-sort="1749254400000" data-listing-file-modified-sort="1752237350709" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="399">
+<div class="quarto-post image-right" data-index="6" data-categories="cHl0aG9uJTJDbWFyaW1v" data-listing-date-sort="1749254400000" data-listing-file-modified-sort="1752377594923" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="399">
 <div class="thumbnail"><a href="./posts/marimo-in-quarto/20250607.html" class="no-external">
 
 <img loading="lazy" src="./posts/marimo-in-quarto/marimo_in_quarto.png" class="thumbnail-image">
@@ -445,7 +613,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1752237350716" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="447">
+<div class="quarto-post image-right" data-index="7" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1748217600000" data-listing-file-modified-sort="1752377594930" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="447">
 <div class="thumbnail"><a href="./posts/styling-tricks-table-body/20250526.html" class="no-external">
 
 <img loading="lazy" src="./posts/styling-tricks-table-body/table_body.png" class="thumbnail-image">
@@ -481,7 +649,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="cHl0aG9uJTJDcG9sYXJz" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1752237350692" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2019">
+<div class="quarto-post image-right" data-index="8" data-categories="cHl0aG9uJTJDcG9sYXJz" data-listing-date-sort="1748131200000" data-listing-file-modified-sort="1752377594907" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2019">
 <div class="thumbnail"><a href="./posts/casewhen-in-polars/20250525.html" class="no-external">
 
 <img loading="lazy" src="./posts/casewhen-in-polars/code.png" class="thumbnail-image">
@@ -513,7 +681,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1746921600000" data-listing-file-modified-sort="1752237350706" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="165">
+<div class="quarto-post image-right" data-index="9" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1746921600000" data-listing-file-modified-sort="1752377594921" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="165">
 <div class="thumbnail"><a href="./posts/gt-row-selector/20250511.html" class="no-external">
 
 <img loading="lazy" src="./posts/gt-row-selector/every_n_row.png" class="thumbnail-image">
@@ -549,7 +717,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="cHl0aG9uJTJDcG9sYXJz" data-listing-date-sort="1744848000000" data-listing-file-modified-sort="1752237350710" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2304">
+<div class="quarto-post image-right" data-index="10" data-categories="cHl0aG9uJTJDcG9sYXJz" data-listing-date-sort="1744848000000" data-listing-file-modified-sort="1752377594924" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2304">
 <div class="thumbnail"><a href="./posts/polars-custom-expr-namespace/20250417.html" class="no-external">
 
 <img loading="lazy" src="./posts/polars-custom-expr-namespace/code.png" class="thumbnail-image">
@@ -581,7 +749,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDcGxvdG5pbmU=" data-listing-date-sort="1744761600000" data-listing-file-modified-sort="1752237350695" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="30" data-listing-word-count-sort="5999">
+<div class="quarto-post image-right" data-index="11" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDcGxvdG5pbmU=" data-listing-date-sort="1744761600000" data-listing-file-modified-sort="1752377594909" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="30" data-listing-word-count-sort="5999">
 <div class="thumbnail"><a href="./posts/clone-reciprocal-tariffs-table-p9/20250416.html" class="no-external">
 
 <img loading="lazy" src="./posts/clone-reciprocal-tariffs-table-p9/reciprocal_tariffs_p9.png" class="thumbnail-image">
@@ -615,7 +783,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDbWF0cGxvdGxpYiUyQ3Bsb3RuaW5l" data-listing-date-sort="1744416000000" data-listing-file-modified-sort="1752237350709" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="33" data-listing-word-count-sort="6499">
+<div class="quarto-post image-right" data-index="12" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDbWF0cGxvdGxpYiUyQ3Bsb3RuaW5l" data-listing-date-sort="1744416000000" data-listing-file-modified-sort="1752377594923" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="33" data-listing-word-count-sort="6499">
 <div class="thumbnail"><a href="./posts/p9-polars-alta-ski-resort/20250412.html" class="no-external">
 
 <img loading="lazy" src="./posts/p9-polars-alta-ski-resort/alta_ski_resort.png" class="thumbnail-image">
@@ -651,7 +819,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-categories="cHl0aG9uJTJDbWF0cGxvdGxpYiUyQ3Bsb3RuaW5l" data-listing-date-sort="1744329600000" data-listing-file-modified-sort="1752237350692" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="156">
+<div class="quarto-post image-right" data-index="13" data-categories="cHl0aG9uJTJDbWF0cGxvdGxpYiUyQ3Bsb3RuaW5l" data-listing-date-sort="1744329600000" data-listing-file-modified-sort="1752377594906" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="156">
 <div class="thumbnail"><a href="./posts/access-axes-in-plotnine/20250411.html" class="no-external">
 
 <img loading="lazy" src="./posts/access-axes-in-plotnine/p9_ht_ax_text.png" class="thumbnail-image">
@@ -685,7 +853,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1743638400000" data-listing-file-modified-sort="1752237350698" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3118">
+<div class="quarto-post image-right" data-index="14" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1743638400000" data-listing-file-modified-sort="1752377594912" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3118">
 <div class="thumbnail"><a href="./posts/clone-reciprocal-tariffs-table/20250403.html" class="no-external">
 
 <img loading="lazy" src="./posts/clone-reciprocal-tariffs-table/reciprocal_tariffs_gt.png" class="thumbnail-image">
@@ -719,7 +887,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1740441600000" data-listing-file-modified-sort="1752237350716" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="962">
+<div class="quarto-post image-right" data-index="15" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1740441600000" data-listing-file-modified-sort="1752377594930" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="962">
 <div class="thumbnail"><a href="./posts/table-body-custom-palette/20250225.html" class="no-external">
 
 <img loading="lazy" src="./posts/table-body-custom-palette/table_body_custom_palette.png" class="thumbnail-image">
@@ -755,7 +923,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDbWF0cGxvdGxpYg==" data-listing-date-sort="1739145600000" data-listing-file-modified-sort="1752237350701" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4437">
+<div class="quarto-post image-right" data-index="16" data-categories="cHl0aG9uJTJDcGFuZGFzJTJDcG9sYXJzJTJDbWF0cGxvdGxpYg==" data-listing-date-sort="1739145600000" data-listing-file-modified-sort="1752377594916" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4437">
 <div class="thumbnail"><a href="./posts/effective-dataviz-polars-alta-ski-resort/20250210.html" class="no-external">
 
 <img loading="lazy" src="./posts/effective-dataviz-polars-alta-ski-resort/alta_ski_resort.png" class="thumbnail-image">
@@ -791,7 +959,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1737676800000" data-listing-file-modified-sort="1752237350715" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="526">
+<div class="quarto-post image-right" data-index="17" data-categories="cHl0aG9uJTJDcG9sYXJzJTJDZ3Q=" data-listing-date-sort="1737676800000" data-listing-file-modified-sort="1752377594930" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="526">
 <div class="thumbnail"><a href="./posts/style-table-body/20250124.html" class="no-external">
 
 <img loading="lazy" src="./posts/style-table-body/table_body.png" class="thumbnail-image">
@@ -825,7 +993,7 @@ Jerry Wu
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-categories="cHl0aG9uJTJDZGphbmdvJTJDcmVzZW5k" data-listing-date-sort="1734912000000" data-listing-file-modified-sort="1752237350700" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="673">
+<div class="quarto-post image-right" data-index="18" data-categories="cHl0aG9uJTJDZGphbmdvJTJDcmVzZW5k" data-listing-date-sort="1734912000000" data-listing-file-modified-sort="1752377594915" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="673">
 <div class="thumbnail"><a href="./posts/django-allauth-resend/20241223.html" class="no-external">
 
 <img loading="lazy" src="./posts/django-allauth-resend/resend_logs.png" class="thumbnail-image">
@@ -864,6 +1032,19 @@ Jerry Wu
 </div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
     const anchorJS = new window.AnchorJS();
     anchorJS.options = {
