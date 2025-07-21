@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jerry Wu">
-<meta name="dcterms.date" content="2025-05-26">
+<meta name="dcterms.date" content="2025-07-21">
 
-<title>Styling tricks in Great Tables – Tech’n’Take</title>
+<title>Notes on Turtle Island – Tech’n’Take</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,45 +22,10 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -108,9 +73,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
-<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -322,12 +284,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Styling tricks in Great Tables</h1>
+      <h1 class="title">Notes on Turtle Island</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
-                <div class="quarto-category">pandas</div>
                 <div class="quarto-category">polars</div>
-                <div class="quarto-category">gt</div>
+                <div class="quarto-category">ti</div>
               </div>
                   </div>
   </div>
@@ -345,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">May 26, 2025</p>
+        <p class="date">July 21, 2025</p>
       </div>
     </div>
     
@@ -356,8 +317,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#output-column-names" id="toc-output-column-names" class="nav-link active" data-scroll-target="#output-column-names">Output Column Names</a></li>
+  <li><a href="#expression-context-vs-dataframe-context" id="toc-expression-context-vs-dataframe-context" class="nav-link" data-scroll-target="#expression-context-vs-dataframe-context">Expression Context vs DataFrame Context</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -367,165 +335,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>This post highlights a powerful yet underused feature in Great Tables: using existing columns to style the table body via <a href="https://posit-dev.github.io/great-tables/reference/from_column.html">from_column()</a>.</p>
-<p>Let’s say you have the following Polars DataFrame <code>df</code>:</p>
-<div id="8719b452" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, from_column, loc, style</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables.data <span class="im">import</span> films</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df_style <span class="op">=</span> pl.DataFrame(</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"color"</span>: [<span class="st">"papayawhip"</span>, <span class="st">"lightblue"</span>, <span class="st">"lightgreen"</span>],</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"size"</span>: [<span class="st">"small"</span>, <span class="st">"x-large"</span>, <span class="st">"medium"</span>],</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"weight"</span>: [<span class="st">"normal"</span>, <span class="st">"bold"</span>, <span class="st">"lighter"</span>],</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"align"</span>: [<span class="st">"right"</span>, <span class="st">"center"</span>, <span class="st">"left"</span>],</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>columns <span class="op">=</span> [<span class="st">"year"</span>, <span class="st">"title"</span>, <span class="st">"run_time"</span>]</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.concat(</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    [</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        pl.from_pandas(films.head(<span class="dv">3</span>).loc[:, columns]),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        df_style,</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">"horizontal"</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>shape: (3, 7)
-┌──────┬───────────────────────────┬──────────┬────────────┬─────────┬─────────┬────────┐
-│ year ┆ title                     ┆ run_time ┆ color      ┆ size    ┆ weight  ┆ align  │
-│ ---  ┆ ---                       ┆ ---      ┆ ---        ┆ ---     ┆ ---     ┆ ---    │
-│ i64  ┆ str                       ┆ str      ┆ str        ┆ str     ┆ str     ┆ str    │
-╞══════╪═══════════════════════════╪══════════╪════════════╪═════════╪═════════╪════════╡
-│ 1946 ┆ The Lovers                ┆ 1h 30m   ┆ papayawhip ┆ small   ┆ normal  ┆ right  │
-│ 1946 ┆ Anna and the King of Siam ┆ 2h 8m    ┆ lightblue  ┆ x-large ┆ bold    ┆ center │
-│ 1946 ┆ Blood and Fire            ┆ 1h 40m   ┆ lightgreen ┆ medium  ┆ lighter ┆ left   │
-└──────┴───────────────────────────┴──────────┴────────────┴─────────┴─────────┴────────┘</code></pre>
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="turtle_island_docs.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Turtle Island docs"></p>
+</figure>
 </div>
-</div>
-<p>The <code>color</code>, <code>size</code>, <code>weight</code>, and <code>align</code> columns contain style-related metadata. We can use <code>from_column()</code> to map this metadata to four styling options provided by Great Tables—<a href="https://posit-dev.github.io/great-tables/reference/style.fill.html">style.fill()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.text.html">style.text()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.borders.html">style.borders()</a>, and <a href="https://posit-dev.github.io/great-tables/reference/style.css.html">style.css()</a>—all of which are built on the internal <code>CellStyle</code> class.</p>
-<div id="c1c4d39b" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    GT(df)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>[</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            style.fill(color<span class="op">=</span>from_column(<span class="st">"color"</span>)),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            style.text(</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                size<span class="op">=</span>from_column(<span class="st">"size"</span>),</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                weight<span class="op">=</span>from_column(<span class="st">"weight"</span>),</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                align<span class="op">=</span>from_column(<span class="st">"align"</span>),</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        ],</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        locations<span class="op">=</span>loc.body(columns),</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    .cols_hide(df_style.columns)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">6</span>, color<span class="op">=</span><span class="st">"gray"</span>)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<div id="gqqxqicbaw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>
-#gqqxqicbaw table {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-
-#gqqxqicbaw thead, tbody, tfoot, tr, td, th { border-style: none; }
- tr { background-color: transparent; }
-#gqqxqicbaw p { margin: 0; padding: 0; }
- #gqqxqicbaw .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #gqqxqicbaw .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #gqqxqicbaw .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #gqqxqicbaw .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #gqqxqicbaw .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #gqqxqicbaw .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #gqqxqicbaw .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #gqqxqicbaw .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #gqqxqicbaw .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #gqqxqicbaw .gt_column_spanner_outer:first-child { padding-left: 0; }
- #gqqxqicbaw .gt_column_spanner_outer:last-child { padding-right: 0; }
- #gqqxqicbaw .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #gqqxqicbaw .gt_spanner_row { border-bottom-style: hidden; }
- #gqqxqicbaw .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #gqqxqicbaw .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
- #gqqxqicbaw .gt_from_md> :first-child { margin-top: 0; }
- #gqqxqicbaw .gt_from_md> :last-child { margin-bottom: 0; }
- #gqqxqicbaw .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #gqqxqicbaw .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #gqqxqicbaw .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #gqqxqicbaw .gt_row_group_first td { border-top-width: 2px; }
- #gqqxqicbaw .gt_row_group_first th { border-top-width: 2px; }
- #gqqxqicbaw .gt_striped { background-color: #F4F4F4; }
- #gqqxqicbaw .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #gqqxqicbaw .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #gqqxqicbaw .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #gqqxqicbaw .gt_left { text-align: left; }
- #gqqxqicbaw .gt_center { text-align: center; }
- #gqqxqicbaw .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #gqqxqicbaw .gt_font_normal { font-weight: normal; }
- #gqqxqicbaw .gt_font_bold { font-weight: bold; }
- #gqqxqicbaw .gt_font_italic { font-style: italic; }
- #gqqxqicbaw .gt_super { font-size: 65%; }
- #gqqxqicbaw .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #gqqxqicbaw .gt_asterisk { font-size: 100%; vertical-align: 0; }
- 
-</style>
-<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<thead>
-
-<tr class="gt_col_headings">
-  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="year">year</th>
-  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="title">title</th>
-  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="run_time">run_time</th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-  <tr>
-    <td style="background-color: papayawhip; font-size: small;text-align: right;font-weight: normal;" class="gt_row gt_right">1946</td>
-    <td style="background-color: papayawhip; font-size: small;text-align: right;font-weight: normal;" class="gt_row gt_left">The Lovers</td>
-    <td style="background-color: papayawhip; font-size: small;text-align: right;font-weight: normal;" class="gt_row gt_left">1h 30m</td>
-  </tr>
-  <tr>
-    <td style="background-color: lightblue; font-size: x-large;text-align: center;font-weight: bold;" class="gt_row gt_right gt_striped">1946</td>
-    <td style="background-color: lightblue; font-size: x-large;text-align: center;font-weight: bold;" class="gt_row gt_left gt_striped">Anna and the King of Siam</td>
-    <td style="background-color: lightblue; font-size: x-large;text-align: center;font-weight: bold;" class="gt_row gt_left gt_striped">2h 8m</td>
-  </tr>
-  <tr>
-    <td style="background-color: lightgreen; font-size: medium;text-align: left;font-weight: lighter;" class="gt_row gt_right">1946</td>
-    <td style="background-color: lightgreen; font-size: medium;text-align: left;font-weight: lighter;" class="gt_row gt_left">Blood and Fire</td>
-    <td style="background-color: lightgreen; font-size: medium;text-align: left;font-weight: lighter;" class="gt_row gt_left">1h 40m</td>
-  </tr>
-</tbody>
-
-
-</table>
-
-</div>
-        
-</div>
-</div>
-<p><strong>One last note:</strong> <code>from_column()</code> works with both Pandas and Polars DataFrames. For Polars users, you can also pass expressions directly without wrapping them in <code>from_column()</code>. The following code produces the same styled table as shown above:</p>
-<div id="f91e88c4" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    GT(df)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    .tab_style(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>[</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            style.fill(color<span class="op">=</span>pl.col(<span class="st">"color"</span>)),</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            style.text(</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                size<span class="op">=</span>pl.col(<span class="st">"size"</span>), weight<span class="op">=</span>pl.col(<span class="st">"weight"</span>), align<span class="op">=</span>pl.col(<span class="st">"align"</span>)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            ),</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        ],</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        locations<span class="op">=</span>loc.body(columns),</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    .cols_hide(df_style.columns)</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    .opt_stylize(style<span class="op">=</span><span class="dv">6</span>, color<span class="op">=</span><span class="st">"gray"</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p>This is a short post documenting some things I often forget while building <a href="https://github.com/jrycw/turtle-island">Turtle Island</a>.</p>
+<section id="output-column-names" class="level2">
+<h2 class="anchored" data-anchor-id="output-column-names">Output Column Names</h2>
+<p>In Polars, if an explicit name isn’t provided, the output column will take the name of the first expression. This default behavior is generally helpful, but it can lead to unexpected results—especially when the first expression doesn’t directly represent a column. For example, if the first expression is <code>pl.lit()</code>, the resulting column name will be <code>"literal"</code>.</p>
+<p>This isn’t a big issue when dealing with a single column, but it becomes problematic when using expressions like <code>pl.all()</code> or <code>pl.col("*")</code>. In such cases, logic that depends on column names often breaks.</p>
+<p>My current workaround is to tweak the internal logic so that the returned expression doesn’t start with something like <code>pl.lit()</code>, especially in functions that aim to support wildcard expressions.</p>
+</section>
+<section id="expression-context-vs-dataframe-context" class="level2">
+<h2 class="anchored" data-anchor-id="expression-context-vs-dataframe-context">Expression Context vs DataFrame Context</h2>
+<p>Since Polars expressions are designed to be evaluated later (not immediately), we cannot rely on any runtime properties of the DataFrame when building them. That means things like the shape or number of rows in the DataFrame are not available during expression construction.</p>
+<p>However, some built-in Polars functions help bridge this gap. For instance, <code>pl.len()</code> returns an expression that can be used to represent the number of rows in the future evaluation context. This is useful for writing general-purpose logic in <strong>Turtle Island</strong>.</p>
+<p>A major caveat is that Polars expressions can’t be evaluated directly in Python. You can’t write something like <code>if pl.len()</code> or <code>pl.len() + 1</code> as regular Python code. These expressions must be used inside other Polars expressions or functions—such as <code>pl.int_range(0, pl.len() + 1)</code>—where they’ll be correctly interpreted and evaluated within the Polars execution context.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -541,6 +367,7 @@ Disclaimer
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
