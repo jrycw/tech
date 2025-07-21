@@ -1,0 +1,33 @@
+---
+title: "Notes on Turtle Island"
+html-table-processing: none
+date: "2025-07-21"
+categories: [python, polars, ti]
+jupyter: python3
+image: "turtle_island_docs.png"
+---
+
+![](turtle_island_docs.png){fig-align="left" fig-alt="Turtle Island docs"}
+
+This is a short post documenting some things I often forget while building [Turtle Island](https://github.com/jrycw/turtle-island).
+
+## Output Column Names
+In Polars, if an explicit name isn’t provided, the output column will take the name of the first expression.
+This default behavior is generally helpful, but it can lead to unexpected results—especially when the first expression doesn’t directly represent a column. For example, if the first expression is `pl.lit()`, the resulting column name will be `"literal"`.
+
+This isn’t a big issue when dealing with a single column, but it becomes problematic when using expressions like `pl.all()` or `pl.col("*")`. In such cases, logic that depends on column names often breaks.
+
+My current workaround is to tweak the internal logic so that the returned expression doesn’t start with something like `pl.lit()`, especially in functions that aim to support wildcard expressions.
+
+## Expression Context vs DataFrame Context
+Since Polars expressions are designed to be evaluated later (not immediately), we cannot rely on any runtime properties of the DataFrame when building them.
+That means things like the shape or number of rows in the DataFrame are not available during expression construction.
+
+However, some built-in Polars functions help bridge this gap. For instance, `pl.len()` returns an expression that can be used to represent the number of rows in the future evaluation context. This is useful for writing general-purpose logic in **Turtle Island**.
+
+A major caveat is that Polars expressions can’t be evaluated directly in Python. You can’t write something like `if pl.len()` or `pl.len() + 1` as regular Python code. These expressions must be used inside other Polars expressions or functions—such as `pl.int_range(0, pl.len() + 1)`—where they’ll be correctly interpreted and evaluated within the Polars execution context.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
