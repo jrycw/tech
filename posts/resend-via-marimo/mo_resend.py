@@ -1,25 +1,3 @@
----
-title: "Send Email via marimo"
-html-table-processing: none
-date: "2025-06-25"
-categories: [python, marimo, resend]
-jupyter: python3
-image: "resend_via_marimo.png"
-filters:
-    - marimo-team/marimo
----
-
-This post demonstrates how to send emails using [Resend](https://resend.com/) from within a marimo app.
-
-![](resend_via_marimo.png){fig-align="center" fig-alt="Resend via marimo"}
-
-It seems the app runs fine locally but doesn't work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.
-
-Check out the full marimo code below or view it on [molab](https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB).
-```{python}
-#| code-fold: true
-#| eval: false
-#| code-summary: Show full code
 import marimo
 
 __generated_with = "0.14.7"
@@ -94,9 +72,3 @@ def _(mo, send_email):
 
 if __name__ == "__main__":
     app.run()
-```
-
-::: {.callout-warning}
-# Disclaimer
-This post was drafted by me, with AI assistance to refine the content.
-::: 
