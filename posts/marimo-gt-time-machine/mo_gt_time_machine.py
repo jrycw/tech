@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -20,6 +21,7 @@ def _():
     import pandas as pd
     from great_tables import GT, html
     from great_tables.data import airquality
+
     return Callable, GT, Self, airquality, copy, html, inspect, wraps
 
 
@@ -86,7 +88,6 @@ def _(Callable, GT, Self, copy, html, inspect, wraps):
             "pipe",
         ]
 
-
     def lazify(cls: GT) -> GT:
         def add_to_pipeline(func: Callable[..., GT]) -> callable:
             @wraps(func)
@@ -102,9 +103,10 @@ def _(Callable, GT, Self, copy, html, inspect, wraps):
             return wrapper
 
         for member_name in get_allowed_member_names():
-            setattr(cls, member_name, add_to_pipeline(getattr(GT, member_name)))
+            setattr(
+                cls, member_name, add_to_pipeline(getattr(GT, member_name))
+            )
         return cls
-
 
     @lazify
     class WigGT:
@@ -172,6 +174,7 @@ def _(Callable, GT, Self, copy, html, inspect, wraps):
 
         def _make_gt(self) -> GT:
             return GT(*self._args, **self._kwargs)
+
     return (WigGT,)
 
 

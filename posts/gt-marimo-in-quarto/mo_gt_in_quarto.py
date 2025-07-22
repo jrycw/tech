@@ -18,7 +18,13 @@ def _(pl):
     data = {
         "col1": [2, 5, 7, 10, 15],
         "col2": ["x", "y", "y", "z", "z"],
-        "color": ["lightgrey", "lightblue", "lightblue", "papayawhip", "papayawhip"],
+        "color": [
+            "lightgrey",
+            "lightblue",
+            "lightblue",
+            "papayawhip",
+            "papayawhip",
+        ],
     }
     df = pl.DataFrame(data)
     return (df,)

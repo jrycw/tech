@@ -11,6 +11,7 @@ def _():
     from html import escape
     import polars as pl
     import resend
+
     return escape, mo, resend
 
 
@@ -34,6 +35,7 @@ def _(escape, resend):
         }
 
         email = resend.Emails.send(params)
+
     return (send_email,)
 
 

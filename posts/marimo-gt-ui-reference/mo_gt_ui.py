@@ -7,6 +7,7 @@ app = marimo.App(width="medium")
 @app.cell
 def _():
     import marimo as mo
+
     return (mo,)
 
 
@@ -17,6 +18,7 @@ def _():
 
     import pandas as pd
     from great_tables import GT, html
+
     return GT, Iterable, html, pd, random
 
 
@@ -33,21 +35,19 @@ def _(Iterable):
             raise ValueError("The object does not have a valid render method.")
         return getattr(widget, render_method)()
 
-
     def render_widgets(widgets):
         if not isinstance(widgets, Iterable):
             widgets = [widgets]
         return [render_widget(widget) for widget in widgets]
 
-
     def strify_widget_value(widget):
         return str(widget.value)
-
 
     def strify_widget_values(widgets):
         if not isinstance(widgets, Iterable):
             widgets = [widgets]
         return [strify_widget_value(w) for w in widgets]
+
     return render_widgets, strify_widget_values
 
 
@@ -95,7 +95,9 @@ def _(mo, random):
         mo.md("[Button](https://docs.marimo.io/api/inputs/button/)"),
         mo.md("[Number](https://docs.marimo.io/api/inputs/number/)"),
         mo.md("[Slider](https://docs.marimo.io/api/inputs/slider/)"),
-        mo.md("[Range Slider](https://docs.marimo.io/api/inputs/range_slider/)"),
+        mo.md(
+            "[Range Slider](https://docs.marimo.io/api/inputs/range_slider/)"
+        ),
         mo.md("[Radio](https://docs.marimo.io/api/inputs/radio/)"),
         mo.md("[Dropdown](https://docs.marimo.io/api/inputs/dropdown/)"),
         mo.md("[MultiSelect](https://docs.marimo.io/api/inputs/multiselect/)"),
@@ -170,7 +172,6 @@ def _(mo, random):
             }
         ),
     ]
-
 
     # table styling
     _style_number_start, _style_number_end = 1, 6
