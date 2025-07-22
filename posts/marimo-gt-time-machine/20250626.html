@@ -460,7 +460,7 @@ Give It a Sec – WASM Magic Happening
     <marimo-cell-output>
     <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;msg&quot;: &quot;An ancestor raised an exception (ModuleNotFoundError): &quot;, &quot;exception_type&quot;: &quot;ModuleNotFoundError&quot;, &quot;raising_cell&quot;: &quot;Hbol&quot;, &quot;type&quot;: &quot;exception&quot;}]"></marimo-mime-renderer>
     </marimo-cell-output>
-    <marimo-cell-code hidden="">def%20lazify(cls%3A%20GT)%20-%3E%20GT%3A%0A%20%20%20%20def%20add_to_pipeline(func%3A%20Callable%5B...%2C%20GT%5D)%20-%3E%20callable%3A%0A%20%20%20%20%20%20%20%20%40wraps(func)%0A%20%20%20%20%20%20%20%20def%20wrapper(self%2C%20*args%2C%20**kwargs)%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20def%20inner(self)%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%20func(self%2C%20*args%2C%20**kwargs)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%23%20container%20for%20storing%20callable%20objects%0A%20%20%20%20%20%20%20%20%20%20%20%20self._pipeline.append(inner)%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20self%0A%0A%20%20%20%20%20%20%20%20wrapper.__signature__%20%3D%20inspect.signature(func)%0A%20%20%20%20%20%20%20%20return%20wrapper%0A%0A%20%20%20%20for%20member_name%20in%20get_allowed_member_names()%3A%0A%20%20%20%20%20%20%20%20setattr(cls%2C%20member_name%2C%20add_to_pipeline(getattr(GT%2C%20member_name)))%0A%20%20%20%20return%20cls</marimo-cell-code>
+    <marimo-cell-code hidden="">def%20lazify(cls%3A%20GT)%20-%3E%20GT%3A%0A%20%20%20%20def%20add_to_pipeline(func%3A%20Callable%5B...%2C%20GT%5D)%20-%3E%20callable%3A%0A%20%20%20%20%20%20%20%20%40wraps(func)%0A%20%20%20%20%20%20%20%20def%20wrapper(self%2C%20*args%2C%20**kwargs)%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20def%20inner(self)%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20return%20func(self%2C%20*args%2C%20**kwargs)%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%23%20container%20for%20storing%20callable%20objects%0A%20%20%20%20%20%20%20%20%20%20%20%20self._pipeline.append(inner)%0A%20%20%20%20%20%20%20%20%20%20%20%20return%20self%0A%0A%20%20%20%20%20%20%20%20wrapper.__signature__%20%3D%20inspect.signature(func)%0A%20%20%20%20%20%20%20%20return%20wrapper%0A%0A%20%20%20%20for%20member_name%20in%20get_allowed_member_names()%3A%0A%20%20%20%20%20%20%20%20setattr(%0A%20%20%20%20%20%20%20%20%20%20%20%20cls%2C%20member_name%2C%20add_to_pipeline(getattr(GT%2C%20member_name))%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20return%20cls</marimo-cell-code>
 </marimo-island>
 </section>
 <section id="designing-the-wiggt-class" class="level3">
@@ -629,7 +629,7 @@ Slider Range Limitation
 <section id="full-marimo-code" class="level3">
 <h3 class="anchored" data-anchor-id="full-marimo-code">Full marimo code</h3>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_FfAE5bVJ9P6DWDDy4Gng2h">molab</a>.</p>
-<div id="01964f5d" class="cell" data-execution_count="1">
+<div id="74eb68f0" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
