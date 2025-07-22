@@ -147,7 +147,9 @@ def lazify(cls: GT) -> GT:
         return wrapper
 
     for member_name in get_allowed_member_names():
-        setattr(cls, member_name, add_to_pipeline(getattr(GT, member_name)))
+        setattr(
+            cls, member_name, add_to_pipeline(getattr(GT, member_name))
+        )
     return cls
 ```
 
