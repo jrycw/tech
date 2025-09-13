@@ -401,7 +401,7 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <p><img src="alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="abd32ef6" class="cell" data-execution_count="1">
+<div id="7758f5be" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
@@ -805,7 +805,7 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <p>With the data prepared, we now turn our focus to visualization. The <code>plot_temps()</code> function is relatively long, so we’ll walk through it step by step. Ultimately, we’ll construct several intermediate DataFrames and use them to build a <code>ggplot</code> object for rendering.</p>
 <section id="reshaping-the-main-dataframe" class="level3">
 <h3 class="anchored" data-anchor-id="reshaping-the-main-dataframe">Reshaping the Main DataFrame</h3>
-<p>We begin by filtering the dataset to include only rows corresponding to <code>Ski</code> seasons. Then, using <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html"><code>pl.DataFrame.pivot()</code></a> and <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html"><code>pl.DataFrame.unpivot()</code></a>, we reshape the main DataFrame.</p>
+<p>We begin by filtering the dataset to include only rows corresponding to <code>Ski</code> seasons. Then, using <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.pivot.html">pl.DataFrame.pivot()</a> and <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.unpivot.html">pl.DataFrame.unpivot()</a>, we reshape the main DataFrame.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_temps(</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    _df: pl.DataFrame, idx_colname: <span class="bu">str</span> <span class="op">=</span> <span class="st">"DAY_OF_SEASON"</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> ggplot:</span>
