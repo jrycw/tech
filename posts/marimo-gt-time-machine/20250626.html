@@ -375,10 +375,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#marimo" id="toc-marimo" class="nav-link" data-scroll-target="#marimo">marimo</a>
   <ul class="collapse">
-  <li><a href="#step-1-create-a-slider-to-navigate-table-states" id="toc-step-1-create-a-slider-to-navigate-table-states" class="nav-link" data-scroll-target="#step-1-create-a-slider-to-navigate-table-states">Step 1: Create a Slider to Navigate Table States</a></li>
-  <li><a href="#step-2-build-the-lazy-table-sequence" id="toc-step-2-build-the-lazy-table-sequence" class="nav-link" data-scroll-target="#step-2-build-the-lazy-table-sequence">Step 2: Build the Lazy Table Sequence</a></li>
-  <li><a href="#step-3-trigger-execution-with-.collect" id="toc-step-3-trigger-execution-with-.collect" class="nav-link" data-scroll-target="#step-3-trigger-execution-with-.collect">Step 3: Trigger Execution with <code>.collect()</code></a></li>
-  <li><a href="#step-4-access-all-built-tables" id="toc-step-4-access-all-built-tables" class="nav-link" data-scroll-target="#step-4-access-all-built-tables">Step 4: Access All Built Tables</a></li>
+  <li><a href="#create-a-slider-to-navigate-table-states" id="toc-create-a-slider-to-navigate-table-states" class="nav-link" data-scroll-target="#create-a-slider-to-navigate-table-states">Create a Slider to Navigate Table States</a></li>
+  <li><a href="#build-the-lazy-table-sequence" id="toc-build-the-lazy-table-sequence" class="nav-link" data-scroll-target="#build-the-lazy-table-sequence">Build the Lazy Table Sequence</a></li>
+  <li><a href="#trigger-execution-with-.collect" id="toc-trigger-execution-with-.collect" class="nav-link" data-scroll-target="#trigger-execution-with-.collect">Trigger Execution with <code>.collect()</code></a></li>
+  <li><a href="#access-all-built-tables" id="toc-access-all-built-tables" class="nav-link" data-scroll-target="#access-all-built-tables">Access All Built Tables</a></li>
   <li><a href="#full-marimo-code" id="toc-full-marimo-code" class="nav-link" data-scroll-target="#full-marimo-code">Full marimo code</a></li>
   </ul></li>
   <li><a href="#in-closing" id="toc-in-closing" class="nav-link" data-scroll-target="#in-closing">In Closing</a></li>
@@ -554,12 +554,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="marimo" class="level2">
 <h2 class="anchored" data-anchor-id="marimo">marimo</h2>
 <p>Now we’re ready to <strong>time travel</strong> through the table-building process!</p>
-<section id="step-1-create-a-slider-to-navigate-table-states" class="level3">
-<h3 class="anchored" data-anchor-id="step-1-create-a-slider-to-navigate-table-states">Step 1: Create a Slider to Navigate Table States</h3>
+<section id="create-a-slider-to-navigate-table-states" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-slider-to-navigate-table-states">Create a Slider to Navigate Table States</h3>
 <p>We begin by creating a slider that represents each step in the build pipeline.</p>
 <ul>
-<li>Step <code>0</code> is the original <code>GT</code> object.</li>
-<li>Step <code>1</code> applies the first method call, and so on.</li>
+<li><code>Step 0</code> is the original <code>GT</code> object.</li>
+<li><code>Step 1</code> applies the first method call, and so on.</li>
 </ul>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -582,8 +582,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <marimo-cell-code hidden="">time_widget%20%3D%20mo.ui.slider(start%3D0%2C%20stop%3D6%2C%20step%3D1%2C%20value%3D0%2C%20label%3D%22Step%22)</marimo-cell-code>
 </marimo-island>
 </section>
-<section id="step-2-build-the-lazy-table-sequence" class="level3">
-<h3 class="anchored" data-anchor-id="step-2-build-the-lazy-table-sequence">Step 2: Build the Lazy Table Sequence</h3>
+<section id="build-the-lazy-table-sequence" class="level3">
+<h3 class="anchored" data-anchor-id="build-the-lazy-table-sequence">Build the Lazy Table Sequence</h3>
 <p>Next, we use an example from the <a href="https://posit-dev.github.io/great-tables/examples/">Great Tables documentation</a> to create a lazy <code>WigGT</code> object. This will internally store each method call but won’t execute them just yet.</p>
 <p>You’ll see a slider widget embedded in the table’s source note — but it won’t be functional until we finalize the process.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lazy_wig_gt <span class="op">=</span> (</span>
@@ -613,8 +613,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <marimo-cell-code hidden="">lazy_wig_gt%20%3D%20(%0A%20%20%20%20WigGT(airquality.head(10).assign(Year%3D1973)%2C%20widget%3Dtime_widget)%0A%20%20%20%20.opt_stylize(color%3D%22pink%22%2C%20style%3D2)%0A%20%20%20%20.tab_header(%0A%20%20%20%20%20%20%20%20title%3D%22New%20York%20Air%20Quality%20Measurements%22%2C%0A%20%20%20%20%20%20%20%20subtitle%3D%22Daily%20measurements%20in%20New%20York%20City%20(May%201-10%2C%201973)%22%2C%0A%20%20%20%20)%0A%20%20%20%20.tab_spanner(label%3D%22Time%22%2C%20columns%3D%5B%22Year%22%2C%20%22Month%22%2C%20%22Day%22%5D)%0A%20%20%20%20.tab_spanner(%0A%20%20%20%20%20%20%20%20label%3D%22Measurement%22%2C%20columns%3D%5B%22Ozone%22%2C%20%22Solar_R%22%2C%20%22Wind%22%2C%20%22Temp%22%5D%0A%20%20%20%20)%0A%20%20%20%20.cols_move_to_start(columns%3D%5B%22Year%22%2C%20%22Month%22%2C%20%22Day%22%5D)%0A%20%20%20%20.cols_label(%0A%20%20%20%20%20%20%20%20Ozone%3Dhtml(%22Ozone%2C%3Cbr%3EppbV%22)%2C%0A%20%20%20%20%20%20%20%20Solar_R%3Dhtml(%22Solar%20R.%2C%3Cbr%3Ecal%2Fm%3Csup%3E2%3C%2Fsup%3E%22)%2C%0A%20%20%20%20%20%20%20%20Wind%3Dhtml(%22Wind%2C%3Cbr%3Emph%22)%2C%0A%20%20%20%20%20%20%20%20Temp%3Dhtml(%22Temp%2C%3Cbr%3E%26deg%3BF%22)%2C%0A%20%20%20%20)%0A)%0Alazy_wig_gt</marimo-cell-code>
 </marimo-island>
 </section>
-<section id="step-3-trigger-execution-with-.collect" class="level3">
-<h3 class="anchored" data-anchor-id="step-3-trigger-execution-with-.collect">Step 3: Trigger Execution with <code>.collect()</code></h3>
+<section id="trigger-execution-with-.collect" class="level3">
+<h3 class="anchored" data-anchor-id="trigger-execution-with-.collect">Trigger Execution with <code>.collect()</code></h3>
 <p>To make the slider work, we call <code>.collect()</code> on the <code>WigGT</code> instance. This executes the stored methods and generates a list of tables, one for each step.</p>
 <p>Once collected, you can interactively slide through each version of the table!</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>wig_gt <span class="op">=</span> lazy_wig_gt.collect()</span>
@@ -626,15 +626,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <marimo-cell-code hidden="">wig_gt%20%3D%20lazy_wig_gt.collect()%0Awig_gt</marimo-cell-code>
 </marimo-island>
 </section>
-<section id="step-4-access-all-built-tables" class="level3">
-<h3 class="anchored" data-anchor-id="step-4-access-all-built-tables">Step 4: Access All Built Tables</h3>
+<section id="access-all-built-tables" class="level3">
+<h3 class="anchored" data-anchor-id="access-all-built-tables">Access All Built Tables</h3>
 <p>Finally, you can retrieve all constructed tables using the <code>.tables</code> property, which returns a list of <code>GT</code> objects.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>wig_gt.tables</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="full-marimo-code" class="level3">
 <h3 class="anchored" data-anchor-id="full-marimo-code">Full marimo code</h3>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_FfAE5bVJ9P6DWDDy4Gng2h">molab</a>.</p>
-<div id="f8289f25" class="cell" data-execution_count="1">
+<div id="6ceb1a41" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
