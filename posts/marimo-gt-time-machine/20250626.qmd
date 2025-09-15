@@ -306,11 +306,11 @@ class WigGT:
 ## marimo
 Now we’re ready to **time travel** through the table-building process!
 
-### Step 1: Create a Slider to Navigate Table States
+### Create a Slider to Navigate Table States
 We begin by creating a slider that represents each step in the build pipeline.
 
-* Step `0` is the original `GT` object.
-* Step `1` applies the first method call, and so on.
+* `Step 0` is the original `GT` object.
+* `Step 1` applies the first method call, and so on.
 
 ::: {.callout-warning}
 # Slider Range Limitation
@@ -325,7 +325,7 @@ time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
 time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
 ```
 
-### Step 2: Build the Lazy Table Sequence
+### Build the Lazy Table Sequence
 Next, we use an example from the [Great Tables documentation](https://posit-dev.github.io/great-tables/examples/) to create a lazy `WigGT` object. This will internally store each method call but won’t execute them just yet.
 
 You’ll see a slider widget embedded in the table’s source note — but it won’t be functional until we finalize the process.
@@ -375,7 +375,7 @@ lazy_wig_gt = (
 lazy_wig_gt
 ```
 
-### Step 3: Trigger Execution with `.collect()`
+### Trigger Execution with `.collect()`
 To make the slider work, we call `.collect()` on the `WigGT` instance. This executes the stored methods and generates a list of tables, one for each step.
 
 Once collected, you can interactively slide through each version of the table!
@@ -390,7 +390,7 @@ wig_gt
 ```
 
 
-### Step 4: Access All Built Tables
+### Access All Built Tables
 Finally, you can retrieve all constructed tables using the `.tables` property, which returns a list of `GT` objects.
 ```python
 wig_gt.tables
