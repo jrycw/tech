@@ -89,7 +89,7 @@
 <li><strong><code>make_tooltip()</code></strong> – Creates HTML tooltips from <code>label</code> and <code>tooltip</code> columns for hoverable text display.</li>
 </ul>
 <p>Here’s a quick example that uses <code>ti.is_every_nth_row()</code> to build a Polars expression suitable for styling tables interactively with Great Tables:</p>
-<div id="8259e2a4" class="cell" data-execution_count="1">
+<div id="88626de6" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -268,7 +268,7 @@ font-style: inherit;">"pink"</span>)</span>
 </marimo-island>
 <p>One interesting discovery: the new state of the <a href="https://docs.marimo.io/api/inputs/run_button/">mo.ui.run_button</a> doesn’t persist as expected. This may be resolved by more effectively using marimo’s <a href="https://docs.marimo.io/guides/state/?h=state">reactive state</a>, which I plan to explore further.</p>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_zeHb8T4sPPfbjokeEJnEn6">molab</a>.</p>
-<div id="ffb126ef" class="cell" data-execution_count="1">
+<div id="6b0fbe92" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -1753,7 +1753,7 @@ font-style: inherit;">=</span> lazy_wig_gt.collect()</span>
 <section id="full-marimo-code" class="level3">
 <h3 class="anchored" data-anchor-id="full-marimo-code">Full marimo code</h3>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_FfAE5bVJ9P6DWDDy4Gng2h">molab</a>.</p>
-<div id="7cfe7678" class="cell" data-execution_count="1">
+<div id="7cf43982" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
@@ -2735,352 +2735,6 @@ font-style: inherit;">"__main__"</span>:</span>
   <media:content url="https://tech.ycwu.space/posts/marimo-gt-time-machine/marimo_gt_time_machine.png" medium="image" type="image/png" height="213" width="144"/>
 </item>
 <item>
-  <title>Send Email via marimo</title>
-  <dc:creator>Jerry Wu</dc:creator>
-  <link>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-
-<p>This post demonstrates how to send emails using <a href="https://resend.com/">Resend</a> from within a marimo app.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Resend via marimo"></p>
-</figure>
-</div>
-<p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
-<p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB">molab</a>.</p>
-<div id="adfa5b69" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Show full code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> marimo</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">__generated_with <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"0.14.7"</span></span>
-<span id="cb1-4">app <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> marimo.App(width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"medium"</span>)</span>
-<span id="cb1-5"></span>
-<span id="cb1-6"></span>
-<span id="cb1-7"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _():</span>
-<span id="cb1-9">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> marimo <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> mo</span>
-<span id="cb1-10">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> os</span>
-<span id="cb1-11">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> html <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> escape</span>
-<span id="cb1-12">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pl</span>
-<span id="cb1-13">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> resend</span>
-<span id="cb1-14"></span>
-<span id="cb1-15">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> escape, mo, resend</span>
-<span id="cb1-16"></span>
-<span id="cb1-17"></span>
-<span id="cb1-18"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-19"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _(escape, resend):</span>
-<span id="cb1-20">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> send_email(d: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">dict</span>[<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>:</span>
-<span id="cb1-21">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">"""</span></span>
-<span id="cb1-22"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">        https://resend.com/docs/send-with-python</span></span>
-<span id="cb1-23"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">        """</span></span>
-<span id="cb1-24">        resend.api_key <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"RESEND_API_KEY"</span>]</span>
-<span id="cb1-25">        from_ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"from_"</span>]</span>
-<span id="cb1-26">        to <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [mail.strip() <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> mail <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"to"</span>].split(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">","</span>)]</span>
-<span id="cb1-27">        subject <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"subject"</span>]</span>
-<span id="cb1-28">        html_ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> escape(d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"content"</span>]).replace(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"&lt;br&gt;"</span>)</span>
-<span id="cb1-29"></span>
-<span id="cb1-30">        params: resend.Emails.SendParams <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {</span>
-<span id="cb1-31">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"from"</span>: from_,</span>
-<span id="cb1-32">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"to"</span>: to,</span>
-<span id="cb1-33">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"subject"</span>: subject,</span>
-<span id="cb1-34">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"html"</span>: html_,</span>
-<span id="cb1-35">        }</span>
-<span id="cb1-36"></span>
-<span id="cb1-37">        email <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resend.Emails.send(params)</span>
-<span id="cb1-38"></span>
-<span id="cb1-39">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (send_email,)</span>
-<span id="cb1-40"></span>
-<span id="cb1-41"></span>
-<span id="cb1-42"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-43"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _(mo, send_email):</span>
-<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Create a form with multiple eleme</span></span>
-<span id="cb1-45">    form <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb1-46">        mo.md(</span>
-<span id="cb1-47">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"""</span></span>
-<span id="cb1-48"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        **marimo mail**</span></span>
-<span id="cb1-49"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{RESEND_API_KEY}</span></span>
-<span id="cb1-50"></span>
-<span id="cb1-51"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{from_}</span></span>
-<span id="cb1-52"></span>
-<span id="cb1-53"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{to}</span></span>
-<span id="cb1-54"></span>
-<span id="cb1-55"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{subject}</span></span>
-<span id="cb1-56"></span>
-<span id="cb1-57"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{content}</span></span>
-<span id="cb1-58"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    """</span></span>
-<span id="cb1-59">        )</span>
-<span id="cb1-60">        .batch(</span>
-<span id="cb1-61">            RESEND_API_KEY<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(</span>
-<span id="cb1-62">                label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"RESEND_API_KEY"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"password"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span></span>
-<span id="cb1-63">            ),</span>
-<span id="cb1-64">            from_<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"From"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-65">            to<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"To"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-66">            subject<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Subject"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-67">            content<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text_area(full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-68">        )</span>
-<span id="cb1-69">        .form(show_clear_button<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, on_change<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>send_email)</span>
-<span id="cb1-70">    )</span>
-<span id="cb1-71">    form</span>
-<span id="cb1-72">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span></span>
-<span id="cb1-73"></span>
-<span id="cb1-74"></span>
-<span id="cb1-75"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"__main__"</span>:</span>
-<span id="cb1-76">    app.run()</span></code></pre></div></div>
-</details>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Disclaimer
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This post was drafted by me, with AI assistance to refine the content.</p>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>python</category>
-  <category>marimo</category>
-  <category>resend</category>
-  <guid>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</guid>
-  <pubDate>Wed, 25 Jun 2025 00:00:00 GMT</pubDate>
-  <media:content url="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" medium="image" type="image/png" height="64" width="144"/>
-</item>
-<item>
   <title>Interactive Django Deployment Checklist with marimo</title>
   <dc:creator>Jerry Wu</dc:creator>
   <link>https://tech.ycwu.space/posts/marimo-django-deployment-checklist/20250625.html</link>
@@ -3151,7 +2805,7 @@ font-style: inherit;">"__main__"</span>:</span>
     <marimo-cell-code hidden="">done_count%20%3D%20sum(s.value%20for%20s%20in%20status_widgets)%0A%0Agt%20%3D%20(%0A%20%20%20%20GT(%0A%20%20%20%20%20%20%20%20df.with_columns(%0A%20%20%20%20%20%20%20%20%20%20%20%20pl.Series(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5Bstatus._repr_html_()%20for%20status%20in%20status_widgets%5D%0A%20%20%20%20%20%20%20%20%20%20%20%20).alias(%22Status%22)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20)%0A%20%20%20%20.tab_source_note(f%22%7Bdone_count%7D%20%2F%20%7Bn_row%7D%22)%0A%20%20%20%20.tab_source_note(%0A%20%20%20%20%20%20%20%20html(%0A%20%20%20%20%20%20%20%20%20%20%20%20create_bar(%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20done_count%20%2F%20n_row%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20max_width%3D750%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20height%3D20%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20background_color1%3D%22lightgray%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20background_color2%3D%22%2366CDAA%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20)%0A%20%20%20%20%20%20%20%20)%0A%20%20%20%20)%0A%20%20%20%20.tab_header(%22%E2%9C%85%20Django%20Deployment%20Checklist%22)%0A%20%20%20%20.opt_stylize(color%3D%22cyan%22%2C%20style%3D4)%0A)%0Agt</marimo-cell-code>
 </marimo-island>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_xEAc6KCZkX9h8hxoCkKNBc">molab</a>.</p>
-<div id="dd6896e0" class="cell" data-execution_count="1">
+<div id="22519bd7" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -3593,6 +3247,352 @@ font-style: inherit;">"__main__"</span>:</span>
   <media:content url="https://tech.ycwu.space/posts/marimo-django-deployment-checklist/marimo_django_deployment_checklist.png" medium="image" type="image/png" height="95" width="144"/>
 </item>
 <item>
+  <title>Send Email via marimo</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<p>This post demonstrates how to send emails using <a href="https://resend.com/">Resend</a> from within a marimo app.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Resend via marimo"></p>
+</figure>
+</div>
+<p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
+<p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB">molab</a>.</p>
+<div id="a613444a" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show full code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> marimo</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">__generated_with <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"0.14.7"</span></span>
+<span id="cb1-4">app <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> marimo.App(width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"medium"</span>)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _():</span>
+<span id="cb1-9">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> marimo <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> mo</span>
+<span id="cb1-10">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb1-11">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> html <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> escape</span>
+<span id="cb1-12">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-13">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> resend</span>
+<span id="cb1-14"></span>
+<span id="cb1-15">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> escape, mo, resend</span>
+<span id="cb1-16"></span>
+<span id="cb1-17"></span>
+<span id="cb1-18"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-19"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _(escape, resend):</span>
+<span id="cb1-20">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> send_email(d: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb1-21">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        https://resend.com/docs/send-with-python</span></span>
+<span id="cb1-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        """</span></span>
+<span id="cb1-24">        resend.api_key <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_API_KEY"</span>]</span>
+<span id="cb1-25">        from_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"from_"</span>]</span>
+<span id="cb1-26">        to <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [mail.strip() <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> mail <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"to"</span>].split(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">","</span>)]</span>
+<span id="cb1-27">        subject <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"subject"</span>]</span>
+<span id="cb1-28">        html_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> escape(d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>]).replace(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"&lt;br&gt;"</span>)</span>
+<span id="cb1-29"></span>
+<span id="cb1-30">        params: resend.Emails.SendParams <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb1-31">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"from"</span>: from_,</span>
+<span id="cb1-32">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"to"</span>: to,</span>
+<span id="cb1-33">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"subject"</span>: subject,</span>
+<span id="cb1-34">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"html"</span>: html_,</span>
+<span id="cb1-35">        }</span>
+<span id="cb1-36"></span>
+<span id="cb1-37">        email <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> resend.Emails.send(params)</span>
+<span id="cb1-38"></span>
+<span id="cb1-39">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (send_email,)</span>
+<span id="cb1-40"></span>
+<span id="cb1-41"></span>
+<span id="cb1-42"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-43"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _(mo, send_email):</span>
+<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create a form with multiple eleme</span></span>
+<span id="cb1-45">    form <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (</span>
+<span id="cb1-46">        mo.md(</span>
+<span id="cb1-47">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-48"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        **marimo mail**</span></span>
+<span id="cb1-49"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{RESEND_API_KEY}</span></span>
+<span id="cb1-50"></span>
+<span id="cb1-51"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{from_}</span></span>
+<span id="cb1-52"></span>
+<span id="cb1-53"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{to}</span></span>
+<span id="cb1-54"></span>
+<span id="cb1-55"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{subject}</span></span>
+<span id="cb1-56"></span>
+<span id="cb1-57"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{content}</span></span>
+<span id="cb1-58"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb1-59">        )</span>
+<span id="cb1-60">        .batch(</span>
+<span id="cb1-61">            RESEND_API_KEY<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(</span>
+<span id="cb1-62">                label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_API_KEY"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"password"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span>
+<span id="cb1-63">            ),</span>
+<span id="cb1-64">            from_<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"From"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-65">            to<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"To"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-66">            subject<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Subject"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-67">            content<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text_area(full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-68">        )</span>
+<span id="cb1-69">        .form(show_clear_button<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, on_change<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>send_email)</span>
+<span id="cb1-70">    )</span>
+<span id="cb1-71">    form</span>
+<span id="cb1-72">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span></span>
+<span id="cb1-73"></span>
+<span id="cb1-74"></span>
+<span id="cb1-75"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb1-76">    app.run()</span></code></pre></div></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>python</category>
+  <category>marimo</category>
+  <category>resend</category>
+  <guid>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</guid>
+  <pubDate>Wed, 25 Jun 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" medium="image" type="image/png" height="64" width="144"/>
+</item>
+<item>
   <title>Great Tables with marimo in Quarto</title>
   <dc:creator>Jerry Wu</dc:creator>
   <link>https://tech.ycwu.space/posts/gt-marimo-in-quarto/20250612.html</link>
@@ -3650,7 +3650,7 @@ font-style: inherit;">"__main__"</span>:</span>
     <marimo-cell-code hidden="">gt.opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
 </marimo-island>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_En2k3WtpkE1Uf6a8QvCS7n">molab</a>.</p>
-<div id="0b3c9fdb" class="cell" data-execution_count="1">
+<div id="af643a9a" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -3966,7 +3966,7 @@ font-style: inherit;">"__main__"</span>:</span>
     <marimo-cell-code hidden="">GT(df).opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
 </marimo-island>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_uHQvXDXF3UsvFQD9xZkaiu">molab</a>.</p>
-<div id="d38ff8f5" class="cell" data-execution_count="1">
+<div id="14e78e29" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -4219,7 +4219,7 @@ font-style: inherit;">"__main__"</span>:</span>
 
 <p>This post highlights a powerful yet underused feature in Great Tables: using existing columns to style the table body via <a href="https://posit-dev.github.io/great-tables/reference/from_column.html">from_column()</a>.</p>
 <p>Let’s say you have the following Polars DataFrame <code>df</code>:</p>
-<div id="f5a46176" class="cell" data-execution_count="1">
+<div id="9ac0d4d5" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -4323,7 +4323,7 @@ font-style: inherit;">print</span>(df)</span></code></pre></div></div>
 </div>
 </div>
 <p>The <code>color</code>, <code>size</code>, <code>weight</code>, and <code>align</code> columns contain style-related metadata. We can use <code>from_column()</code> to map this metadata to four styling options provided by Great Tables—<a href="https://posit-dev.github.io/great-tables/reference/style.fill.html">style.fill()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.text.html">style.text()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.borders.html">style.borders()</a>, and <a href="https://posit-dev.github.io/great-tables/reference/style.css.html">style.css()</a>—all of which are built on the internal <code>CellStyle</code> class.</p>
-<div id="af957fdd" class="cell" data-execution_count="2">
+<div id="b2a38f13" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    GT(df)</span>
 <span id="cb3-3">    .tab_style(</span>
@@ -4369,52 +4369,52 @@ background-color: null;
 font-style: inherit;">"gray"</span>)</span>
 <span id="cb3-16">)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="zjruziwwql" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="myqhxdlkop" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#zjruziwwql table {
+#myqhxdlkop table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#zjruziwwql thead, tbody, tfoot, tr, td, th { border-style: none; }
+#myqhxdlkop thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#zjruziwwql p { margin: 0; padding: 0; }
- #zjruziwwql .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #zjruziwwql .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #zjruziwwql .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #zjruziwwql .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #zjruziwwql .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #zjruziwwql .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #zjruziwwql .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #zjruziwwql .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #zjruziwwql .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #zjruziwwql .gt_column_spanner_outer:first-child { padding-left: 0; }
- #zjruziwwql .gt_column_spanner_outer:last-child { padding-right: 0; }
- #zjruziwwql .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #zjruziwwql .gt_spanner_row { border-bottom-style: hidden; }
- #zjruziwwql .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #zjruziwwql .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
- #zjruziwwql .gt_from_md> :first-child { margin-top: 0; }
- #zjruziwwql .gt_from_md> :last-child { margin-bottom: 0; }
- #zjruziwwql .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #zjruziwwql .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #zjruziwwql .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #zjruziwwql .gt_row_group_first td { border-top-width: 2px; }
- #zjruziwwql .gt_row_group_first th { border-top-width: 2px; }
- #zjruziwwql .gt_striped { background-color: #F4F4F4; }
- #zjruziwwql .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #zjruziwwql .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #zjruziwwql .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #zjruziwwql .gt_left { text-align: left; }
- #zjruziwwql .gt_center { text-align: center; }
- #zjruziwwql .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #zjruziwwql .gt_font_normal { font-weight: normal; }
- #zjruziwwql .gt_font_bold { font-weight: bold; }
- #zjruziwwql .gt_font_italic { font-style: italic; }
- #zjruziwwql .gt_super { font-size: 65%; }
- #zjruziwwql .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #zjruziwwql .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#myqhxdlkop p { margin: 0; padding: 0; }
+ #myqhxdlkop .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #myqhxdlkop .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #myqhxdlkop .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #myqhxdlkop .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #myqhxdlkop .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #myqhxdlkop .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #myqhxdlkop .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #myqhxdlkop .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #myqhxdlkop .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #myqhxdlkop .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #myqhxdlkop .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #myqhxdlkop .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #myqhxdlkop .gt_spanner_row { border-bottom-style: hidden; }
+ #myqhxdlkop .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #myqhxdlkop .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
+ #myqhxdlkop .gt_from_md> :first-child { margin-top: 0; }
+ #myqhxdlkop .gt_from_md> :last-child { margin-bottom: 0; }
+ #myqhxdlkop .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #myqhxdlkop .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
+ #myqhxdlkop .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #myqhxdlkop .gt_row_group_first td { border-top-width: 2px; }
+ #myqhxdlkop .gt_row_group_first th { border-top-width: 2px; }
+ #myqhxdlkop .gt_striped { background-color: #F4F4F4; }
+ #myqhxdlkop .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #myqhxdlkop .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #myqhxdlkop .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #myqhxdlkop .gt_left { text-align: left; }
+ #myqhxdlkop .gt_center { text-align: center; }
+ #myqhxdlkop .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #myqhxdlkop .gt_font_normal { font-weight: normal; }
+ #myqhxdlkop .gt_font_bold { font-weight: bold; }
+ #myqhxdlkop .gt_font_italic { font-style: italic; }
+ #myqhxdlkop .gt_super { font-size: 65%; }
+ #myqhxdlkop .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #myqhxdlkop .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -4452,7 +4452,7 @@ font-style: inherit;">"gray"</span>)</span>
 </div>
 </div>
 <p><strong>One last note:</strong> <code>from_column()</code> works with both Pandas and Polars DataFrames. For Polars users, you can also pass expressions directly without wrapping them in <code>from_column()</code>. The following code produces the same styled table as shown above:</p>
-<div id="f8905921" class="cell" data-execution_count="3">
+<div id="b92148b8" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df)</span>
 <span id="cb4-3">    .tab_style(</span>
@@ -4544,7 +4544,7 @@ font-style: inherit;">"gray"</span>)</span>
 <li><code>otherwise</code>: A fallback expression used in <code>.otherwise()</code> if no conditions match.</li>
 </ul>
 <p>The given example demonstrates how <code>case_when()</code> can simplify conditional logic compared to the more verbose <code>pl.when().then().otherwise()</code> chain.</p>
-<div id="83bda281" class="cell" data-execution_count="1">
+<div id="95a6379b" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -4774,7 +4774,7 @@ font-style: inherit;">return</span> expr</span></code></pre></div></div>
 <section id="custom-expression-namespace" class="level2">
 <h2 class="anchored" data-anchor-id="custom-expression-namespace">Custom Expression Namespace</h2>
 <p>With <code>case_when()</code> in place, we can refactor the <code>DiscreteSplitter</code> expression namespace like this:</p>
-<div id="00fd3e39" class="cell" data-execution_count="2">
+<div id="20cf84fe" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@cache</span></span>
@@ -5033,7 +5033,7 @@ font-style: inherit;">4</span>]),</span>
 <h2 class="anchored" data-anchor-id="custom-dataframe-namespace">Custom DataFrame Namespace</h2>
 <p>Instead of relying on <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>, we can also use <code>_mod_expr()</code> directly to enable similar categorization.</p>
 <p>Here’s how the <code>DiscreteSplitter</code> can be implemented as a custom DataFrame namespace:</p>
-<div id="f8eaaa78" class="cell" data-execution_count="3">
+<div id="5ce35e6c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@pl.api.register_dataframe_namespace</span>(<span class="st" style="color: #20794D;
@@ -5314,7 +5314,7 @@ font-style: inherit;">1</span>)</span>
 
 <p>This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While <a href="https://github.com/posit-dev/great-tables/issues/678">it</a> may or may not be adopted by the team, I thought it would be fun to document it here on the blog.</p>
 <p>I recently created a utility called <a href="https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row">every_n_row()</a>, designed to work with both Pandas and Polars DataFrames (support for <code>pyarrow</code> is still under investigation). With <code>every_n_row()</code>, we can easily target alternating rows—for example, select odd rows using <code>every_n_row(2)</code> and even rows using either <code>every_n_row(2, 1)</code> or <code>~every_n_row(2)</code>.</p>
-<div id="357a0a42" class="cell" data-execution_count="1">
+<div id="5b82c0c5" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -5462,7 +5462,7 @@ font-style: inherit;">"pink"</span>)</span>
 
 <p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
 <p>Here is the code snippet: <img src="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
-<div id="18ac87ca" class="cell" data-execution_count="1">
+<div id="f233daca" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -6213,7 +6213,7 @@ font-style: inherit;">6</span>)</span>
 <section id="remark" class="level3">
 <h3 class="anchored" data-anchor-id="remark">Remark</h3>
 <p>Here’s a rough draft showing how to achieve a similar effect using the DataFrame namespace. I might revisit and refine this approach in the future.</p>
-<div id="a1ce7bb7" class="cell" data-execution_count="2">
+<div id="fa678553" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="im" style="color: #00769E;
@@ -6658,7 +6658,7 @@ font-style: inherit;">6</span>)</span>
 
 <p>This post presents a recreated visualization using Polars and plotnine, based on my <a href="../../posts/clone-reciprocal-tariffs-table/20250403.html">earlier work</a>.</p>
 <p>Below is the final figure: <img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table-p9/reciprocal_tariffs_p9.png" class="img-fluid quarto-figure quarto-figure-center" alt="Cloned Reciprocal Tariffs Table"></p>
-<div id="209430c6" class="cell" data-execution_count="1">
+<div id="938ed8be" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -8577,7 +8577,7 @@ I’ll walk through the journey I took to recreate the visualization. Some parts
 <p><img src="https://tech.ycwu.space/posts/p9-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="84e94036" class="cell" data-execution_count="1">
+<div id="58060adb" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -11205,7 +11205,7 @@ font-style: inherit;">=</span> add_ax_text(ax)</span>
 <p><img src="https://tech.ycwu.space/posts/access-axes-in-plotnine/p9_ht_ax_text.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="plotnine used in combination with HighlightText"></p>
 </figure>
 </div>
-<div id="a73095de" class="cell" data-execution_count="1">
+<div id="9db1914f" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> highlight_text <span class="im" style="color: #00769E;
@@ -11341,7 +11341,7 @@ font-style: inherit;">=</span>ax)</span>
 <p><img src="https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table/reciprocal_tariffs_gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Cloned Reciprocal Tariffs Table"></p>
 </figure>
 </div>
-<div id="df8a16ea" class="cell" data-execution_count="1">
+<div id="a916bde8" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -12239,7 +12239,7 @@ font-style: inherit;"># .save("reciprocal_tariffs_gt.png", web_driver="firefox",
 <p>I’ve been actively developing the <a href="https://github.com/jrycw/turtle-island"><strong>Turtle Island</strong></a> library and found this example to be a great opportunity to test its usability.</p>
 <p>I was genuinely surprised by how well <code>ti.case_when()</code> and <code>ti.is_every_nth_row()</code> worked together to refactor the code into a more concise and expressive form. Since <code>ti.is_every_nth_row()</code> returns an expression, we aren’t actually creating a new column in the DataFrame—it’s more like adding a virtual column.</p>
 <p>This experience has further strengthened my confidence in the design and practical value of <strong>Turtle Island</strong>.</p>
-<div id="08c697ad" class="cell" data-execution_count="2">
+<div id="4cd43a65" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>If using <strong>Turtle Island</strong></summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
@@ -12426,7 +12426,7 @@ font-style: inherit;">"vertical"</span></span>
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll start by creating a <code>data</code> dictionary, which will be used with Pandas or Polars later. Additionally, we’ll define a <code>color_mapping</code> dictionary to store the palette information for styling.</p>
-<div id="3cf9a943" class="cell" data-execution_count="1">
+<div id="46c88ba2" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
@@ -12514,7 +12514,7 @@ font-style: inherit;">"papayawhip"</span>}</span></code></pre></div></div>
 <section id="pandas" class="level2">
 <h2 class="anchored" data-anchor-id="pandas">Pandas</h2>
 <p>First, we create a Pandas DataFrame called <code>df_pd</code> using <code>data</code> as the input:</p>
-<div id="c98af76f" class="cell" data-execution_count="2">
+<div id="966fe09f" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">df_pd <span class="op" style="color: #5E5E5E;
@@ -12536,7 +12536,7 @@ font-style: inherit;">print</span>(df_pd)</span></code></pre></div></div>
 <section id="using-an-existing-column" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column">Using an Existing Column</h3>
 <p>In this straightforward scenario, the DataFrame already contains a predefined column with color names for each row. You can use the <a href="https://posit-dev.github.io/great-tables/reference/from_column.html#great_tables.from_column">from_column()</a> function provided by Great Tables to apply colors to the table body:</p>
-<div id="71714e1d" class="cell" data-execution_count="3">
+<div id="baedbd5d" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df_pd)</span>
 <span id="cb4-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -12568,7 +12568,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-functions" class="level3">
 <h3 class="anchored" data-anchor-id="using-functions">Using Functions</h3>
 <p>In cases where colors need to be determined dynamically based on conditions, the <a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.case_when.html#pandas.Series.case_when">pd.Series.case_when()</a> function can be very useful. The following example categorizes the values of the <code>col1</code> column into three different colors:</p>
-<div id="852f9961" class="cell" data-execution_count="4">
+<div id="4e84e6ad" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -12641,7 +12641,7 @@ font-style: inherit;">"pink"</span>)</span>
 <ul class="nav nav-tabs"><li class="nav-item"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" aria-controls="tabset-1-1" aria-selected="true" href="">pd.Series.map()</a></li><li class="nav-item"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" aria-controls="tabset-1-2" aria-selected="false" href="">pd.Series.replace()</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" aria-labelledby="tabset-1-1-tab">
-<div id="1a49d784" class="cell" data-execution_count="5">
+<div id="339e8875" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">(</span>
 <span id="cb6-2">    GT(df_pd)</span>
 <span id="cb6-3">    .tab_style(</span>
@@ -12679,7 +12679,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <div id="tabset-1-2" class="tab-pane" aria-labelledby="tabset-1-2-tab">
-<div id="9ff544d0" class="cell" data-execution_count="6">
+<div id="f82c1e16" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">(</span>
 <span id="cb7-2">    GT(df_pd)</span>
 <span id="cb7-3">    .tab_style(</span>
@@ -12717,7 +12717,7 @@ font-style: inherit;">"pink"</span>)</span>
 </div>
 </div>
 <p>Alternatively, if you prefer sticking with the same approach, <code>pd.Series.case_when()</code> still works:</p>
-<div id="04b22a2e" class="cell" data-execution_count="7">
+<div id="a61f2521" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -12784,7 +12784,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="polars" class="level2">
 <h2 class="anchored" data-anchor-id="polars">Polars</h2>
 <p>Just like before, let’s start by creating a Polars DataFrame named <code>df_pl</code> using <code>data</code> as input:</p>
-<div id="491b880a" class="cell" data-execution_count="8">
+<div id="0fb5b587" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">df_pl<span class="op" style="color: #5E5E5E;
@@ -12812,7 +12812,7 @@ font-style: inherit;">print</span>(df_pl)</span></code></pre></div></div>
 <section id="using-an-existing-column-1" class="level3">
 <h3 class="anchored" data-anchor-id="using-an-existing-column-1">Using an Existing Column</h3>
 <p>If the DataFrame already contains a column specifying colors, we can apply them directly with <code>from_column()</code>:</p>
-<div id="14d8658f" class="cell" data-execution_count="9">
+<div id="1bf0c324" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">(</span>
 <span id="cb11-2">    GT(df_pl)</span>
 <span id="cb11-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -12841,7 +12841,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb11-6">)</span></code></pre></div></div>
 </div>
 <p>As another option, we can reference the <code>color</code> column using a Polars expression:</p>
-<div id="6623b641" class="cell" data-execution_count="10">
+<div id="3dde5c53" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">(</span>
 <span id="cb12-2">    GT(df_pl)</span>
 <span id="cb12-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
@@ -12873,7 +12873,7 @@ font-style: inherit;">"pink"</span>)</span>
 <section id="using-conditional-logic-with-polars-expressions" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-logic-with-polars-expressions">Using Conditional Logic with Polars Expressions</h3>
 <p>For cases where colors need to be assigned dynamically, <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when()</a> provides a structured way to define conditions. The example below assigns colors based on the values in <code>col1</code>:</p>
-<div id="2657ae9c" class="cell" data-execution_count="11">
+<div id="24212221" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -12935,7 +12935,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb13-15">)</span></code></pre></div></div>
 </div>
 <p>For categorical-like columns (e.g., <code>col2</code>), predefined mappings can be applied efficiently using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.Expr.replace.html#polars.Expr.replace">pl.Expr.replace()</a>:</p>
-<div id="0db59db1" class="cell" data-execution_count="12">
+<div id="8aa95009" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">(</span>
 <span id="cb14-2">    GT(df_pl)</span>
 <span id="cb14-3">    .tab_style(</span>
@@ -12967,7 +12967,7 @@ font-style: inherit;">"pink"</span>)</span>
 <span id="cb14-9">)</span></code></pre></div></div>
 </div>
 <p>Alternatively, if you prefer the conditional approach, <code>pl.when()</code> can still be used:</p>
-<div id="17788755" class="cell" data-execution_count="13">
+<div id="deffaa95" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">color_selector_expr <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
@@ -13074,7 +13074,7 @@ font-style: inherit;">"pink"</span>)</span>
 <p><img src="https://tech.ycwu.space/posts/effective-dataviz-polars-alta-ski-resort/alta_ski_resort.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Alta ski resort"></p>
 </figure>
 </div>
-<div id="6b7f0043" class="cell" data-execution_count="1">
+<div id="f14989b2" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -15137,7 +15137,7 @@ font-style: inherit;">return</span> _df</span></code></pre></div></div>
 <section id="preparations" class="level2">
 <h2 class="anchored" data-anchor-id="preparations">Preparations</h2>
 <p>We’ll use the built-in dataset <code>gtcars</code> to create a Polars DataFrame. First, we’ll select the columns <code>mfr</code>, <code>drivetrain</code>, <code>year</code>, and <code>hp</code> to create a small pivoted table named <code>df_mini</code>. Then, we’ll pass <code>df_mini</code> to the <code>GT</code> object and use <code>GT.tab_stub()</code>, setting <code>drivetrain</code> as <code>rowname_col=</code> and <code>mfr</code> as <code>groupname_col=</code> to create the table <code>gt</code>, as shown below:</p>
-<div id="b10cb15f" class="cell" data-execution_count="1">
+<div id="39caa78c" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -15234,52 +15234,52 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <span id="cb1-16">gt</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<div id="svihtpxeiz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="bcjgbctwzp" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#svihtpxeiz table {
+#bcjgbctwzp table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#svihtpxeiz thead, tbody, tfoot, tr, td, th { border-style: none; }
+#bcjgbctwzp thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#svihtpxeiz p { margin: 0; padding: 0; }
- #svihtpxeiz .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #svihtpxeiz .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #svihtpxeiz .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #svihtpxeiz .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #svihtpxeiz .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #svihtpxeiz .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #svihtpxeiz .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #svihtpxeiz .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #svihtpxeiz .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #svihtpxeiz .gt_column_spanner_outer:first-child { padding-left: 0; }
- #svihtpxeiz .gt_column_spanner_outer:last-child { padding-right: 0; }
- #svihtpxeiz .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #svihtpxeiz .gt_spanner_row { border-bottom-style: hidden; }
- #svihtpxeiz .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #svihtpxeiz .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #svihtpxeiz .gt_from_md> :first-child { margin-top: 0; }
- #svihtpxeiz .gt_from_md> :last-child { margin-bottom: 0; }
- #svihtpxeiz .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #svihtpxeiz .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #svihtpxeiz .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #svihtpxeiz .gt_row_group_first td { border-top-width: 2px; }
- #svihtpxeiz .gt_row_group_first th { border-top-width: 2px; }
- #svihtpxeiz .gt_striped { background-color: #F4F4F4; }
- #svihtpxeiz .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #svihtpxeiz .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #svihtpxeiz .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #svihtpxeiz .gt_left { text-align: left; }
- #svihtpxeiz .gt_center { text-align: center; }
- #svihtpxeiz .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #svihtpxeiz .gt_font_normal { font-weight: normal; }
- #svihtpxeiz .gt_font_bold { font-weight: bold; }
- #svihtpxeiz .gt_font_italic { font-style: italic; }
- #svihtpxeiz .gt_super { font-size: 65%; }
- #svihtpxeiz .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #svihtpxeiz .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#bcjgbctwzp p { margin: 0; padding: 0; }
+ #bcjgbctwzp .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #bcjgbctwzp .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #bcjgbctwzp .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #bcjgbctwzp .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #bcjgbctwzp .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bcjgbctwzp .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #bcjgbctwzp .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bcjgbctwzp .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #bcjgbctwzp .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #bcjgbctwzp .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #bcjgbctwzp .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #bcjgbctwzp .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #bcjgbctwzp .gt_spanner_row { border-bottom-style: hidden; }
+ #bcjgbctwzp .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #bcjgbctwzp .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #bcjgbctwzp .gt_from_md> :first-child { margin-top: 0; }
+ #bcjgbctwzp .gt_from_md> :last-child { margin-bottom: 0; }
+ #bcjgbctwzp .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #bcjgbctwzp .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #bcjgbctwzp .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #bcjgbctwzp .gt_row_group_first td { border-top-width: 2px; }
+ #bcjgbctwzp .gt_row_group_first th { border-top-width: 2px; }
+ #bcjgbctwzp .gt_striped { background-color: #F4F4F4; }
+ #bcjgbctwzp .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #bcjgbctwzp .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #bcjgbctwzp .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #bcjgbctwzp .gt_left { text-align: left; }
+ #bcjgbctwzp .gt_center { text-align: center; }
+ #bcjgbctwzp .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #bcjgbctwzp .gt_font_normal { font-weight: normal; }
+ #bcjgbctwzp .gt_font_bold { font-weight: bold; }
+ #bcjgbctwzp .gt_font_italic { font-style: italic; }
+ #bcjgbctwzp .gt_super { font-size: 65%; }
+ #bcjgbctwzp .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #bcjgbctwzp .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -15360,7 +15360,7 @@ font-style: inherit;">"mfr"</span>).opt_stylize()</span>
 <section id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column" class="level2">
 <h2 class="anchored" data-anchor-id="using-a-for-loop-repeatedly-call-gt.tab_style-for-each-column">Using a For-Loop: Repeatedly Call <code>GT.tab_style()</code> for Each Column</h2>
 <p>The most intuitive way is to call <code>GT.tab_style()</code> for each column. Here’s how:</p>
-<div id="d43a2ea8" class="cell" data-execution_count="2">
+<div id="070e23e3" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-2" style="background: #f1f3f5;"><pre class="sourceCode python code-annotation-code code-with-copy code-annotated"><code class="sourceCode python"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target">gt1 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> gt</span>
@@ -15401,52 +15401,52 @@ font-style: inherit;">650</span>))</span>
 </dl>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="eizesbwlzm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="rczphguben" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#eizesbwlzm table {
+#rczphguben table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#eizesbwlzm thead, tbody, tfoot, tr, td, th { border-style: none; }
+#rczphguben thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#eizesbwlzm p { margin: 0; padding: 0; }
- #eizesbwlzm .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #eizesbwlzm .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #eizesbwlzm .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #eizesbwlzm .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #eizesbwlzm .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #eizesbwlzm .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #eizesbwlzm .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #eizesbwlzm .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #eizesbwlzm .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #eizesbwlzm .gt_column_spanner_outer:first-child { padding-left: 0; }
- #eizesbwlzm .gt_column_spanner_outer:last-child { padding-right: 0; }
- #eizesbwlzm .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #eizesbwlzm .gt_spanner_row { border-bottom-style: hidden; }
- #eizesbwlzm .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #eizesbwlzm .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #eizesbwlzm .gt_from_md> :first-child { margin-top: 0; }
- #eizesbwlzm .gt_from_md> :last-child { margin-bottom: 0; }
- #eizesbwlzm .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #eizesbwlzm .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #eizesbwlzm .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #eizesbwlzm .gt_row_group_first td { border-top-width: 2px; }
- #eizesbwlzm .gt_row_group_first th { border-top-width: 2px; }
- #eizesbwlzm .gt_striped { background-color: #F4F4F4; }
- #eizesbwlzm .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #eizesbwlzm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #eizesbwlzm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #eizesbwlzm .gt_left { text-align: left; }
- #eizesbwlzm .gt_center { text-align: center; }
- #eizesbwlzm .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #eizesbwlzm .gt_font_normal { font-weight: normal; }
- #eizesbwlzm .gt_font_bold { font-weight: bold; }
- #eizesbwlzm .gt_font_italic { font-style: italic; }
- #eizesbwlzm .gt_super { font-size: 65%; }
- #eizesbwlzm .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #eizesbwlzm .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#rczphguben p { margin: 0; padding: 0; }
+ #rczphguben .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #rczphguben .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #rczphguben .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #rczphguben .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #rczphguben .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #rczphguben .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #rczphguben .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #rczphguben .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #rczphguben .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #rczphguben .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #rczphguben .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #rczphguben .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #rczphguben .gt_spanner_row { border-bottom-style: hidden; }
+ #rczphguben .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #rczphguben .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #rczphguben .gt_from_md> :first-child { margin-top: 0; }
+ #rczphguben .gt_from_md> :last-child { margin-bottom: 0; }
+ #rczphguben .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #rczphguben .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #rczphguben .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #rczphguben .gt_row_group_first td { border-top-width: 2px; }
+ #rczphguben .gt_row_group_first th { border-top-width: 2px; }
+ #rczphguben .gt_striped { background-color: #F4F4F4; }
+ #rczphguben .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #rczphguben .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #rczphguben .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #rczphguben .gt_left { text-align: left; }
+ #rczphguben .gt_center { text-align: center; }
+ #rczphguben .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #rczphguben .gt_font_normal { font-weight: normal; }
+ #rczphguben .gt_font_bold { font-weight: bold; }
+ #rczphguben .gt_font_italic { font-style: italic; }
+ #rczphguben .gt_super { font-size: 65%; }
+ #rczphguben .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #rczphguben .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -15525,7 +15525,7 @@ font-style: inherit;">650</span>))</span>
 <section id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects" class="level2">
 <h2 class="anchored" data-anchor-id="utilizing-the-locations-parameter-in-gt.tab_style-pass-a-list-of-loc.body-objects">Utilizing the <code>locations=</code> Parameter in <code>GT.tab_style()</code>: Pass a List of <code>loc.body()</code> Objects</h2>
 <p>A more concise method is to pass a list of <code>loc.body()</code> objects to the <code>locations=</code> parameter in <code>GT.tab_style()</code>, as shown below:</p>
-<div id="1f65baa0" class="cell" data-execution_count="3">
+<div id="3e677846" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">(</span>
 <span id="cb2-2">    gt.tab_style(</span>
 <span id="cb2-3">        style<span class="op" style="color: #5E5E5E;
@@ -15556,52 +15556,52 @@ font-style: inherit;">in</span> year_cols</span>
 <span id="cb2-8">    )</span>
 <span id="cb2-9">)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<div id="orbvhperbn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="lhuztnitom" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#orbvhperbn table {
+#lhuztnitom table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#orbvhperbn thead, tbody, tfoot, tr, td, th { border-style: none; }
+#lhuztnitom thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#orbvhperbn p { margin: 0; padding: 0; }
- #orbvhperbn .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #orbvhperbn .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #orbvhperbn .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #orbvhperbn .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #orbvhperbn .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #orbvhperbn .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #orbvhperbn .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #orbvhperbn .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #orbvhperbn .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #orbvhperbn .gt_column_spanner_outer:first-child { padding-left: 0; }
- #orbvhperbn .gt_column_spanner_outer:last-child { padding-right: 0; }
- #orbvhperbn .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #orbvhperbn .gt_spanner_row { border-bottom-style: hidden; }
- #orbvhperbn .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #orbvhperbn .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #orbvhperbn .gt_from_md> :first-child { margin-top: 0; }
- #orbvhperbn .gt_from_md> :last-child { margin-bottom: 0; }
- #orbvhperbn .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #orbvhperbn .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #orbvhperbn .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #orbvhperbn .gt_row_group_first td { border-top-width: 2px; }
- #orbvhperbn .gt_row_group_first th { border-top-width: 2px; }
- #orbvhperbn .gt_striped { background-color: #F4F4F4; }
- #orbvhperbn .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #orbvhperbn .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #orbvhperbn .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #orbvhperbn .gt_left { text-align: left; }
- #orbvhperbn .gt_center { text-align: center; }
- #orbvhperbn .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #orbvhperbn .gt_font_normal { font-weight: normal; }
- #orbvhperbn .gt_font_bold { font-weight: bold; }
- #orbvhperbn .gt_font_italic { font-style: italic; }
- #orbvhperbn .gt_super { font-size: 65%; }
- #orbvhperbn .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #orbvhperbn .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#lhuztnitom p { margin: 0; padding: 0; }
+ #lhuztnitom .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #lhuztnitom .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #lhuztnitom .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #lhuztnitom .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #lhuztnitom .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #lhuztnitom .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #lhuztnitom .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #lhuztnitom .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #lhuztnitom .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #lhuztnitom .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #lhuztnitom .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #lhuztnitom .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #lhuztnitom .gt_spanner_row { border-bottom-style: hidden; }
+ #lhuztnitom .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #lhuztnitom .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #lhuztnitom .gt_from_md> :first-child { margin-top: 0; }
+ #lhuztnitom .gt_from_md> :last-child { margin-bottom: 0; }
+ #lhuztnitom .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #lhuztnitom .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #lhuztnitom .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #lhuztnitom .gt_row_group_first td { border-top-width: 2px; }
+ #lhuztnitom .gt_row_group_first th { border-top-width: 2px; }
+ #lhuztnitom .gt_striped { background-color: #F4F4F4; }
+ #lhuztnitom .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #lhuztnitom .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #lhuztnitom .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #lhuztnitom .gt_left { text-align: left; }
+ #lhuztnitom .gt_center { text-align: center; }
+ #lhuztnitom .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #lhuztnitom .gt_font_normal { font-weight: normal; }
+ #lhuztnitom .gt_font_bold { font-weight: bold; }
+ #lhuztnitom .gt_font_italic { font-style: italic; }
+ #lhuztnitom .gt_super { font-size: 65%; }
+ #lhuztnitom .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #lhuztnitom .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -15680,7 +15680,7 @@ font-style: inherit;">in</span> year_cols</span>
 <section id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling" class="level2">
 <h2 class="anchored" data-anchor-id="leveraging-the-mask-parameter-in-loc.body-use-polars-expressions-for-streamlined-styling">Leveraging the <code>mask=</code> Parameter in <code>loc.body()</code>: Use Polars Expressions for Streamlined Styling</h2>
 <p>The most modern approach (<code>0.16.0</code>) is to pass a Polars expression to the <code>mask=</code> parameter in <code>loc.body()</code>, as illustrated here:</p>
-<div id="249537d9" class="cell" data-execution_count="4">
+<div id="0834a963" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    gt.tab_style(</span>
 <span id="cb3-3">        style<span class="op" style="color: #5E5E5E;
@@ -15700,52 +15700,52 @@ font-style: inherit;">650</span>))</span>
 <span id="cb3-5">    )</span>
 <span id="cb3-6">)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
-<div id="lbolidpojl" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="xhmhycpbsc" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#lbolidpojl table {
+#xhmhycpbsc table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#lbolidpojl thead, tbody, tfoot, tr, td, th { border-style: none; }
+#xhmhycpbsc thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#lbolidpojl p { margin: 0; padding: 0; }
- #lbolidpojl .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #lbolidpojl .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #lbolidpojl .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #lbolidpojl .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #lbolidpojl .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #lbolidpojl .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #lbolidpojl .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #lbolidpojl .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #lbolidpojl .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #lbolidpojl .gt_column_spanner_outer:first-child { padding-left: 0; }
- #lbolidpojl .gt_column_spanner_outer:last-child { padding-right: 0; }
- #lbolidpojl .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #lbolidpojl .gt_spanner_row { border-bottom-style: hidden; }
- #lbolidpojl .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #lbolidpojl .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #lbolidpojl .gt_from_md> :first-child { margin-top: 0; }
- #lbolidpojl .gt_from_md> :last-child { margin-bottom: 0; }
- #lbolidpojl .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #lbolidpojl .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #lbolidpojl .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #lbolidpojl .gt_row_group_first td { border-top-width: 2px; }
- #lbolidpojl .gt_row_group_first th { border-top-width: 2px; }
- #lbolidpojl .gt_striped { background-color: #F4F4F4; }
- #lbolidpojl .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #lbolidpojl .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #lbolidpojl .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #lbolidpojl .gt_left { text-align: left; }
- #lbolidpojl .gt_center { text-align: center; }
- #lbolidpojl .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #lbolidpojl .gt_font_normal { font-weight: normal; }
- #lbolidpojl .gt_font_bold { font-weight: bold; }
- #lbolidpojl .gt_font_italic { font-style: italic; }
- #lbolidpojl .gt_super { font-size: 65%; }
- #lbolidpojl .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #lbolidpojl .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#xhmhycpbsc p { margin: 0; padding: 0; }
+ #xhmhycpbsc .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #xhmhycpbsc .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #xhmhycpbsc .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #xhmhycpbsc .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #xhmhycpbsc .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xhmhycpbsc .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #xhmhycpbsc .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #xhmhycpbsc .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #xhmhycpbsc .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #xhmhycpbsc .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #xhmhycpbsc .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #xhmhycpbsc .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #xhmhycpbsc .gt_spanner_row { border-bottom-style: hidden; }
+ #xhmhycpbsc .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #xhmhycpbsc .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #xhmhycpbsc .gt_from_md> :first-child { margin-top: 0; }
+ #xhmhycpbsc .gt_from_md> :last-child { margin-bottom: 0; }
+ #xhmhycpbsc .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #xhmhycpbsc .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #xhmhycpbsc .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #xhmhycpbsc .gt_row_group_first td { border-top-width: 2px; }
+ #xhmhycpbsc .gt_row_group_first th { border-top-width: 2px; }
+ #xhmhycpbsc .gt_striped { background-color: #F4F4F4; }
+ #xhmhycpbsc .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #xhmhycpbsc .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #xhmhycpbsc .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #xhmhycpbsc .gt_left { text-align: left; }
+ #xhmhycpbsc .gt_center { text-align: center; }
+ #xhmhycpbsc .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #xhmhycpbsc .gt_font_normal { font-weight: normal; }
+ #xhmhycpbsc .gt_font_bold { font-weight: bold; }
+ #xhmhycpbsc .gt_font_italic { font-style: italic; }
+ #xhmhycpbsc .gt_super { font-size: 65%; }
+ #xhmhycpbsc .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #xhmhycpbsc .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
