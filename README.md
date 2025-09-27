@@ -1,2 +1,23 @@
 # tech
 Jerry Wu's Tech'n'take
+
+* [Exploring Resend SMTP Service with Django](https://tech.ycwu.space/posts/django-allauth-resend/20241223.html)
+* [Three Approaches to Styling the Table Body in Great Tables](https://tech.ycwu.space/posts/style-table-body/20250124.html)
+* [Weekend Challenge - Effective Data Visualization with Polars and Matplotlib](https://tech.ycwu.space/posts/effective-dataviz-polars-alta-ski-resort/20250210.html)
+* [Applying Custom Color Palettes to the Table Body in Great Tables](https://tech.ycwu.space/posts/table-body-custom-palette/20250225.html)
+* [Clone the Reciprocal Tariffs Table Using Great Tables](https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table/20250403.html)
+* [How to Access the Axes in Plotnine](https://tech.ycwu.space/posts/access-axes-in-plotnine/20250411.html)
+* [Weekend Challenge – Recreating a Data Visualization with Polars and Plotnine](https://tech.ycwu.space/posts/p9-polars-alta-ski-resort/20250412.html)
+* [Clone the Reciprocal Tariffs Table Using Plotnine](https://tech.ycwu.space/posts/clone-reciprocal-tariffs-table-p9/20250416.html)
+* [Polars Custom Expression Namespace](https://tech.ycwu.space/posts/polars-custom-expr-namespace/20250417.html)
+* [Custom Row Selector in Great Tables](https://tech.ycwu.space/posts/gt-row-selector/20250511.html)
+* [case_when() in Polars](https://tech.ycwu.space/posts/casewhen-in-polars/20250525.html)
+* [Styling tricks in Great Tables](https://tech.ycwu.space/posts/styling-tricks-table-body/20250526.html)
+* [marimo in Quarto](https://tech.ycwu.space/posts/marimo-in-quarto/20250607.html)
+* [Great Tables with marimo in Quarto](https://tech.ycwu.space/posts/gt-marimo-in-quarto/20250612.html)
+* [Interactive Django Deployment Checklist with marimo](https://tech.ycwu.space/posts/marimo-django-deployment-checklist/20250625.html)
+* [Send Email via marimo](https://tech.ycwu.space/posts/resend-via-marimo/20250625.html)
+* [Time Machine for Great Tables in marimo](https://tech.ycwu.space/posts/marimo-gt-time-machine/20250626.html)
+* [Creating an Integrated marimo UI Explorer with Great Tables](https://tech.ycwu.space/posts/marimo-gt-ui-reference/20250704.html)
+* [Turtle Island: A Utility Kit for Polars Expressions](https://tech.ycwu.space/posts/turtle-island-intro/20250706.html)
+* [Notes on Turtle Island](https://tech.ycwu.space/posts/turtle-island-notes/20250721.html)
