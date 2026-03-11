@@ -21,3 +21,4 @@ Jerry Wu's Tech'n'take
 * [Creating an Integrated marimo UI Explorer with Great Tables](https://tech.ycwu.space/posts/marimo-gt-ui-reference/20250704.html)
 * [Turtle Island: A Utility Kit for Polars Expressions](https://tech.ycwu.space/posts/turtle-island-intro/20250706.html)
 * [Notes on Turtle Island](https://tech.ycwu.space/posts/turtle-island-notes/20250721.html)
+* [Rust Notes #1: Loop Scope vs Python](https://tech.ycwu.space/posts/rust-notes-1/20260311.html)
