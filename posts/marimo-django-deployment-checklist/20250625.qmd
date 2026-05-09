@@ -25,13 +25,13 @@ The widgets may take a few moments to load, as they rely on WebAssembly under th
 5. Finally, I gave the table a nice header with [GT.tab_header()](https://posit-dev.github.io/great-tables/reference/GT.tab_header.html#great_tables.GT.tab_header) and applied some styling using [GT.opt_stylize()](https://posit-dev.github.io/great-tables/reference/GT.opt_stylize.html#great_tables.GT.opt_stylize).
 
 
-```python {.marimo}
+```{python .marimo}
 import marimo as mo
 import polars as pl
 from great_tables import GT, html, md
 ```
 
-```python {.marimo}
+```{python .marimo}
 tasks = [
     "Set DEBUG = False",
     "Configure ALLOWED_HOSTS",
@@ -65,12 +65,12 @@ data = {"Status": status, "Task": tasks, "Notes": notes}
 df = pl.DataFrame(data)
 ```
 
-```python {.marimo}
+```{python .marimo}
 status_widget = mo.ui.switch()
 status_widgets = mo.ui.array([status_widget] * n_row)
 ```
 
-```python {.marimo}
+```{python .marimo}
 def create_bar(
     x: float,
     max_width: int,
@@ -87,7 +87,7 @@ def create_bar(
     """
 ```
 
-```python {.marimo}
+```{python .marimo}
 #| echo: false
 done_count = sum(s.value for s in status_widgets)
 
