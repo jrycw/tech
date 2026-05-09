@@ -14,20 +14,21 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: Set up Quarto
-      uses: quarto-dev/quarto-actions/setup@v2
-    - run: quarto add marimo-team/quarto-marimo --no-prompt --quiet
-
     - name: Install uv
       uses: astral-sh/setup-uv@v5
       with:
         python-version: 3.12
-    - run: uv pip install --python=3.12 pip
-    - run: uv venv venv
-    - run: source venv/bin/activate
-    - run: uv pip install -r requirements.txt
 
-    - name: Render and Publish
+    - name: Install dependencies
+      run: uv sync --project .
+
+    - name: Set up Quarto
+      uses: quarto-dev/quarto-actions/setup@v2
+
+    - name: Install marimo extension
+      run: quarto add marimo-team/quarto-marimo --no-prompt --quiet
+
+    - name: publish
       uses: quarto-dev/quarto-actions/publish@v2
       with:
         target: gh-pages
