@@ -26,7 +26,7 @@ This setup allows us to move back and forth through the table-building steps and
 
 Let’s break it down.
 
-```{python .marimo}
+```python {.marimo}
 #| echo: false
 import marimo as mo
 import copy
@@ -47,7 +47,7 @@ def get_allowed_member_names() -> list[str]:
     return ["fmt", "fmt_number", ...]
 ```
 
-```{python .marimo}
+```python {.marimo}
 def get_allowed_member_names() -> list[str]:
     return [
         "fmt",
@@ -131,7 +131,7 @@ def lazify(cls: GT) -> GT:
     return cls
 ```
 
-```{python .marimo}
+```python {.marimo}
 def lazify(cls: GT) -> GT:
     def add_to_pipeline(func: Callable[..., GT]) -> callable:
         @wraps(func)
@@ -231,7 +231,7 @@ class WigGT:
         return GT(*self._args, **self._kwargs)
 ```
 
-```{python .marimo}
+```python {.marimo}
 @lazify
 class WigGT:
     def __init__(self, *args, widget, **kwargs):
@@ -319,7 +319,7 @@ Because all method calls are deferred, we can't determine the total number of st
 time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
 ```
 
-```{python .marimo}
+```python {.marimo}
 time_widget = mo.ui.slider(start=0, stop=6, step=1, value=0, label="Step")
 ```
 
@@ -350,7 +350,7 @@ lazy_wig_gt = (
 lazy_wig_gt
 ```
 
-```{python .marimo}
+```python {.marimo}
 lazy_wig_gt = (
     WigGT(airquality.head(10).assign(Year=1973), widget=time_widget)
     .opt_stylize(color="pink", style=2)
@@ -382,7 +382,7 @@ wig_gt = lazy_wig_gt.collect()
 wig_gt
 ```
 
-```{python .marimo}
+```python {.marimo}
 wig_gt = lazy_wig_gt.collect()
 wig_gt
 ```

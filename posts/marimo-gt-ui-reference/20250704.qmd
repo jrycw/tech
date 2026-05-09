@@ -27,7 +27,7 @@ This interactive table includes four columns:
 
 To keep things playful, I added a touch of randomness—so the table appears slightly different each time it loads.
 
-```{python .marimo}
+```python {.marimo}
 import marimo as mo
 
 import random
@@ -37,7 +37,7 @@ import pandas as pd
 from great_tables import GT, html
 ```
 
-```{python .marimo}
+```python {.marimo}
 def render_widget(widget):
     if hasattr(widget, "_display_"):
         render_method = "_display_"
@@ -63,7 +63,7 @@ def strify_widget_values(widgets):
     return [strify_widget_value(w) for w in widgets]
 ```
 
-```{python .marimo}
+```python {.marimo}
 switch = mo.ui.switch()
 checkbox = mo.ui.checkbox(label="check me")
 date = mo.ui.date()
@@ -203,7 +203,7 @@ color_widget = mo.ui.radio(
 )
 ```
 
-```{python .marimo}
+```python {.marimo}
 col_widget = render_widgets(widgets)
 col_value = strify_widget_values(widgets)
 
@@ -217,7 +217,7 @@ data = {
 df = pd.DataFrame(data)
 ```
 
-```{python .marimo}
+```python {.marimo}
 gt = (
     GT(df)
     .cols_align("left")
@@ -226,7 +226,7 @@ gt = (
 )
 ```
 
-```{python .marimo}
+```python {.marimo}
 #| echo: false
 (
     gt.opt_stylize(style=style_widget.value, color=color_widget.value)

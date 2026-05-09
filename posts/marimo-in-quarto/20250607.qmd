@@ -17,13 +17,13 @@ This post demonstrates that Polars, Great Tables, and marimo can successfully ru
 The widgets may take a few moments to load, as they rely on WebAssembly under the hood.
 ::: 
 
-```{python .marimo}
+```python {.marimo}
 import marimo as mo
 import polars as pl
 from great_tables import GT, loc, style
 ```
 
-```{python .marimo}
+```python {.marimo}
 data = {
     "col1": [2, 5, 7, 10, 15],
     "col2": ["x", "y", "y", "z", "z"],
@@ -33,7 +33,7 @@ df = pl.DataFrame(data)
 print(df)
 ```
 
-```{python .marimo}
+```python {.marimo}
 style_widget = mo.ui.slider(1, 6, label="Select Style Number")
 mo.output.append(style_widget)
 
@@ -47,7 +47,7 @@ row_striping_widget = mo.ui.switch(value=True, label="Add Row Striping?")
 mo.output.append(row_striping_widget)
 ```
 
-```{python .marimo}
+```python {.marimo}
 #| echo: false
 GT(df).opt_stylize(
     style=style_widget.value,
