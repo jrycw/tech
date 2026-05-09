@@ -25,41 +25,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -111,12 +76,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-
-
-<link rel="stylesheet" href="../../styles.css">
-</head>
-
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<script data-marimo="true">
+    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
+        value: Object.freeze({
+            trusted: true,
+            notebookCode: "import marimo\n\n__generated_with = \"0.23.5\"\napp = marimo.App()\n\n\n@app.cell\ndef _():\n    import marimo as mo\n    import polars as pl\n    from great_tables import GT, html\n\n    return GT, html, mo, pl\n\n\n@app.cell\ndef _(pl):\n    data = {\n        \"col1\": [2, 5, 7, 10, 15],\n        \"col2\": [\"x\", \"y\", \"y\", \"z\", \"z\"],\n        \"color\": [\n            \"lightgrey\",\n            \"lightblue\",\n            \"lightblue\",\n            \"papayawhip\",\n            \"papayawhip\",\n        ],\n    }\n    df = pl.DataFrame(data)\n    print(df)\n    return (df,)\n\n\n@app.cell\ndef _(GT, df, html, mo):\n    style_widget = mo.ui.slider(1, 6, label=\"Style Number\")\n\n    _colors = [\"blue\", \"cyan\", \"pink\", \"green\", \"red\", \"gray\"]\n    color_widget = mo.ui.radio(\n        options=_colors, value=_colors[0], label=\"Style Color\", inline=True\n    )\n\n    row_striping_widget = mo.ui.switch(value=True, label=\"Row Striping?\")\n\n    gt = (\n        GT(df)\n        .tab_header(html(style_widget), html(color_widget))\n        .tab_source_note(html(row_striping_widget))\n        .opt_align_table_header(\"left\")\n    )\n    return color_widget, gt, row_striping_widget, style_widget\n\n\n@app.cell\ndef _(color_widget, gt, row_striping_widget, style_widget):\n    gt.opt_stylize(\n        style=style_widget.value,\n        color=color_widget.value,\n        add_row_striping=row_striping_widget.value,\n    )\n    return\n\n\n@app.cell\ndef _():\n    import marimo\n\n    __generated_with = \"0.13.15\"\n    app = marimo.App(width=\"medium\")\n\n\n    @app.cell\n    def _():\n        import marimo as mo\n        import polars as pl\n        from great_tables import GT, html\n\n        return GT, html, mo, pl\n\n\n    @app.cell\n    def _(pl):\n        data = {\n            \"col1\": [2, 5, 7, 10, 15],\n            \"col2\": [\"x\", \"y\", \"y\", \"z\", \"z\"],\n            \"color\": [\n                \"lightgrey\",\n                \"lightblue\",\n                \"lightblue\",\n                \"papayawhip\",\n                \"papayawhip\",\n            ],\n        }\n        df = pl.DataFrame(data)\n        return (df,)\n\n\n    @app.cell\n    def _(GT, df, html, mo):\n        style_widget = mo.ui.slider(1, 6, label=\"Style Number\")\n\n        _colors = [\"blue\", \"cyan\", \"pink\", \"green\", \"red\", \"gray\"]\n        color_widget = mo.ui.radio(\n            options=_colors, value=_colors[0], label=\"Style Color\", inline=True\n        )\n\n        row_striping_widget = mo.ui.switch(value=True, label=\"Row Striping?\")\n\n        gt = (\n            GT(df)\n            .tab_header(html(style_widget), html(color_widget))\n            .tab_source_note(html(row_striping_widget))\n            .opt_align_table_header(\"left\")\n        )\n        return color_widget, gt, row_striping_widget, style_widget\n\n\n    @app.cell\n    def _(color_widget, gt, row_striping_widget, style_widget):\n        gt.opt_stylize(\n            style=style_widget.value,\n            color=color_widget.value,\n            add_row_striping=row_striping_widget.value,\n        )\n        return\n\n\n    if __name__ == \"__main__\":\n        app.run()\n\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
+        }),
+        writable: false,
+        configurable: false,
+    });
+</script></head><body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -278,7 +247,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     } else {
       toggleColorMode(false);
     }
-  </script>
+  </script><marimo-code hidden="">import%20marimo%0A%0A__generated_with%20%3D%20%220.23.5%22%0Aapp%20%3D%20marimo.App%28%29%0A%0A%0A%40app.cell%0Adef%20_%28%29%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20polars%20as%20pl%0A%20%20%20%20from%20great_tables%20import%20GT%2C%20html%0A%0A%20%20%20%20return%20GT%2C%20html%2C%20mo%2C%20pl%0A%0A%0A%40app.cell%0Adef%20_%28pl%29%3A%0A%20%20%20%20data%20%3D%20%7B%0A%20%20%20%20%20%20%20%20%22col1%22%3A%20%5B2%2C%205%2C%207%2C%2010%2C%2015%5D%2C%0A%20%20%20%20%20%20%20%20%22col2%22%3A%20%5B%22x%22%2C%20%22y%22%2C%20%22y%22%2C%20%22z%22%2C%20%22z%22%5D%2C%0A%20%20%20%20%20%20%20%20%22color%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22lightgrey%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%7D%0A%20%20%20%20df%20%3D%20pl.DataFrame%28data%29%0A%20%20%20%20print%28df%29%0A%20%20%20%20return%20%28df%2C%29%0A%0A%0A%40app.cell%0Adef%20_%28GT%2C%20df%2C%20html%2C%20mo%29%3A%0A%20%20%20%20style_widget%20%3D%20mo.ui.slider%281%2C%206%2C%20label%3D%22Style%20Number%22%29%0A%0A%20%20%20%20_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0A%20%20%20%20color_widget%20%3D%20mo.ui.radio%28%0A%20%20%20%20%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Style%20Color%22%2C%20inline%3DTrue%0A%20%20%20%20%29%0A%0A%20%20%20%20row_striping_widget%20%3D%20mo.ui.switch%28value%3DTrue%2C%20label%3D%22Row%20Striping%3F%22%29%0A%0A%20%20%20%20gt%20%3D%20%28%0A%20%20%20%20%20%20%20%20GT%28df%29%0A%20%20%20%20%20%20%20%20.tab_header%28html%28style_widget%29%2C%20html%28color_widget%29%29%0A%20%20%20%20%20%20%20%20.tab_source_note%28html%28row_striping_widget%29%29%0A%20%20%20%20%20%20%20%20.opt_align_table_header%28%22left%22%29%0A%20%20%20%20%29%0A%20%20%20%20return%20color_widget%2C%20gt%2C%20row_striping_widget%2C%20style_widget%0A%0A%0A%40app.cell%0Adef%20_%28color_widget%2C%20gt%2C%20row_striping_widget%2C%20style_widget%29%3A%0A%20%20%20%20gt.opt_stylize%28%0A%20%20%20%20%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A%20%20%20%20%29%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_%28%29%3A%0A%20%20%20%20import%20marimo%0A%0A%20%20%20%20__generated_with%20%3D%20%220.13.15%22%0A%20%20%20%20app%20%3D%20marimo.App%28width%3D%22medium%22%29%0A%0A%0A%20%20%20%20%40app.cell%0A%20%20%20%20def%20_%28%29%3A%0A%20%20%20%20%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20%20%20%20%20import%20polars%20as%20pl%0A%20%20%20%20%20%20%20%20from%20great_tables%20import%20GT%2C%20html%0A%0A%20%20%20%20%20%20%20%20return%20GT%2C%20html%2C%20mo%2C%20pl%0A%0A%0A%20%20%20%20%40app.cell%0A%20%20%20%20def%20_%28pl%29%3A%0A%20%20%20%20%20%20%20%20data%20%3D%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%22col1%22%3A%20%5B2%2C%205%2C%207%2C%2010%2C%2015%5D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22col2%22%3A%20%5B%22x%22%2C%20%22y%22%2C%20%22y%22%2C%20%22z%22%2C%20%22z%22%5D%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%22color%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22lightgrey%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%5D%2C%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20df%20%3D%20pl.DataFrame%28data%29%0A%20%20%20%20%20%20%20%20return%20%28df%2C%29%0A%0A%0A%20%20%20%20%40app.cell%0A%20%20%20%20def%20_%28GT%2C%20df%2C%20html%2C%20mo%29%3A%0A%20%20%20%20%20%20%20%20style_widget%20%3D%20mo.ui.slider%281%2C%206%2C%20label%3D%22Style%20Number%22%29%0A%0A%20%20%20%20%20%20%20%20_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0A%20%20%20%20%20%20%20%20color_widget%20%3D%20mo.ui.radio%28%0A%20%20%20%20%20%20%20%20%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Style%20Color%22%2C%20inline%3DTrue%0A%20%20%20%20%20%20%20%20%29%0A%0A%20%20%20%20%20%20%20%20row_striping_widget%20%3D%20mo.ui.switch%28value%3DTrue%2C%20label%3D%22Row%20Striping%3F%22%29%0A%0A%20%20%20%20%20%20%20%20gt%20%3D%20%28%0A%20%20%20%20%20%20%20%20%20%20%20%20GT%28df%29%0A%20%20%20%20%20%20%20%20%20%20%20%20.tab_header%28html%28style_widget%29%2C%20html%28color_widget%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20.tab_source_note%28html%28row_striping_widget%29%29%0A%20%20%20%20%20%20%20%20%20%20%20%20.opt_align_table_header%28%22left%22%29%0A%20%20%20%20%20%20%20%20%29%0A%20%20%20%20%20%20%20%20return%20color_widget%2C%20gt%2C%20row_striping_widget%2C%20style_widget%0A%0A%0A%20%20%20%20%40app.cell%0A%20%20%20%20def%20_%28color_widget%2C%20gt%2C%20row_striping_widget%2C%20style_widget%29%3A%0A%20%20%20%20%20%20%20%20gt.opt_stylize%28%0A%20%20%20%20%20%20%20%20%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A%20%20%20%20%20%20%20%20%29%0A%20%20%20%20%20%20%20%20return%0A%0A%0A%20%20%20%20if%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20%20%20%20%20app.run%28%29%0A%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run%28%29%0A</marimo-code><script type="module" src="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.23.5/dist/main.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.23.5/dist/style.css" rel="stylesheet" title="marimo-islands" crossorigin="anonymous">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&amp;family=Lora&amp;family=PT+Sans:wght@400;700&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
+<marimo-filename hidden=""></marimo-filename>
+
+
+<link rel="stylesheet" href="../../styles.css">
+
+
+
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
@@ -344,7 +325,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">2025-06-12</p>
+        <p class="date">June 12, 2025</p>
       </div>
     </div>
     
@@ -372,35 +353,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<pre><code>Error executing marimo: Process execution failed: Traceback (most recent call last):
-  File "/home/runner/work/tech/tech/_extensions/marimo-team/marimo/extract.py", line 394, in &lt;module&gt;
-    conversion = convert_from_md_to_pandoc_export(file, no_js)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/tech/tech/_extensions/marimo-team/marimo/extract.py", line 376, in convert_from_md_to_pandoc_export
-    return parser.convert(text)  # type: ignore[arg-type, return-value, no-any-return]
-           ^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/_temp/setup-uv-cache/archive-v0/bqUVrTHAG5KvXfz_/lib/python3.12/site-packages/marimo/_convert/markdown/to_ir.py", line 289, in convert
-    return super().convert(text)
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/_temp/setup-uv-cache/archive-v0/bqUVrTHAG5KvXfz_/lib/python3.12/site-packages/markdown/core.py", line 372, in convert
-    output = self.serializer(root)
-             ^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/tech/tech/_extensions/marimo-team/marimo/extract.py", line 295, in tree_to_pandoc_export
-    config, code = extract_and_strip_quarto_config(code)
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/tech/tech/_extensions/marimo-team/marimo/extract.py", line 81, in extract_and_strip_quarto_config
-    config[key] = json.loads(value)
-                  ^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
-    return _default_decoder.decode(s)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
-    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
-    raise JSONDecodeError("Expecting value", s, err.value) from None
-json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
-</code></pre>
 <p>This is a follow-up to my <a href="../../posts/marimo-in-quarto/20250607.html">previous post</a>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -423,48 +375,32 @@ json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
 </div>
 </div>
 <p>Here, I demonstrate how marimo widgets can be embedded in Great Tables by wrapping them with the <code>html()</code> function provided by the library. This allows interactive widgets to control the table’s appearance in a Quarto environment via WASM — a surprisingly powerful capability, in my opinion.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python marimo code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo <span class="im">as</span> mo</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> great_tables <span class="im">import</span> GT, html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python marimo code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"col1"</span>: [<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">15</span>],</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"col2"</span>: [<span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>, <span class="st">"z"</span>],</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"color"</span>: [</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lightgrey"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lightblue"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lightblue"</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"papayawhip"</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"papayawhip"</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    ],</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame(data)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python marimo code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>style_widget <span class="op">=</span> mo.ui.slider(<span class="dv">1</span>, <span class="dv">6</span>, label<span class="op">=</span><span class="st">"Style Number"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>_colors <span class="op">=</span> [<span class="st">"blue"</span>, <span class="st">"cyan"</span>, <span class="st">"pink"</span>, <span class="st">"green"</span>, <span class="st">"red"</span>, <span class="st">"gray"</span>]</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>color_widget <span class="op">=</span> mo.ui.radio(</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    options<span class="op">=</span>_colors, value<span class="op">=</span>_colors[<span class="dv">0</span>], label<span class="op">=</span><span class="st">"Style Color"</span>, inline<span class="op">=</span><span class="va">True</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>row_striping_widget <span class="op">=</span> mo.ui.switch(value<span class="op">=</span><span class="va">True</span>, label<span class="op">=</span><span class="st">"Row Striping?"</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>gt <span class="op">=</span> (</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    GT(df)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    .tab_header(html(style_widget), html(color_widget))</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    .tab_source_note(html(row_striping_widget))</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    .opt_align_table_header(<span class="st">"left"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python marimo code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>gt.opt_stylize(</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    style<span class="op">=</span>style_widget.value,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span>color_widget.value,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    add_row_striping<span class="op">=</span>row_striping_widget.value,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<marimo-island data-app-id="main" data-cell-id="Hbol" data-reactive="true">
+    <marimo-cell-output>
+    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;type&quot;:&quot;exception&quot;,&quot;msg&quot;:&quot;No module named 'polars'&quot;,&quot;exception_type&quot;:&quot;ModuleNotFoundError&quot;,&quot;raising_cell&quot;:null,&quot;traceback&quot;:null}]"></marimo-mime-renderer>
+    </marimo-cell-output>
+    <marimo-cell-code hidden="">import%20marimo%20as%20mo%0Aimport%20polars%20as%20pl%0Afrom%20great_tables%20import%20GT%2C%20html</marimo-cell-code>
+</marimo-island>
+<marimo-island data-app-id="main" data-cell-id="MJUe" data-reactive="true">
+    <marimo-cell-output>
+    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;type&quot;:&quot;exception&quot;,&quot;msg&quot;:&quot;An ancestor raised an exception (ModuleNotFoundError): &quot;,&quot;exception_type&quot;:&quot;Ancestor raised&quot;,&quot;raising_cell&quot;:&quot;Hbol&quot;,&quot;traceback&quot;:null}]"></marimo-mime-renderer>
+    </marimo-cell-output>
+    <marimo-cell-code hidden="">data%20%3D%20%7B%0A%20%20%20%20%22col1%22%3A%20%5B2%2C%205%2C%207%2C%2010%2C%2015%5D%2C%0A%20%20%20%20%22col2%22%3A%20%5B%22x%22%2C%20%22y%22%2C%20%22y%22%2C%20%22z%22%2C%20%22z%22%5D%2C%0A%20%20%20%20%22color%22%3A%20%5B%0A%20%20%20%20%20%20%20%20%22lightgrey%22%2C%0A%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%22lightblue%22%2C%0A%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%20%20%20%20%22papayawhip%22%2C%0A%20%20%20%20%5D%2C%0A%7D%0Adf%20%3D%20pl.DataFrame(data)%0Aprint(df)</marimo-cell-code>
+</marimo-island>
+<marimo-island data-app-id="main" data-cell-id="vblA" data-reactive="true">
+    <marimo-cell-output>
+    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;type&quot;:&quot;exception&quot;,&quot;msg&quot;:&quot;An ancestor raised an exception (ModuleNotFoundError): &quot;,&quot;exception_type&quot;:&quot;Ancestor raised&quot;,&quot;raising_cell&quot;:&quot;Hbol&quot;,&quot;traceback&quot;:null}]"></marimo-mime-renderer>
+    </marimo-cell-output>
+    <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Style%20Number%22)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Style%20Color%22%2C%20inline%3DTrue%0A)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Row%20Striping%3F%22)%0A%0Agt%20%3D%20(%0A%20%20%20%20GT(df)%0A%20%20%20%20.tab_header(html(style_widget)%2C%20html(color_widget))%0A%20%20%20%20.tab_source_note(html(row_striping_widget))%0A%20%20%20%20.opt_align_table_header(%22left%22)%0A)</marimo-cell-code>
+</marimo-island>
+<marimo-island data-app-id="main" data-cell-id="bkHC" data-reactive="true">
+    <marimo-cell-output>
+    <marimo-mime-renderer data-mime="&quot;application/vnd.marimo+error&quot;" data-data="[{&quot;type&quot;:&quot;exception&quot;,&quot;msg&quot;:&quot;An ancestor raised an exception (ModuleNotFoundError): &quot;,&quot;exception_type&quot;:&quot;Ancestor raised&quot;,&quot;raising_cell&quot;:&quot;Hbol&quot;,&quot;traceback&quot;:null}]"></marimo-mime-renderer>
+    </marimo-cell-output>
+    <marimo-cell-code hidden="">gt.opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
+</marimo-island>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_En2k3WtpkE1Uf6a8QvCS7n/app">molab</a>.</p>
-<pre class="{python}"><code>#| code-fold: true
-#| eval: false
-#| code-summary: Show full code
-import marimo
+<pre class="{python}"><code>import marimo
 
 __generated_with = "0.13.15"
 app = marimo.App(width="medium")
