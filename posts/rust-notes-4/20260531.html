@@ -368,6 +368,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#puzzle-4-derive-generated-implementations" id="toc-puzzle-4-derive-generated-implementations" class="nav-link" data-scroll-target="#puzzle-4-derive-generated-implementations">Puzzle 4: Derive-Generated Implementations</a></li>
   <li><a href="#puzzle-5-deref-method-lookup" id="toc-puzzle-5-deref-method-lookup" class="nav-link" data-scroll-target="#puzzle-5-deref-method-lookup">Puzzle 5: Deref Method Lookup</a></li>
   <li><a href="#puzzle-6-blanket-implementations" id="toc-puzzle-6-blanket-implementations" class="nav-link" data-scroll-target="#puzzle-6-blanket-implementations">Puzzle 6: Blanket Implementations</a></li>
+  <li><a href="#puzzle-7-macro-generated-implementations" id="toc-puzzle-7-macro-generated-implementations" class="nav-link" data-scroll-target="#puzzle-7-macro-generated-implementations">Puzzle 7: Macro-Generated Implementations</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -1092,6 +1093,202 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <blockquote class="blockquote">
 <p>The key idea is that <code>union()</code> is written only once, yet it automatically becomes available on many different collection types. In the example, a vector, an array, and even a filtered <code>Option</code> can all call the same <code>union()</code> method because they satisfy the required iterator constraint.</p>
+</blockquote>
+</section>
+<section id="puzzle-7-macro-generated-implementations" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-7-macro-generated-implementations">Puzzle 7: Macro-Generated Implementations</h2>
+<p>Treat 15 integer-like types uniformly: <code>u8</code>, …, <code>usize</code>, …<code>i128</code>, <code>char</code>, <code>IPv4</code>, <code>IPv6</code></p>
+<p>For example, with a <code>min</code>, <code>max</code>, and ability to add one (unchecked).</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    direction TB
+
+    class Integer {
+        &lt;&lt;abstract class&gt;&gt;
+        +add_one()
+        +min_value()
+        +max_value()
+    }
+
+    class NumericInteger {
+        &lt;&lt;abstract class&gt;&gt;
+        +add_one()
+        +min_value()
+        +max_value()
+    }
+
+    class IpInteger {
+        &lt;&lt;abstract class&gt;&gt;
+        +add_one()
+        +min_value()
+        +max_value()
+    }
+
+    class CharInteger {
+        &lt;&lt;abstract class&gt;&gt;
+        +add_one()
+        +min_value()
+        +max_value()
+    }
+
+    class u8 {
+        &lt;&lt;concrete class&gt;&gt;
+        +add_one() // inherited
+        +min_value() // inherited
+        +max_value() // inherited
+    }
+
+    class IPv4Type {
+        &lt;&lt;concrete class&gt;&gt;
+        +add_one() // inherited
+        +min_value() // inherited
+        +max_value() // inherited
+    }
+
+    class IPv6Type {
+        &lt;&lt;concrete class&gt;&gt;
+        +add_one() // inherited
+        +min_value() // inherited
+        +max_value() // inherited
+    }
+
+    class CharType {
+        &lt;&lt;concrete class&gt;&gt;
+        +add_one() // inherited
+        +min_value() // inherited
+        +max_value() // inherited
+    }
+
+    Integer &lt;|-- NumericInteger : is-a
+    Integer &lt;|-- IpInteger : is-a
+    Integer &lt;|-- CharInteger : is-a
+
+    NumericInteger &lt;|-- u8 : is-a
+    IpInteger &lt;|-- IPv4Type : is-a
+    IpInteger &lt;|-- IPv6Type : is-a
+    CharInteger &lt;|-- CharType : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>In addition to procedural macros like <code>derive</code>, which take a token stream and transform it into another token stream, declarative macros (<code>macro_rules!</code>) can also generate code — including full method implementations.</p>
+<p>The key difference here is that instead of manually writing nearly identical <code>impl</code> blocks for each type, we encode the shared logic once and reuse it across all implementations via macros. This significantly reduces repetition while keeping the specialization for each type explicit where needed.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Macro-Generated Implementations — Code
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::net::</span><span class="op">{</span>Ipv4Addr<span class="op">,</span> Ipv6Addr<span class="op">};</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Integer<span class="op">:</span> <span class="bu">Copy</span> <span class="op">+</span> <span class="bu">Ord</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> add_one(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="pp">macro_rules!</span> impl_integer_ops_num <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    (<span class="op">$</span>t<span class="op">:</span>ty) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> add_one(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span> <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;$</span>t<span class="op">&gt;</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;$</span>t<span class="op">&gt;</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="pp">macro_rules!</span> impl_integer_ops_ip <span class="op">{</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    (<span class="op">$</span>ip_type<span class="op">:</span>ty<span class="op">,</span> <span class="op">$</span>representation_type<span class="op">:</span>ty) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> add_one(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;$</span>ip_type<span class="op">&gt;</span><span class="pp">::</span>from(<span class="op">&lt;$</span>representation_type<span class="op">&gt;</span><span class="pp">::</span>from(<span class="kw">self</span>) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;$</span>ip_type<span class="op">&gt;</span><span class="pp">::</span>from(<span class="op">&lt;$</span>representation_type<span class="op">&gt;</span><span class="pp">::</span><span class="cn">MIN</span>)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>            <span class="op">&lt;$</span>ip_type<span class="op">&gt;</span><span class="pp">::</span>from(<span class="op">&lt;$</span>representation_type<span class="op">&gt;</span><span class="pp">::</span><span class="cn">MAX</span>)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="pp">macro_rules!</span> impl_integer_ops_char <span class="op">{</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    () <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> add_one(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> <span class="dt">u32</span><span class="pp">::</span>from(<span class="kw">self</span>) <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> num <span class="op">==</span> <span class="dv">0xD800</span> <span class="op">{</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>                num <span class="op">=</span> <span class="dv">0xE000</span><span class="op">;</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>            <span class="op">}</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>            <span class="dt">char</span><span class="pp">::</span>from_u32(num)<span class="op">.</span>expect(<span class="st">"next char must be a valid Unicode scalar value"</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>            <span class="dt">char</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>            <span class="dt">char</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i8</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">i8</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u8</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">u8</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i16</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">i16</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u16</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">u16</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i32</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">i32</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u32</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">u32</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i64</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">i64</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u64</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">u64</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i128</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">i128</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u128</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">u128</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">isize</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">isize</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">usize</span> <span class="op">{</span> <span class="pp">impl_integer_ops_num!</span>(<span class="dt">usize</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> Ipv4Addr <span class="op">{</span> <span class="pp">impl_integer_ops_ip!</span>(Ipv4Addr<span class="op">,</span> <span class="dt">u32</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> Ipv6Addr <span class="op">{</span> <span class="pp">impl_integer_ops_ip!</span>(Ipv6Addr<span class="op">,</span> <span class="dt">u128</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">char</span> <span class="op">{</span> <span class="pp">impl_integer_ops_char!</span>()<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a><span class="co">// Can't use num_traits::PrimInt as a 'subclass'</span></span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a><span class="co">// because Rust worries that 'char' etc. might</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a><span class="co">// be added to it later (coherence).</span></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a><span class="co">// HOWEVER: You could define your own PrimInt with 12 impls.</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: macro-generated implementation.</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> x<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">254</span><span class="op">;</span></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(x<span class="op">.</span>add_one()<span class="op">,</span> <span class="dv">255</span>)<span class="op">;</span></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="ch">'a'</span><span class="op">.</span>add_one()<span class="op">,</span> <span class="ch">'b'</span>)<span class="op">;</span></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>min_value()<span class="op">,</span> <span class="dt">char</span><span class="pp">::</span><span class="cn">MIN</span>)<span class="op">;</span></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>max_value()<span class="op">,</span> <span class="dt">char</span><span class="pp">::</span><span class="cn">MAX</span>)<span class="op">;</span></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="pp">Ipv4Addr::</span>min_value()<span class="op">,</span> <span class="pp">Ipv4Addr::</span>new(<span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span>))<span class="op">;</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="pp">Ipv4Addr::</span>max_value()<span class="op">,</span> <span class="pp">Ipv4Addr::</span>new(<span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span><span class="op">,</span> <span class="dv">255</span>))<span class="op">;</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The key idea is that macros let us scale a single abstraction (<code>Integer</code>) across many unrelated types by generating repetitive <code>impl</code> blocks automatically, while still allowing special-case logic (like <code>char</code> and IP addresses) where needed.</p>
 </blockquote>
 </section>
 <section id="conclusion" class="level2">
