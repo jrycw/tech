@@ -368,7 +368,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#puzzle-4-derive-generated-implementations" id="toc-puzzle-4-derive-generated-implementations" class="nav-link" data-scroll-target="#puzzle-4-derive-generated-implementations">Puzzle 4: Derive-Generated Implementations</a></li>
   <li><a href="#puzzle-5-deref-method-lookup" id="toc-puzzle-5-deref-method-lookup" class="nav-link" data-scroll-target="#puzzle-5-deref-method-lookup">Puzzle 5: Deref Method Lookup</a></li>
   <li><a href="#puzzle-6-blanket-implementations" id="toc-puzzle-6-blanket-implementations" class="nav-link" data-scroll-target="#puzzle-6-blanket-implementations">Puzzle 6: Blanket Implementations</a></li>
-  <li><a href="#slightly-cleaner-in-my-view" id="toc-slightly-cleaner-in-my-view" class="nav-link" data-scroll-target="#slightly-cleaner-in-my-view">Slightly cleaner in my view</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -920,11 +919,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="puzzle-6-blanket-implementations" class="level2">
 <h2 class="anchored" data-anchor-id="puzzle-6-blanket-implementations">Puzzle 6: Blanket Implementations</h2>
 <p>We want to union any number of sets (<code>RangeSetBlaze&lt;T&gt;</code>). In OO terms, any collection that is an iterable of <code>RangeSetBlaze&lt;T&gt;</code> references should inherit this operation.</p>
-</section>
-<section id="slightly-cleaner-in-my-view" class="level2 Warning-tip" data-collapse="false">
-<h2 class="anchored" data-anchor-id="slightly-cleaner-in-my-view">Slightly cleaner in my view</h2>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Slightly cleaner in my view
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
 <p>We want to union any number of sets (<code>RangeSetBlaze</code>). In OO terms, any collection that can be iterated as <code>&amp;RangeSetBlaze</code> should inherit this operation.</p>
-</section>
+</div>
+</div>
+</div>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
 <div>
@@ -976,7 +986,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The requirements are typically expressed through trait bounds, often using a <code>where</code> clause. This lets us precisely control which types receive the implementation while keeping the code concise and reusable.</p>
 <p>Like other generic features in Rust, blanket implementations are resolved at compile time. The compiler generates the necessary code for each applicable type, providing flexibility without introducing runtime overhead.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -985,7 +995,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::collections::</span>BTreeSet<span class="op">;</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1063,7 +1073,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -1072,7 +1082,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>One interesting thing I learned from this example is that the final test works because <a href="https://rust.docs.kernel.org/core/option/index.html#iterating-over-option"><code>Option&lt;T&gt;</code> implements <code>IntoIterator</code></a>. As a result, <code>Option&lt;&amp;RangeSetBlaze&gt;</code> becomes an iterator that yields either zero or one <code>&amp;RangeSetBlaze</code> value. Since it satisfies the blanket implementation’s trait bound, the expression</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cn">Some</span>(<span class="op">&amp;</span>a)<span class="op">.</span>filter(<span class="op">|</span>set<span class="op">|</span> <span class="op">!</span>set<span class="op">.</span>is_empty())<span class="op">.</span><span class="kw">union</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -1083,6 +1093,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p>The key idea is that <code>union()</code> is written only once, yet it automatically becomes available on many different collection types. In the example, a vector, an array, and even a filtered <code>Option</code> can all call the same <code>union()</code> method because they satisfy the required iterator constraint.</p>
 </blockquote>
+</section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
 <p>Here is the conclusion table from Carl Kadie:</p>
