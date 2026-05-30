@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jerry Wu">
-<meta name="dcterms.date" content="2026-05-09">
+<meta name="dcterms.date" content="2026-05-31">
 
-<title>Rust Notes #2: Trait-Based Conversions in Iterators – Tech’n’Take</title>
+<title>Rust Notes #4: Inherit-ish – Tech’n’Take</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -322,7 +322,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Rust Notes #2: Trait-Based Conversions in Iterators</h1>
+      <h1 class="title">Rust Notes #4: Inherit-ish</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">rust</div>
               </div>
@@ -342,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">May 9, 2026</p>
+        <p class="date">May 31, 2026</p>
       </div>
     </div>
     
@@ -353,8 +353,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#puzzle-1-trait-default-methods" id="toc-puzzle-1-trait-default-methods" class="nav-link active" data-scroll-target="#puzzle-1-trait-default-methods">Puzzle 1: Trait Default Methods</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -366,37 +372,91 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><img src="rust_notes_2.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 2"></p>
+<p><img src="rust_notes_4.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 4"></p>
 </figure>
 </div>
-<p>Today I read some code in <a href="https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html">Rust by Example</a> and came across an interesting usage of iterator combinators.</p>
-<p>Typically, I would pass a closure to <code>Iterator::map()</code>, but a more elegant approach is to use a trait function pointer directly. For example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> v <span class="op">=</span> <span class="pp">vec!</span>[<span class="st">"42"</span>]<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r1<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> v<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|</span>s<span class="op">|</span> s<span class="op">.</span>to_string())<span class="op">.</span>collect()<span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r2<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> v<span class="op">.</span>into_iter()<span class="op">.</span>map(<span class="dt">String</span><span class="pp">::</span>from)<span class="op">.</span>collect()<span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Alternative <code>r1</code> implementation using <code>String::from()</code>
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>An alternative implementation for <code>r1</code> is:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> r1<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> v<span class="op">.</span>iter()<span class="op">.</span>map(<span class="op">|&amp;</span>s<span class="op">|</span> <span class="dt">String</span><span class="pp">::</span>from(s))<span class="op">.</span>collect()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Using <code>.to_string()</code> or <code>String::from()</code> here is mostly a matter of coding style.</p>
-<p>The item type produced by <code>v.iter()</code> is <code>&amp;&amp;str</code>. In the first version, we rely on Rust’s auto-deref feature with <code>|s| s.to_string()</code>. In the second version, we manually destructure the extra reference layer using <code>|&amp;s|</code>, converting the item from <code>&amp;&amp;str</code> to <code>&amp;str</code>, which can then be passed directly to <code>String::from()</code>.</p>
-</div>
-</div>
-</div>
-<p>For <code>r1</code>, we provide a closure that is applied to each item of the iterator. For <code>r2</code>, however, we directly pass the <code>String::from</code> function.</p>
-<p>This technique becomes especially useful when type constraints are already clear from context. Instead of explicitly referring to a concrete constructor like <code>String::from</code>, Rust allows us to rely on more general trait-based conversions. For example, the book demonstrates that <code>.map_err(From::from)</code> leverages the <code>From::from</code> function as a generic conversion mechanism, letting the compiler infer the appropriate target error type from the surrounding <code>Result</code> context. This makes the code more flexible and reduces the need to commit to a specific concrete type at the point of transformation.</p>
+<p>After watching Carl Kadie’s excellent talk <a href="www.youtube.com/watch?v=3IyKC5EtNkM">9 Ways to Do Inheritance in Rust, a Language without Inheritance</a>, I decided to write down some notes from his work.</p>
+<p>To be clear, all of the ideas and code presented here come from Carl Kadie. You can find the original material in the accompanying <a href="https://github.com/CarlKCarlK/inherit">GitHub repository</a>. My role here is simply that of a note-taker, with added commentary to help my future self (and perhaps others) revisit these concepts more easily.</p>
+<section id="puzzle-1-trait-default-methods" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-1-trait-default-methods">Puzzle 1: Trait Default Methods</h2>
+<p><code>RangeSetBlaze</code> works with sets of integers such as <code>u8</code>, <code>i16</code>, and other integer types. Each integer type must provide fundamental operations like <code>min_value()</code> and <code>max_value()</code>. At the same time, we want all integer types to share additional behavior, such as an <code>exhausted_range()</code> method.</p>
+<pre class="mermaid"><code>classDiagram
+    direction TB
+
+    class Integer {
+        &lt;&lt;abstract class&gt;&gt;
+        +min_value() Self // required
+        +max_value() Self // required
+        +exhausted_range() RangeInclusive~Self~  // code
+    }
+
+    class u8 {
+        &lt;&lt;concrete class&gt;&gt;
+        +min_value() Self
+        +max_value() Self
+        +exhausted_range() RangeInclusive~Self~  // inherited
+    }
+
+    class i16 {
+        &lt;&lt;concrete class&gt;&gt;
+        +min_value() Self
+        +max_value() Self
+        +exhausted_range() RangeInclusive~Self~  // inherited
+    }
+
+    Integer &lt;|-- u8 : is-a
+    Integer &lt;|-- i16 : is-a</code></pre>
+<p>In Rust, traits are often thought of as contracts: they define a set of required methods that implementors must provide. In that sense, a trait specifies <em>what</em> functionality a type must have.</p>
+<p>However, traits can do more than define interfaces. They can also provide concrete method implementations. When a trait includes such methods, all implementors automatically gain access to them unless they choose to override the default behavior. This gives us something conceptually similar to inheritance: shared behavior defined once and reused across multiple types.</p>
+<p>This pattern is known as <strong>trait default methods</strong>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::ops::</span>RangeInclusive<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: Trait Default Methods.</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Integer<span class="op">:</span> <span class="bu">Copy</span> <span class="op">+</span> <span class="bu">Ord</span> <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Default behavior inherited by implementors.</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Any impl can override this method.</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Returns an exhausted (empty) range`.</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> exhausted_range() <span class="op">-&gt;</span> RangeInclusive<span class="op">&lt;</span><span class="dt">Self</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="pp">debug_assert!</span>(<span class="dt">Self</span><span class="pp">::</span>min_value() <span class="op">&lt;</span> <span class="dt">Self</span><span class="pp">::</span>max_value()<span class="op">,</span> <span class="st">"Precondition"</span>)<span class="op">;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span><span class="pp">::</span>max_value()<span class="op">..=</span><span class="dt">Self</span><span class="pp">::</span>min_value()</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u8</span> <span class="op">{</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">u8</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">u8</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i16</span> <span class="op">{</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">i16</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">i16</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="dt">u8</span><span class="pp">::</span>exhausted_range()<span class="op">;</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="dt">i16</span><span class="pp">::</span>exhausted_range()<span class="op">;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(r1<span class="op">,</span> <span class="dv">255</span><span class="op">..=</span><span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(r2<span class="op">.</span>is_empty())<span class="op">;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME (again): Trait Default Methods.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The key idea is that <code>u8</code> and <code>i16</code> only need to implement the required methods, <code>min_value()</code> and <code>max_value()</code>. The <code>exhausted_range()</code> method is defined once in the trait and automatically shared by all implementors.</p>
+<p>This is not inheritance in the classical object-oriented sense, but it achieves one of the most practical benefits of inheritance: reuse of behavior without duplicating code.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -412,6 +472,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
