@@ -108,9 +108,202 @@ fn main() {
 ```
 :::
 
-The key idea is that `u8` and `i16` only need to implement the required methods, `min_value()` and `max_value()`. The `exhausted_range()` method is defined once in the trait and automatically shared by all implementors.
+> The key idea is that `u8` and `i16` only need to implement the required methods, `min_value()` and `max_value()`. The `exhausted_range()` method is defined once in the trait and automatically shared by all implementors.
 
-This is not inheritance in the classical object-oriented sense, but it achieves one of the most practical benefits of inheritance: reuse of behavior without duplicating code.
+## Puzzle 2: Supertraits
+
+A servo is an electric motor that can move to a specified angle. We want a `ServoEsp` (our type that controls a servo on an ESP32 microcontroller) to work with any code that needs a servo. A `ServoPlayerEsp` is similar, but with animation ability. (Inspired by `device-envoy`.)
+
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class Servo {
+        <<abstract class>>
+        +set_degrees(degrees)
+    }
+
+    class ServoPlayer {
+        <<abstract class>>
+        +set_degrees(degrees) // from Servo
+        +animate(steps)
+    }
+
+    class ServoEsp {
+        <<concrete class>>
+        +set_degrees(degrees)
+    }
+
+    class ServoPlayerEsp {
+        <<concrete class>>
+        +set_degrees(degrees)
+        +animate(steps)
+    }
+
+    Servo <|-- ServoPlayer : is-a
+    Servo <|-- ServoEsp : is-a
+    ServoPlayer <|-- ServoPlayerEsp : is-a
+```
+
+In Rust, a trait can depend on another trait. The syntax `trait B: A` means that `B` requires `A` as a prerequisite. In other words, any type that implements `B` must also implement `A`.
+
+This is similar to saying that `B` extends `A`: anything that works with `A` will also work with `B`, but `B` provides additional functionality on top.
+
+In traditional object-oriented terms, this feels like an "is-a" relationship where `B` can do everything `A` can do, plus more, while still being treated as an `A` when needed.
+
+This pattern is known as **supertraits**.
+
+::: {.callout-tip collapse="true"}
+## Supertraits — Code
+
+```rust
+use std::thread;
+use std::time::Duration;
+
+// `Servo` is an abstract class (a trait), not a concrete driver.
+trait Servo {
+    fn set_degrees(&self, degrees: u16);
+}
+
+// `ServoPlayer` is also abstract. It extends `Servo` (supertrait), so any
+// `ServoPlayer` can do everything in `Servo` plus animation.
+// TECHNIQUE NAME: Supertraits
+trait ServoPlayer: Servo {
+    // (degrees, milliseconds to hold at that angle)
+    fn animate(&self, steps: &[(u16, u64)]);
+}
+
+#[derive(Default)]
+// Concrete servo driver (similar naming to the real example): `ServoEsp`.
+struct ServoEsp;
+
+impl Servo for ServoEsp {
+    fn set_degrees(&self, degrees: u16) {
+        println!("[ServoEsp] set angle -> {degrees}°");
+    }
+}
+
+#[derive(Default)]
+// Concrete servo player driver that can animate.
+struct ServoPlayerEsp;
+
+impl Servo for ServoPlayerEsp {
+    fn set_degrees(&self, degrees: u16) {
+        println!("[ServoPlayerEsp] set angle -> {degrees}°");
+    }
+}
+
+impl ServoPlayer for ServoPlayerEsp {
+    fn animate(&self, steps: &[(u16, u64)]) {
+        for (degrees, ms) in steps {
+            self.set_degrees(*degrees);
+            println!("[ServoPlayerEsp] hold for {ms}ms");
+            thread::sleep(Duration::from_millis(*ms));
+        }
+    }
+}
+
+// Generic program that only needs a `Servo`.
+fn center_servo(servo: &impl Servo) {
+    servo.set_degrees(90);
+}
+
+// Generic program that needs a `ServoPlayer`.
+fn run_wave(player: &impl ServoPlayer) {
+    player.animate(&[
+        (0, 120),
+        (45, 100),
+        (90, 100),
+        (135, 100),
+        (180, 120),
+        (135, 100),
+        (90, 100),
+        (45, 100),
+        (0, 120),
+    ]);
+}
+
+fn main() {
+    let servo_esp = ServoEsp::default();
+    let servo_player_esp = ServoPlayerEsp::default();
+
+    center_servo(&servo_esp);
+    // `ServoPlayer` can do everything `Servo` can!
+    center_servo(&servo_player_esp);
+    // and more.
+    run_wave(&servo_player_esp);
+}
+```
+:::
+
+> The key idea is that `ServoPlayer` builds on top of `Servo` rather than replacing it. Any type that implements `ServoPlayer` must also implement `Servo`, allowing it to be used wherever a `Servo` is expected while providing additional capabilities. Supertraits therefore offer a trait-based way to express "is-a" relationships and extend behavior incrementally.
+
+
+## Puzzle 3: Extension Traits
+
+We want to add a new method `is_odd()` to an existing concrete type `usize`, that type is defined outside our crate ("foreign").
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class UsizeExtensions {
+        <<abstract class>>
+        +is_odd() bool
+    }
+
+    class usize {
+        <<concrete class>>
+        +is_odd() bool // inherited
+    }
+
+    UsizeExtensions <|-- usize : is-a
+```
+
+For types that we define ourselves, such as structs and enums, we can add methods through an `impl` block. However, Rust does not allow us to write an inherent `impl` for a type defined in another crate, including primitive types like `usize`.
+
+This restriction prevents different crates from attaching conflicting methods to the same type, which would make method resolution ambiguous.
+
+Fortunately, traits provide a workaround. We can define our own trait, implement it for the foreign type, and thereby extend the type with new methods. From the caller's perspective, these methods behave much like native methods on the type itself.
+
+This pattern is known as **extension traits**.
+
+::: {.callout-tip collapse="true"}
+## Extension Traits — Code
+
+```rust
+// impl usize {
+//     fn is_odd(self) -> bool {
+//         self & 1 != 0
+//     }
+// }
+// error[E0390]: cannot define inherent `impl` for primitive types
+
+trait UsizeExtensions {
+    fn is_odd(self) -> bool;
+}
+
+impl UsizeExtensions for usize {
+    fn is_odd(self) -> bool {
+        self & 1 != 0
+    }
+}
+
+// TECHNIQUE NAME: extension traits.
+
+fn main() {
+    let count: usize = 7;
+
+    assert!(count.is_odd());
+    assert!(!12.is_odd());
+}
+```
+:::
+
+> The key idea is that `usize` "inherits" the `is_odd()` method from `UsizeExtensions`. Although we cannot add methods directly to the foreign type, implementing an extension trait gives us a very similar result from the caller's perspective.
+
+
 
 
 ## Conclusion
