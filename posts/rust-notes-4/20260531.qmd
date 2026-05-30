@@ -482,6 +482,154 @@ fn main() {
 > The key idea is that `HtmlBuffer` *feels* like a `String` even though it is a wrapper type. Through `Deref` and `DerefMut`, method calls like `len()` and `push_str()` are automatically forwarded to the inner `String`. This makes the wrapper effectively transparent in everyday use, while still preserving its own distinct identity as a separate type.
 
 
+## Puzzle 6: Blanket Implementations
+
+We want to union any number of sets (`RangeSetBlaze<T>`). In OO terms, any collection that is an iterable of `RangeSetBlaze<T>` references should inherit this operation.
+
+::: {.callout-warning collapse="false"}
+## Slightly cleaner in my view
+We want to union any number of sets (`RangeSetBlaze`). In OO terms, any collection that can be iterated as `&RangeSetBlaze` should inherit this operation.
+:::
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class Iterable {
+        <<abstract class>>
+        +iterator()
+    }
+
+    class RangeSetCollection {
+        <<abstract class>>
+        +iterator() // from Iterable
+        +union()
+    }
+
+    class VectorOfRangeSetRefs {
+        <<concrete class>>
+        +iterator()
+        +union() // inherited
+    }
+
+    class ArrayOfRangeSetRefs {
+        <<concrete class>>
+        +iterator()
+        +union() // inherited
+    }
+
+    class AnyOtherRangeSetCollection {
+        <<concrete class>>
+        +iterator()
+        +union() // inherited
+    }
+
+    Iterable <|-- RangeSetCollection : is-a
+    RangeSetCollection <|-- VectorOfRangeSetRefs : is-a
+    RangeSetCollection <|-- ArrayOfRangeSetRefs : is-a
+    RangeSetCollection <|-- AnyOtherRangeSetCollection : is-a
+```
+
+A blanket implementation allows a trait to be implemented for an entire category of types rather than for a single concrete type. Instead of writing many individual implementations, we can describe a set of requirements and automatically grant the trait to every type that satisfies them.
+
+The requirements are typically expressed through trait bounds, often using a `where` clause. This lets us precisely control which types receive the implementation while keeping the code concise and reusable.
+
+Like other generic features in Rust, blanket implementations are resolved at compile time. The compiler generates the necessary code for each applicable type, providing flexibility without introducing runtime overhead.
+
+::: {.callout-tip collapse="true"}
+## Blanket Implementations — Code
+```rust
+use std::collections::BTreeSet;
+
+// For this example, use u64 as our stand-in integer type.
+type Integer = u64;
+
+// Mock up RangeSetBlaze as a BTreeSet wrapper for demo purposes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct RangeSetBlaze {
+    values: BTreeSet<Integer>,
+}
+
+impl RangeSetBlaze {
+    fn new() -> Self {
+        Self {
+            values: BTreeSet::new(),
+        }
+    }
+
+    // Construct from a slice of Integer values.
+    fn from_slice(values: &[Integer]) -> Self {
+        Self {
+            values: values.iter().copied().collect(),
+        }
+    }
+
+    // Return a new set that is the union of two borrowed sets.
+    fn union(&self, other: &Self) -> Self {
+        Self {
+            values: self.values.union(&other.values).copied().collect(),
+        }
+    }
+
+    fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+}
+
+// A RangeSetCollection must be iterable over borrowed RangeSetBlaze values.
+// In return, the trait gives it a union() method over those values.
+trait RangeSetCollection<'a>: IntoIterator<Item = &'a RangeSetBlaze> {
+    fn union(self) -> RangeSetBlaze
+    where
+        Self: Sized,
+    {
+        let mut result = RangeSetBlaze::new();
+        for set in self {
+            result = RangeSetBlaze::union(&result, set);
+        }
+        result
+    }
+}
+
+// TECHNIQUE NAME: blanket implementation
+//
+// This is broader than a normal extension trait impl.
+// Instead of adding union() to one type, we add it to every type
+// that can be turned into an iterator over &RangeSetBlaze.
+impl<'a, I> RangeSetCollection<'a> for I where I: IntoIterator<Item = &'a RangeSetBlaze> {}
+
+fn main() {
+    let a = RangeSetBlaze::from_slice(&[1, 2, 3]);
+    let b = RangeSetBlaze::from_slice(&[3, 4, 5]);
+    let c = RangeSetBlaze::from_slice(&[5, 7, 9]);
+
+    let expected = RangeSetBlaze::from_slice(&[1, 2, 3, 4, 5, 7, 9]);
+    // A vector of sets can be unioned together.
+    assert_eq!(vec![&a, &b, &c].union(), expected);
+    // An array of sets can be unioned together.
+    assert_eq!([&a, &b, &c].union(), expected);
+    // A filtered option can be unioned.
+    assert_eq!(Some(&a).filter(|set| !set.is_empty()).union(), a);
+}
+```
+:::
+
+::: {.callout-note collapse="true"}
+## `Option<T>` implements `IntoIterator`
+One interesting thing I learned from this example is that the final test works because [`Option<T>` implements `IntoIterator`](https://rust.docs.kernel.org/core/option/index.html#iterating-over-option). As a result, `Option<&RangeSetBlaze>` becomes an iterator that yields either zero or one `&RangeSetBlaze` value. Since it satisfies the blanket implementation's trait bound, the expression
+
+```rust
+Some(&a).filter(|set| !set.is_empty()).union()
+```
+
+can call `union()` just like a vector or an array.
+:::
+
+
+> The key idea is that `union()` is written only once, yet it automatically becomes available on many different collection types. In the example, a vector, an array, and even a filtered `Option` can all call the same `union()` method because they satisfy the required iterator constraint.
+
+
+
 ## Conclusion
 Here is the conclusion table from Carl Kadie:
 
