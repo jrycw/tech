@@ -53,8 +53,6 @@ In Rust, traits are often thought of as contracts: they define a set of required
 
 However, traits can do more than define interfaces. They can also provide concrete method implementations. When a trait includes such methods, all implementors automatically gain access to them unless they choose to override the default behavior. This gives us something conceptually similar to inheritance: shared behavior defined once and reused across multiple types.
 
-This pattern is known as **trait default methods**.
-
 ::: {.callout-tip collapse="true"}
 ## Trait Default Methods — Code
 
@@ -151,8 +149,6 @@ In Rust, a trait can depend on another trait. The syntax `trait B: A` means that
 This is similar to saying that `B` extends `A`: anything that works with `A` will also work with `B`, but `B` provides additional functionality on top.
 
 In traditional object-oriented terms, this feels like an "is-a" relationship where `B` can do everything `A` can do, plus more, while still being treated as an `A` when needed.
-
-This pattern is known as **supertraits**.
 
 ::: {.callout-tip collapse="true"}
 ## Supertraits — Code
@@ -303,6 +299,91 @@ fn main() {
 
 > The key idea is that `usize` "inherits" the `is_odd()` method from `UsizeExtensions`. Although we cannot add methods directly to the foreign type, implementing an extension trait gives us a very similar result from the caller's perspective.
 
+
+## Puzzle 4: Derive-Generated Implementation
+
+We want a small `LedLevel` enum type with two values (`On`, `Off`) that automatically participates in common behaviors (default value, debugging output, equality/order comparisons, hashing, copy/clone).
+
+```mermaid
+classDiagram
+    direction TB
+
+    class LedLevel {
+        <<concrete class>>
+        On
+        Off
+    }
+
+    class Defaultable {
+        <<abstract class>>
+        +default()
+    }
+
+    class Debuggable {
+        <<abstract class>>
+        +debug_string()
+    }
+
+    class EquatableOrdered {
+        <<abstract class>>
+        +equals(other)
+        +compare(other)
+    }
+
+    class Hashable {
+        <<abstract class>>
+        +hash()
+    }
+
+    class CopyableCloneable {
+        <<abstract class>>
+        +copy()
+        +clone()
+    }
+
+    Defaultable <|-- LedLevel : is-a
+    Debuggable <|-- LedLevel : is-a
+    EquatableOrdered <|-- LedLevel : is-a
+    Hashable <|-- LedLevel : is-a
+    CopyableCloneable <|-- LedLevel : is-a
+```
+
+In Rust, the `derive` macro is a powerful convenience feature. It allows us to automatically generate implementations for many common traits, saving us from writing repetitive boilerplate code. These derived traits often provide essential functionality such as formatting, comparison, hashing, and cloning.
+
+Beyond the standard library, many third-party crates also extend this idea. Libraries like `serde`, for example, provide `derive` support for serialization and deserialization traits, making it easy to integrate types with external systems.
+
+::: {.callout-tip collapse="true"}
+## Derive-Generated Implementation — Code
+
+```rust
+// TECHNIQUE NAME: derive-generated implementation
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Default)]
+enum LedLevel {
+    On,
+    #[default]
+    Off,
+}
+
+fn main() {
+    let default_level = LedLevel::default();
+    let on = LedLevel::On;
+    let off = LedLevel::Off;
+
+    assert_eq!(default_level, LedLevel::Off);
+    assert_ne!(on, off);
+    assert!(off > on);
+
+    // `Copy` + `Clone` come from derive too.
+    let copied = on;
+    let cloned = off.clone();
+    assert_eq!(copied, on);
+    assert_eq!(cloned, off);
+}
+```
+:::
+
+> The key idea is that a tiny enum like `LedLevel` can immediately behave like a fully featured type—supporting comparison, copying, hashing, and defaults—simply by attaching `#[derive(...)]`, without writing any manual implementation code.
 
 
 
