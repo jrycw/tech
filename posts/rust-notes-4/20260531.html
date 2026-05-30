@@ -363,9 +363,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#puzzle-1-trait-default-methods" id="toc-puzzle-1-trait-default-methods" class="nav-link active" data-scroll-target="#puzzle-1-trait-default-methods">Puzzle 1: Trait Default Methods</a></li>
-  <li><a href="#puzzle-2-supertraits" id="toc-puzzle-2-supertraits" class="nav-link" data-scroll-target="#puzzle-2-supertraits">Puzzle 2: Supertraits</a></li>
+  <li><a href="#puzzle-2-supertrait" id="toc-puzzle-2-supertrait" class="nav-link" data-scroll-target="#puzzle-2-supertrait">Puzzle 2: Supertrait</a></li>
   <li><a href="#puzzle-3-extension-traits" id="toc-puzzle-3-extension-traits" class="nav-link" data-scroll-target="#puzzle-3-extension-traits">Puzzle 3: Extension Traits</a></li>
-  <li><a href="#puzzle-4-derive-generated-implementation" id="toc-puzzle-4-derive-generated-implementation" class="nav-link" data-scroll-target="#puzzle-4-derive-generated-implementation">Puzzle 4: Derive-Generated Implementation</a></li>
+  <li><a href="#puzzle-4-derive-generated-implementations" id="toc-puzzle-4-derive-generated-implementations" class="nav-link" data-scroll-target="#puzzle-4-derive-generated-implementations">Puzzle 4: Derive-Generated Implementations</a></li>
+  <li><a href="#puzzle-5-deref-method-lookup" id="toc-puzzle-5-deref-method-lookup" class="nav-link" data-scroll-target="#puzzle-5-deref-method-lookup">Puzzle 5: Deref Method Lookup</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -492,8 +493,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The key idea is that <code>u8</code> and <code>i16</code> only need to implement the required methods, <code>min_value()</code> and <code>max_value()</code>. The <code>exhausted_range()</code> method is defined once in the trait and automatically shared by all implementors.</p>
 </blockquote>
 </section>
-<section id="puzzle-2-supertraits" class="level2">
-<h2 class="anchored" data-anchor-id="puzzle-2-supertraits">Puzzle 2: Supertraits</h2>
+<section id="puzzle-2-supertrait" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-2-supertrait">Puzzle 2: Supertrait</h2>
 <p>A servo is an electric motor that can move to a specified angle. We want a <code>ServoEsp</code> (our type that controls a servo on an ESP32 microcontroller) to work with any code that needs a servo. A <code>ServoPlayerEsp</code> is similar, but with animation ability. (Inspired by <code>device-envoy</code>.)</p>
 <div class="cell" data-layout-align="default">
 <div class="cell-output-display">
@@ -543,7 +544,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Supertraits — Code
+<span class="screen-reader-only">Tip</span>Supertrait — Code
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -708,10 +709,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The key idea is that <code>usize</code> “inherits” the <code>is_odd()</code> method from <code>UsizeExtensions</code>. Although we cannot add methods directly to the foreign type, implementing an extension trait gives us a very similar result from the caller’s perspective.</p>
 </blockquote>
 </section>
-<section id="puzzle-4-derive-generated-implementation" class="level2">
-<h2 class="anchored" data-anchor-id="puzzle-4-derive-generated-implementation">Puzzle 4: Derive-Generated Implementation</h2>
+<section id="puzzle-4-derive-generated-implementations" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-4-derive-generated-implementations">Puzzle 4: Derive-Generated Implementations</h2>
 <p>We want a small <code>LedLevel</code> enum type with two values (<code>On</code>, <code>Off</code>) that automatically participates in common behaviors (default value, debugging output, equality/order comparisons, hashing, copy/clone).</p>
-<pre class="mermaid"><code>classDiagram
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
     direction TB
 
     class LedLevel {
@@ -751,7 +757,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     Debuggable &lt;|-- LedLevel : is-a
     EquatableOrdered &lt;|-- LedLevel : is-a
     Hashable &lt;|-- LedLevel : is-a
-    CopyableCloneable &lt;|-- LedLevel : is-a</code></pre>
+    CopyableCloneable &lt;|-- LedLevel : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
 <p>In Rust, the <code>derive</code> macro is a powerful convenience feature. It allows us to automatically generate implementations for many common traits, saving us from writing repetitive boilerplate code. These derived traits often provide essential functionality such as formatting, comparison, hashing, and cloning.</p>
 <p>Beyond the standard library, many third-party crates also extend this idea. Libraries like <code>serde</code>, for example, provide <code>derive</code> support for serialization and deserialization traits, making it easy to integrate types with external systems.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -760,41 +772,147 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Tip</span>Derive-Generated Implementation — Code
+<span class="screen-reader-only">Tip</span>Derive-Generated Implementations — Code
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: derive-generated implementation</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="op">,</span> <span class="bu">Debug</span><span class="op">,</span> <span class="bu">Eq</span><span class="op">,</span> <span class="bu">Hash</span><span class="op">,</span> <span class="bu">Ord</span><span class="op">,</span> <span class="bu">PartialEq</span><span class="op">,</span> <span class="bu">PartialOrd</span><span class="op">,</span> <span class="bu">Default</span><span class="at">)]</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> LedLevel <span class="op">{</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    On<span class="op">,</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">#[</span><span class="kw">default</span><span class="at">]</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    Off<span class="op">,</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> default_level <span class="op">=</span> <span class="pp">LedLevel::</span><span class="kw">default</span>()<span class="op">;</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> on <span class="op">=</span> <span class="pp">LedLevel::</span>On<span class="op">;</span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> off <span class="op">=</span> <span class="pp">LedLevel::</span>Off<span class="op">;</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(default_level<span class="op">,</span> <span class="pp">LedLevel::</span>Off)<span class="op">;</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_ne!</span>(on<span class="op">,</span> off)<span class="op">;</span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(off <span class="op">&gt;</span> on)<span class="op">;</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// `Copy` + `Clone` come from derive too.</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> copied <span class="op">=</span> on<span class="op">;</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> cloned <span class="op">=</span> off<span class="op">.</span>clone()<span class="op">;</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(copied<span class="op">,</span> on)<span class="op">;</span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(cloned<span class="op">,</span> off)<span class="op">;</span></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: derive-generated implementation</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="op">,</span> <span class="bu">Debug</span><span class="op">,</span> <span class="bu">Eq</span><span class="op">,</span> <span class="bu">Hash</span><span class="op">,</span> <span class="bu">Ord</span><span class="op">,</span> <span class="bu">PartialEq</span><span class="op">,</span> <span class="bu">PartialOrd</span><span class="op">,</span> <span class="bu">Default</span><span class="at">)]</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">enum</span> LedLevel <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    On<span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">#[</span><span class="kw">default</span><span class="at">]</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    Off<span class="op">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> default_level <span class="op">=</span> <span class="pp">LedLevel::</span><span class="kw">default</span>()<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> on <span class="op">=</span> <span class="pp">LedLevel::</span>On<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> off <span class="op">=</span> <span class="pp">LedLevel::</span>Off<span class="op">;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(default_level<span class="op">,</span> <span class="pp">LedLevel::</span>Off)<span class="op">;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_ne!</span>(on<span class="op">,</span> off)<span class="op">;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(off <span class="op">&gt;</span> on)<span class="op">;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// `Copy` + `Clone` come from derive too.</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> copied <span class="op">=</span> on<span class="op">;</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> cloned <span class="op">=</span> off<span class="op">.</span>clone()<span class="op">;</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(copied<span class="op">,</span> on)<span class="op">;</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(cloned<span class="op">,</span> off)<span class="op">;</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div>
 <blockquote class="blockquote">
 <p>The key idea is that a tiny enum like <code>LedLevel</code> can immediately behave like a fully featured type—supporting comparison, copying, hashing, and defaults—simply by attaching <code>#[derive(...)]</code>, without writing any manual implementation code.</p>
+</blockquote>
+</section>
+<section id="puzzle-5-deref-method-lookup" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-5-deref-method-lookup">Puzzle 5: Deref Method Lookup</h2>
+<p>We want an <code>HtmlBuffer</code> to feel like a string for everyday method calls, while still being its own distinct type. Note that <code>String</code> is a concrete type with storage, not just an interface/trait/abstract class.</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    direction TB
+
+    class String {
+        &lt;&lt;concrete class&gt;&gt;
+        -bytes
+        +push_str()
+        +len()
+        +as_bytes()
+    }
+
+    class HtmlBuffer {
+        &lt;&lt;concrete class&gt;&gt;
+        +new()
+        +push_str() // inherited
+        +len() // inherited
+        +as_bytes() // inherited
+    }
+
+    String &lt;|-- HtmlBuffer : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The <code>Deref</code> trait allows a type to specify what it should dereference into. This enables a powerful feature in Rust: <strong>method lookup through deref coercion</strong>.</p>
+<p>When a method is not found on the original type, Rust will automatically try to dereference the value and search again on the target type. This process can repeat multiple times, meaning deref behavior can be <strong>chained across multiple wrapper types</strong>.</p>
+<p>For example, a value like <code>Box&lt;String&gt;</code> does not implement <code>contains()</code> directly. However, Rust will first dereference the <code>Box&lt;String&gt;</code> into <code>String</code>, and then continue method lookup on <code>String</code>. Since <code>String</code> itself derefs into <code>str</code>, the call can continue one more step until <code>contains()</code> is found. As a result, a method call like the following works even though <code>contains</code> is defined on <code>str</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="dt">String</span><span class="pp">::</span>from(<span class="st">"hello world"</span>))<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(s<span class="op">.</span>contains(<span class="st">"world"</span>))<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Deref Method Lookup — Code
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// struct HtmlBuffer;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">// impl String for HtmlBuffer {</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">// Error because String is not a trait.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::ops::</span><span class="op">{</span><span class="bu">Deref</span><span class="op">,</span> <span class="bu">DerefMut</span><span class="op">};</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">// HtmlBuffer 'wraps' a String</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> HtmlBuffer(<span class="dt">String</span>)<span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> HtmlBuffer <span class="op">{</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span>(<span class="dt">String</span><span class="pp">::</span>new())</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> <span class="bu">Deref</span> <span class="cf">for</span> HtmlBuffer <span class="op">{</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">type</span> Target <span class="op">=</span> <span class="dt">String</span><span class="op">;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> deref(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="op">&amp;</span><span class="dt">Self</span><span class="pp">::</span>Target <span class="op">{</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span><span class="kw">self</span><span class="op">.</span><span class="dv">0</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> <span class="bu">DerefMut</span> <span class="cf">for</span> HtmlBuffer <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> deref_mut(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">-&gt;</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="dt">Self</span><span class="pp">::</span>Target <span class="op">{</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">.</span><span class="dv">0</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: deref lookup.</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> page <span class="op">=</span> <span class="pp">HtmlBuffer::</span>new()<span class="op">;</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="co">// `push_str` and `len` are String methods found via deref lookup.</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    page<span class="op">.</span>push_str(<span class="st">"&lt;h1&gt;Hello&lt;/h1&gt;"</span>)<span class="op">;</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    page<span class="op">.</span>push_str(<span class="st">"&lt;p&gt;Rust&lt;/p&gt;"</span>)<span class="op">;</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(page<span class="op">.</span>len()<span class="op">,</span> <span class="dv">25</span>)<span class="op">;</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Borrow the thing `page` points to and compare.</span></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="op">&amp;*</span>page<span class="op">,</span> <span class="st">"&lt;h1&gt;Hello&lt;/h1&gt;&lt;p&gt;Rust&lt;/p&gt;"</span>)<span class="op">;</span></span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="co">// Good for `Box`, `Rc`, etc., but not really good here.</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="co">// Also see AsRef, From, and Borrow traits.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The key idea is that <code>HtmlBuffer</code> <em>feels</em> like a <code>String</code> even though it is a wrapper type. Through <code>Deref</code>, method calls like <code>push_str()</code> and <code>len()</code> are automatically forwarded, making the wrapper transparent in everyday use while still preserving its own identity.</p>
 </blockquote>
 </section>
 <section id="conclusion" class="level2">
