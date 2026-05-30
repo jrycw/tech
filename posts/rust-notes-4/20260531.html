@@ -367,6 +367,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#puzzle-3-extension-traits" id="toc-puzzle-3-extension-traits" class="nav-link" data-scroll-target="#puzzle-3-extension-traits">Puzzle 3: Extension Traits</a></li>
   <li><a href="#puzzle-4-derive-generated-implementations" id="toc-puzzle-4-derive-generated-implementations" class="nav-link" data-scroll-target="#puzzle-4-derive-generated-implementations">Puzzle 4: Derive-Generated Implementations</a></li>
   <li><a href="#puzzle-5-deref-method-lookup" id="toc-puzzle-5-deref-method-lookup" class="nav-link" data-scroll-target="#puzzle-5-deref-method-lookup">Puzzle 5: Deref Method Lookup</a></li>
+  <li><a href="#puzzle-6-blanket-implementations" id="toc-puzzle-6-blanket-implementations" class="nav-link" data-scroll-target="#puzzle-6-blanket-implementations">Puzzle 6: Blanket Implementations</a></li>
+  <li><a href="#slightly-cleaner-in-my-view" id="toc-slightly-cleaner-in-my-view" class="nav-link" data-scroll-target="#slightly-cleaner-in-my-view">Slightly cleaner in my view</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -915,6 +917,172 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The key idea is that <code>HtmlBuffer</code> <em>feels</em> like a <code>String</code> even though it is a wrapper type. Through <code>Deref</code> and <code>DerefMut</code>, method calls like <code>len()</code> and <code>push_str()</code> are automatically forwarded to the inner <code>String</code>. This makes the wrapper effectively transparent in everyday use, while still preserving its own distinct identity as a separate type.</p>
 </blockquote>
 </section>
+<section id="puzzle-6-blanket-implementations" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-6-blanket-implementations">Puzzle 6: Blanket Implementations</h2>
+<p>We want to union any number of sets (<code>RangeSetBlaze&lt;T&gt;</code>). In OO terms, any collection that is an iterable of <code>RangeSetBlaze&lt;T&gt;</code> references should inherit this operation.</p>
+</section>
+<section id="slightly-cleaner-in-my-view" class="level2 Warning-tip" data-collapse="false">
+<h2 class="anchored" data-anchor-id="slightly-cleaner-in-my-view">Slightly cleaner in my view</h2>
+<p>We want to union any number of sets (<code>RangeSetBlaze</code>). In OO terms, any collection that can be iterated as <code>&amp;RangeSetBlaze</code> should inherit this operation.</p>
+</section>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    direction TB
+
+    class Iterable {
+        &lt;&lt;abstract class&gt;&gt;
+        +iterator()
+    }
+
+    class RangeSetCollection {
+        &lt;&lt;abstract class&gt;&gt;
+        +iterator() // from Iterable
+        +union()
+    }
+
+    class VectorOfRangeSetRefs {
+        &lt;&lt;concrete class&gt;&gt;
+        +iterator()
+        +union() // inherited
+    }
+
+    class ArrayOfRangeSetRefs {
+        &lt;&lt;concrete class&gt;&gt;
+        +iterator()
+        +union() // inherited
+    }
+
+    class AnyOtherRangeSetCollection {
+        &lt;&lt;concrete class&gt;&gt;
+        +iterator()
+        +union() // inherited
+    }
+
+    Iterable &lt;|-- RangeSetCollection : is-a
+    RangeSetCollection &lt;|-- VectorOfRangeSetRefs : is-a
+    RangeSetCollection &lt;|-- ArrayOfRangeSetRefs : is-a
+    RangeSetCollection &lt;|-- AnyOtherRangeSetCollection : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>A blanket implementation allows a trait to be implemented for an entire category of types rather than for a single concrete type. Instead of writing many individual implementations, we can describe a set of requirements and automatically grant the trait to every type that satisfies them.</p>
+<p>The requirements are typically expressed through trait bounds, often using a <code>where</code> clause. This lets us precisely control which types receive the implementation while keeping the code concise and reusable.</p>
+<p>Like other generic features in Rust, blanket implementations are resolved at compile time. The compiler generates the necessary code for each applicable type, providing flexibility without introducing runtime overhead.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Blanket Implementations — Code
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::collections::</span>BTreeSet<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// For this example, use u64 as our stand-in integer type.</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Integer <span class="op">=</span> <span class="dt">u64</span><span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co">// Mock up RangeSetBlaze as a BTreeSet wrapper for demo purposes.</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">PartialEq</span><span class="op">,</span> <span class="bu">Eq</span><span class="at">)]</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> RangeSetBlaze <span class="op">{</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    values<span class="op">:</span> BTreeSet<span class="op">&lt;</span>Integer<span class="op">&gt;,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> RangeSetBlaze <span class="op">{</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> new() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            values<span class="op">:</span> <span class="pp">BTreeSet::</span>new()<span class="op">,</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Construct from a slice of Integer values.</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> from_slice(values<span class="op">:</span> <span class="op">&amp;</span>[Integer]) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            values<span class="op">:</span> values<span class="op">.</span>iter()<span class="op">.</span>copied()<span class="op">.</span>collect()<span class="op">,</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return a new set that is the union of two borrowed sets.</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> union(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> other<span class="op">:</span> <span class="op">&amp;</span><span class="dt">Self</span>) <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>            values<span class="op">:</span> <span class="kw">self</span><span class="op">.</span>values<span class="op">.</span><span class="kw">union</span>(<span class="op">&amp;</span>other<span class="op">.</span>values)<span class="op">.</span>copied()<span class="op">.</span>collect()<span class="op">,</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> is_empty(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span><span class="op">.</span>values<span class="op">.</span>is_empty()</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="co">// A RangeSetCollection must be iterable over borrowed RangeSetBlaze values.</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a><span class="co">// In return, the trait gives it a union() method over those values.</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> RangeSetCollection<span class="op">&lt;</span><span class="ot">'a</span><span class="op">&gt;:</span> <span class="bu">IntoIterator</span><span class="op">&lt;</span>Item <span class="op">=</span> <span class="op">&amp;</span><span class="ot">'a</span> RangeSetBlaze<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> union(<span class="kw">self</span>) <span class="op">-&gt;</span> RangeSetBlaze</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span><span class="op">:</span> <span class="bu">Sized</span><span class="op">,</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> <span class="kw">mut</span> result <span class="op">=</span> <span class="pp">RangeSetBlaze::</span>new()<span class="op">;</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> set <span class="kw">in</span> <span class="kw">self</span> <span class="op">{</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> <span class="pp">RangeSetBlaze::</span><span class="kw">union</span>(<span class="op">&amp;</span>result<span class="op">,</span> set)<span class="op">;</span></span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>        result</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: blanket implementation</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a><span class="co">//</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a><span class="co">// This is broader than a normal extension trait impl.</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a><span class="co">// Instead of adding union() to one type, we add it to every type</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a><span class="co">// that can be turned into an iterator over &amp;RangeSetBlaze.</span></span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span><span class="op">&lt;</span><span class="ot">'a</span><span class="op">,</span> I<span class="op">&gt;</span> RangeSetCollection<span class="op">&lt;</span><span class="ot">'a</span><span class="op">&gt;</span> <span class="cf">for</span> I <span class="kw">where</span> I<span class="op">:</span> <span class="bu">IntoIterator</span><span class="op">&lt;</span>Item <span class="op">=</span> <span class="op">&amp;</span><span class="ot">'a</span> RangeSetBlaze<span class="op">&gt;</span> <span class="op">{}</span></span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> a <span class="op">=</span> <span class="pp">RangeSetBlaze::</span>from_slice(<span class="op">&amp;</span>[<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>])<span class="op">;</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> b <span class="op">=</span> <span class="pp">RangeSetBlaze::</span>from_slice(<span class="op">&amp;</span>[<span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span>])<span class="op">;</span></span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> c <span class="op">=</span> <span class="pp">RangeSetBlaze::</span>from_slice(<span class="op">&amp;</span>[<span class="dv">5</span><span class="op">,</span> <span class="dv">7</span><span class="op">,</span> <span class="dv">9</span>])<span class="op">;</span></span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> expected <span class="op">=</span> <span class="pp">RangeSetBlaze::</span>from_slice(<span class="op">&amp;</span>[<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">4</span><span class="op">,</span> <span class="dv">5</span><span class="op">,</span> <span class="dv">7</span><span class="op">,</span> <span class="dv">9</span>])<span class="op">;</span></span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A vector of sets can be unioned together.</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="pp">vec!</span>[<span class="op">&amp;</span>a<span class="op">,</span> <span class="op">&amp;</span>b<span class="op">,</span> <span class="op">&amp;</span>c]<span class="op">.</span><span class="kw">union</span>()<span class="op">,</span> expected)<span class="op">;</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>    <span class="co">// An array of sets can be unioned together.</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>([<span class="op">&amp;</span>a<span class="op">,</span> <span class="op">&amp;</span>b<span class="op">,</span> <span class="op">&amp;</span>c]<span class="op">.</span><span class="kw">union</span>()<span class="op">,</span> expected)<span class="op">;</span></span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A filtered option can be unioned.</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(<span class="cn">Some</span>(<span class="op">&amp;</span>a)<span class="op">.</span>filter(<span class="op">|</span>set<span class="op">|</span> <span class="op">!</span>set<span class="op">.</span>is_empty())<span class="op">.</span><span class="kw">union</span>()<span class="op">,</span> a)<span class="op">;</span></span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span><code>Option&lt;T&gt;</code> implements <code>IntoIterator</code>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>One interesting thing I learned from this example is that the final test works because <a href="https://rust.docs.kernel.org/core/option/index.html#iterating-over-option"><code>Option&lt;T&gt;</code> implements <code>IntoIterator</code></a>. As a result, <code>Option&lt;&amp;RangeSetBlaze&gt;</code> becomes an iterator that yields either zero or one <code>&amp;RangeSetBlaze</code> value. Since it satisfies the blanket implementation’s trait bound, the expression</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cn">Some</span>(<span class="op">&amp;</span>a)<span class="op">.</span>filter(<span class="op">|</span>set<span class="op">|</span> <span class="op">!</span>set<span class="op">.</span>is_empty())<span class="op">.</span><span class="kw">union</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>can call <code>union()</code> just like a vector or an array.</p>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The key idea is that <code>union()</code> is written only once, yet it automatically becomes available on many different collection types. In the example, a vector, an array, and even a filtered <code>Option</code> can all call the same <code>union()</code> method because they satisfy the required iterator constraint.</p>
+</blockquote>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
 <p>Here is the conclusion table from Carl Kadie:</p>
