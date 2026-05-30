@@ -108,7 +108,7 @@ fn main() {
 
 > The key idea is that `u8` and `i16` only need to implement the required methods, `min_value()` and `max_value()`. The `exhausted_range()` method is defined once in the trait and automatically shared by all implementors.
 
-## Puzzle 2: Supertraits
+## Puzzle 2: Supertrait
 
 A servo is an electric motor that can move to a specified angle. We want a `ServoEsp` (our type that controls a servo on an ESP32 microcontroller) to work with any code that needs a servo. A `ServoPlayerEsp` is similar, but with animation ability. (Inspired by `device-envoy`.)
 
@@ -151,7 +151,7 @@ This is similar to saying that `B` extends `A`: anything that works with `A` wil
 In traditional object-oriented terms, this feels like an "is-a" relationship where `B` can do everything `A` can do, plus more, while still being treated as an `A` when needed.
 
 ::: {.callout-tip collapse="true"}
-## Supertraits — Code
+## Supertrait — Code
 
 ```rust
 use std::thread;
@@ -300,11 +300,11 @@ fn main() {
 > The key idea is that `usize` "inherits" the `is_odd()` method from `UsizeExtensions`. Although we cannot add methods directly to the foreign type, implementing an extension trait gives us a very similar result from the caller's perspective.
 
 
-## Puzzle 4: Derive-Generated Implementation
+## Puzzle 4: Derive-Generated Implementations
 
 We want a small `LedLevel` enum type with two values (`On`, `Off`) that automatically participates in common behaviors (default value, debugging output, equality/order comparisons, hashing, copy/clone).
 
-```mermaid
+```{mermaid}
 classDiagram
     direction TB
 
@@ -353,7 +353,7 @@ In Rust, the `derive` macro is a powerful convenience feature. It allows us to a
 Beyond the standard library, many third-party crates also extend this idea. Libraries like `serde`, for example, provide `derive` support for serialization and deserialization traits, making it easy to integrate types with external systems.
 
 ::: {.callout-tip collapse="true"}
-## Derive-Generated Implementation — Code
+## Derive-Generated Implementations — Code
 
 ```rust
 // TECHNIQUE NAME: derive-generated implementation
@@ -385,6 +385,101 @@ fn main() {
 
 > The key idea is that a tiny enum like `LedLevel` can immediately behave like a fully featured type—supporting comparison, copying, hashing, and defaults—simply by attaching `#[derive(...)]`, without writing any manual implementation code.
 
+
+
+## Puzzle 5: Deref Method Lookup
+
+We want an `HtmlBuffer` to feel like a string for everyday method calls, while still being its own distinct type. Note that `String` is a concrete type with storage, not just an interface/trait/abstract class.
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class String {
+        <<concrete class>>
+        -bytes
+        +push_str()
+        +len()
+        +as_bytes()
+    }
+
+    class HtmlBuffer {
+        <<concrete class>>
+        +new()
+        +push_str() // inherited
+        +len() // inherited
+        +as_bytes() // inherited
+    }
+
+    String <|-- HtmlBuffer : is-a
+```
+
+The `Deref` trait allows a type to specify what it should dereference into. This enables a powerful feature in Rust: **method lookup through deref coercion**.
+
+When a method is not found on the original type, Rust will automatically try to dereference the value and search again on the target type. This process can repeat multiple times, meaning deref behavior can be **chained across multiple wrapper types**.
+
+For example, a value like `Box<String>` does not implement `contains()` directly. However, Rust will first dereference the `Box<String>` into `String`, and then continue method lookup on `String`. Since `String` itself derefs into `str`, the call can continue one more step until `contains()` is found. As a result, a method call like the following works even though `contains` is defined on `str`:
+
+```rust
+fn main() {
+    let s = Box::new(String::from("hello world"));
+    assert!(s.contains("world"));
+}
+```
+
+::: {.callout-tip collapse="true"}
+## Deref Method Lookup — Code
+```rust
+// struct HtmlBuffer;
+// impl String for HtmlBuffer {
+// }
+// Error because String is not a trait.
+
+use std::ops::{Deref, DerefMut};
+
+// HtmlBuffer 'wraps' a String
+struct HtmlBuffer(String);
+
+impl HtmlBuffer {
+    fn new() -> Self {
+        Self(String::new())
+    }
+}
+
+impl Deref for HtmlBuffer {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for HtmlBuffer {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+// TECHNIQUE NAME: deref lookup.
+
+fn main() {
+    let mut page = HtmlBuffer::new();
+
+    // `push_str` and `len` are String methods found via deref lookup.
+    page.push_str("<h1>Hello</h1>");
+    page.push_str("<p>Rust</p>");
+
+    assert_eq!(page.len(), 25);
+    // Borrow the thing `page` points to and compare.
+    assert_eq!(&*page, "<h1>Hello</h1><p>Rust</p>");
+}
+
+// Good for `Box`, `Rc`, etc., but not really good here.
+// Also see AsRef, From, and Borrow traits.
+```
+:::
+
+> The key idea is that `HtmlBuffer` *feels* like a `String` even though it is a wrapper type. Through `Deref` and `DerefMut`, method calls like `len()` and `push_str()` are automatically forwarded to the inner `String`. This makes the wrapper effectively transparent in everyday use, while still preserving its own distinct identity as a separate type.
 
 
 ## Conclusion
