@@ -912,7 +912,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <blockquote class="blockquote">
-<p>The key idea is that <code>HtmlBuffer</code> <em>feels</em> like a <code>String</code> even though it is a wrapper type. Through <code>Deref</code>, method calls like <code>push_str()</code> and <code>len()</code> are automatically forwarded, making the wrapper transparent in everyday use while still preserving its own identity.</p>
+<p>The key idea is that <code>HtmlBuffer</code> <em>feels</em> like a <code>String</code> even though it is a wrapper type. Through <code>Deref</code> and <code>DerefMut</code>, method calls like <code>len()</code> and <code>push_str()</code> are automatically forwarded to the inner <code>String</code>. This makes the wrapper effectively transparent in everyday use, while still preserving its own distinct identity as a separate type.</p>
 </blockquote>
 </section>
 <section id="conclusion" class="level2">
