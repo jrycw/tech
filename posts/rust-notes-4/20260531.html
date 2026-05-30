@@ -363,6 +363,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#puzzle-1-trait-default-methods" id="toc-puzzle-1-trait-default-methods" class="nav-link active" data-scroll-target="#puzzle-1-trait-default-methods">Puzzle 1: Trait Default Methods</a></li>
+  <li><a href="#puzzle-2-supertraits" id="toc-puzzle-2-supertraits" class="nav-link" data-scroll-target="#puzzle-2-supertraits">Puzzle 2: Supertraits</a></li>
+  <li><a href="#puzzle-3-extension-traits" id="toc-puzzle-3-extension-traits" class="nav-link" data-scroll-target="#puzzle-3-extension-traits">Puzzle 3: Extension Traits</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
@@ -486,8 +488,226 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<blockquote class="blockquote">
 <p>The key idea is that <code>u8</code> and <code>i16</code> only need to implement the required methods, <code>min_value()</code> and <code>max_value()</code>. The <code>exhausted_range()</code> method is defined once in the trait and automatically shared by all implementors.</p>
-<p>This is not inheritance in the classical object-oriented sense, but it achieves one of the most practical benefits of inheritance: reuse of behavior without duplicating code.</p>
+</blockquote>
+</section>
+<section id="puzzle-2-supertraits" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-2-supertraits">Puzzle 2: Supertraits</h2>
+<p>A servo is an electric motor that can move to a specified angle. We want a <code>ServoEsp</code> (our type that controls a servo on an ESP32 microcontroller) to work with any code that needs a servo. A <code>ServoPlayerEsp</code> is similar, but with animation ability. (Inspired by <code>device-envoy</code>.)</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    direction TB
+
+    class Servo {
+        &lt;&lt;abstract class&gt;&gt;
+        +set_degrees(degrees)
+    }
+
+    class ServoPlayer {
+        &lt;&lt;abstract class&gt;&gt;
+        +set_degrees(degrees) // from Servo
+        +animate(steps)
+    }
+
+    class ServoEsp {
+        &lt;&lt;concrete class&gt;&gt;
+        +set_degrees(degrees)
+    }
+
+    class ServoPlayerEsp {
+        &lt;&lt;concrete class&gt;&gt;
+        +set_degrees(degrees)
+        +animate(steps)
+    }
+
+    Servo &lt;|-- ServoPlayer : is-a
+    Servo &lt;|-- ServoEsp : is-a
+    ServoPlayer &lt;|-- ServoPlayerEsp : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>In Rust, a trait can depend on another trait. The syntax <code>trait B: A</code> means that <code>B</code> requires <code>A</code> as a prerequisite. In other words, any type that implements <code>B</code> must also implement <code>A</code>.</p>
+<p>This is similar to saying that <code>B</code> extends <code>A</code>: anything that works with <code>A</code> will also work with <code>B</code>, but <code>B</code> provides additional functionality on top.</p>
+<p>In traditional object-oriented terms, this feels like an “is-a” relationship where <code>B</code> can do everything <code>A</code> can do, plus more, while still being treated as an <code>A</code> when needed.</p>
+<p>This pattern is known as <strong>supertraits</strong>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Supertraits — Code
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::</span>thread<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::time::</span>Duration<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">// `Servo` is an abstract class (a trait), not a concrete driver.</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Servo <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> set_degrees(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> degrees<span class="op">:</span> <span class="dt">u16</span>)<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">// `ServoPlayer` is also abstract. It extends `Servo` (supertrait), so any</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">// `ServoPlayer` can do everything in `Servo` plus animation.</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: Supertraits</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> ServoPlayer<span class="op">:</span> Servo <span class="op">{</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// (degrees, milliseconds to hold at that angle)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> animate(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> steps<span class="op">:</span> <span class="op">&amp;</span>[(<span class="dt">u16</span><span class="op">,</span> <span class="dt">u64</span>)])<span class="op">;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Default</span><span class="at">)]</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co">// Concrete servo driver (similar naming to the real example): `ServoEsp`.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> ServoEsp<span class="op">;</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Servo <span class="cf">for</span> ServoEsp <span class="op">{</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> set_degrees(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> degrees<span class="op">:</span> <span class="dt">u16</span>) <span class="op">{</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">"[ServoEsp] set angle -&gt; {degrees}°"</span>)<span class="op">;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Default</span><span class="at">)]</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">// Concrete servo player driver that can animate.</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> ServoPlayerEsp<span class="op">;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Servo <span class="cf">for</span> ServoPlayerEsp <span class="op">{</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> set_degrees(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> degrees<span class="op">:</span> <span class="dt">u16</span>) <span class="op">{</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="pp">println!</span>(<span class="st">"[ServoPlayerEsp] set angle -&gt; {degrees}°"</span>)<span class="op">;</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> ServoPlayer <span class="cf">for</span> ServoPlayerEsp <span class="op">{</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> animate(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> steps<span class="op">:</span> <span class="op">&amp;</span>[(<span class="dt">u16</span><span class="op">,</span> <span class="dt">u64</span>)]) <span class="op">{</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (degrees<span class="op">,</span> ms) <span class="kw">in</span> steps <span class="op">{</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>            <span class="kw">self</span><span class="op">.</span>set_degrees(<span class="op">*</span>degrees)<span class="op">;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>            <span class="pp">println!</span>(<span class="st">"[ServoPlayerEsp] hold for {ms}ms"</span>)<span class="op">;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>            <span class="pp">thread::</span>sleep(<span class="pp">Duration::</span>from_millis(<span class="op">*</span>ms))<span class="op">;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="co">// Generic program that only needs a `Servo`.</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> center_servo(servo<span class="op">:</span> <span class="op">&amp;</span><span class="kw">impl</span> Servo) <span class="op">{</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    servo<span class="op">.</span>set_degrees(<span class="dv">90</span>)<span class="op">;</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co">// Generic program that needs a `ServoPlayer`.</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> run_wave(player<span class="op">:</span> <span class="op">&amp;</span><span class="kw">impl</span> ServoPlayer) <span class="op">{</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    player<span class="op">.</span>animate(<span class="op">&amp;</span>[</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span><span class="op">,</span> <span class="dv">120</span>)<span class="op">,</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">45</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">90</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">135</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">180</span><span class="op">,</span> <span class="dv">120</span>)<span class="op">,</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">135</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">90</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">45</span><span class="op">,</span> <span class="dv">100</span>)<span class="op">,</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">0</span><span class="op">,</span> <span class="dv">120</span>)<span class="op">,</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    ])<span class="op">;</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> servo_esp <span class="op">=</span> <span class="pp">ServoEsp::</span><span class="kw">default</span>()<span class="op">;</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> servo_player_esp <span class="op">=</span> <span class="pp">ServoPlayerEsp::</span><span class="kw">default</span>()<span class="op">;</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>    center_servo(<span class="op">&amp;</span>servo_esp)<span class="op">;</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="co">// `ServoPlayer` can do everything `Servo` can!</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>    center_servo(<span class="op">&amp;</span>servo_player_esp)<span class="op">;</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>    <span class="co">// and more.</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>    run_wave(<span class="op">&amp;</span>servo_player_esp)<span class="op">;</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The key idea is that <code>ServoPlayer</code> builds on top of <code>Servo</code> rather than replacing it. Any type that implements <code>ServoPlayer</code> must also implement <code>Servo</code>, allowing it to be used wherever a <code>Servo</code> is expected while providing additional capabilities. Supertraits therefore offer a trait-based way to express “is-a” relationships and extend behavior incrementally.</p>
+</blockquote>
+</section>
+<section id="puzzle-3-extension-traits" class="level2">
+<h2 class="anchored" data-anchor-id="puzzle-3-extension-traits">Puzzle 3: Extension Traits</h2>
+<p>We want to add a new method <code>is_odd()</code> to an existing concrete type <code>usize</code>, that type is defined outside our crate (“foreign”).</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">classDiagram
+    direction TB
+
+    class UsizeExtensions {
+        &lt;&lt;abstract class&gt;&gt;
+        +is_odd() bool
+    }
+
+    class usize {
+        &lt;&lt;concrete class&gt;&gt;
+        +is_odd() bool // inherited
+    }
+
+    UsizeExtensions &lt;|-- usize : is-a
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>For types that we define ourselves, such as structs and enums, we can add methods through an <code>impl</code> block. However, Rust does not allow us to write an inherent <code>impl</code> for a type defined in another crate, including primitive types like <code>usize</code>.</p>
+<p>This restriction prevents different crates from attaching conflicting methods to the same type, which would make method resolution ambiguous.</p>
+<p>Fortunately, traits provide a workaround. We can define our own trait, implement it for the foreign type, and thereby extend the type with new methods. From the caller’s perspective, these methods behave much like native methods on the type itself.</p>
+<p>This pattern is known as <strong>extension traits</strong>.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Extension Traits — Code
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// impl usize {</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">//     fn is_odd(self) -&gt; bool {</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">//         self &amp; 1 != 0</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">//     }</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">// error[E0390]: cannot define inherent `impl` for primitive types</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> UsizeExtensions <span class="op">{</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> is_odd(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">bool</span><span class="op">;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> UsizeExtensions <span class="cf">for</span> <span class="dt">usize</span> <span class="op">{</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> is_odd(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">self</span> <span class="op">&amp;</span> <span class="dv">1</span> <span class="op">!=</span> <span class="dv">0</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: extension traits.</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> count<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">7</span><span class="op">;</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(count<span class="op">.</span>is_odd())<span class="op">;</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(<span class="op">!</span><span class="dv">12</span><span class="op">.</span>is_odd())<span class="op">;</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>The key idea is that <code>usize</code> “inherits” the <code>is_odd()</code> method from <code>UsizeExtensions</code>. Although we cannot add methods directly to the foreign type, implementing an extension trait gives us a very similar result from the caller’s perspective.</p>
+</blockquote>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
