@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -343,7 +378,7 @@ ul.task-list li input[type="checkbox"] {
 <p><img src="rust_notes_4.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 4"></p>
 </figure>
 </div>
-<p>After watching Carl Kadie’s excellent talk <a href="www.youtube.com/watch?v=3IyKC5EtNkM">9 Ways to Do Inheritance in Rust, a Language without Inheritance</a>, I decided to write down some notes from his work.</p>
+<p>After watching Carl Kadie’s excellent talk <a href="https://www.youtube.com/watch?v=3IyKC5EtNkM">9 Ways to Do Inheritance in Rust, a Language without Inheritance</a>, I decided to write down some notes from his work.</p>
 <p>To be clear, all of the ideas and code presented here come from Carl Kadie. You can find the original material in the accompanying <a href="https://github.com/CarlKCarlK/inherit">GitHub repository</a>. My role here is simply that of a note-taker, with added commentary to help my future self (and perhaps others) revisit these concepts more easily.</p>
 <section id="puzzle-1-trait-default-methods" class="level2">
 <h2 class="anchored" data-anchor-id="puzzle-1-trait-default-methods">Puzzle 1: Trait Default Methods</h2>
@@ -388,54 +423,67 @@ ul.task-list li input[type="checkbox"] {
 <p>In Rust, traits are often thought of as contracts: they define a set of required methods that implementors must provide. In that sense, a trait specifies <em>what</em> functionality a type must have.</p>
 <p>However, traits can do more than define interfaces. They can also provide concrete method implementations. When a trait includes such methods, all implementors automatically gain access to them unless they choose to override the default behavior. This gives us something conceptually similar to inheritance: shared behavior defined once and reused across multiple types.</p>
 <p>This pattern is known as <strong>trait default methods</strong>.</p>
-<pre class="{rust}"><code>#| code-fold: true
-
-use std::ops::RangeInclusive;
-
-// TECHNIQUE NAME: Trait Default Methods.
-trait Integer: Copy + Ord {
-    fn min_value() -&gt; Self;
-    fn max_value() -&gt; Self;
-
-    // Default behavior inherited by implementors.
-    // Any impl can override this method.
-
-    /// Returns an exhausted (empty) range`.
-    fn exhausted_range() -&gt; RangeInclusive&lt;Self&gt; {
-        debug_assert!(Self::min_value() &lt; Self::max_value(), "Precondition");
-        Self::max_value()..=Self::min_value()
-    }
-}
-
-impl Integer for u8 {
-    fn min_value() -&gt; Self {
-        u8::MIN
-    }
-
-    fn max_value() -&gt; Self {
-        u8::MAX
-    }
-}
-
-impl Integer for i16 {
-    fn min_value() -&gt; Self {
-        i16::MIN
-    }
-
-    fn max_value() -&gt; Self {
-        i16::MAX
-    }
-}
-
-fn main() {
-    let r1 = u8::exhausted_range();
-    let r2 = i16::exhausted_range();
-
-    assert_eq!(r1, 255..=0);
-    assert!(r2.is_empty());
-}
-
-// TECHNIQUE NAME (again): Trait Default Methods.</code></pre>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Example
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">std::ops::</span>RangeInclusive<span class="op">;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME: Trait Default Methods.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">trait</span> Integer<span class="op">:</span> <span class="bu">Copy</span> <span class="op">+</span> <span class="bu">Ord</span> <span class="op">{</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Default behavior inherited by implementors.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Any impl can override this method.</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">/// Returns an exhausted (empty) range`.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> exhausted_range() <span class="op">-&gt;</span> RangeInclusive<span class="op">&lt;</span><span class="dt">Self</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="pp">debug_assert!</span>(<span class="dt">Self</span><span class="pp">::</span>min_value() <span class="op">&lt;</span> <span class="dt">Self</span><span class="pp">::</span>max_value()<span class="op">,</span> <span class="st">"Precondition"</span>)<span class="op">;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">Self</span><span class="pp">::</span>max_value()<span class="op">..=</span><span class="dt">Self</span><span class="pp">::</span>min_value()</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">u8</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">u8</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="dt">u8</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">impl</span> Integer <span class="cf">for</span> <span class="dt">i16</span> <span class="op">{</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> min_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">i16</span><span class="pp">::</span><span class="cn">MIN</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> max_value() <span class="op">-&gt;</span> <span class="dt">Self</span> <span class="op">{</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">i16</span><span class="pp">::</span><span class="cn">MAX</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="dt">u8</span><span class="pp">::</span>exhausted_range()<span class="op">;</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="dt">i16</span><span class="pp">::</span>exhausted_range()<span class="op">;</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert_eq!</span>(r1<span class="op">,</span> <span class="dv">255</span><span class="op">..=</span><span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="pp">assert!</span>(r2<span class="op">.</span>is_empty())<span class="op">;</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co">// TECHNIQUE NAME (again): Trait Default Methods.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
 <p>The key idea is that <code>u8</code> and <code>i16</code> only need to implement the required methods, <code>min_value()</code> and <code>max_value()</code>. The <code>exhausted_range()</code> method is defined once in the trait and automatically shared by all implementors.</p>
 <p>This is not inheritance in the classical object-oriented sense, but it achieves one of the most practical benefits of inheritance: reuse of behavior without duplicating code.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
