@@ -812,6 +812,91 @@ fn main() {
 
 
 
+## Puzzle 8: Constraint-Gated Methods
+
+We have abstract class `OutputArray<N>` with two methods. For `N = 8`, however, we want one extra method because it maps cleanly to a `u8` bitmask.
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class OutputArrayN["OutputArray~N~"] {
+        <<abstract class>>
+        +new()s
+        +set_level_at_index(index, level)
+    }
+
+    class OutputArray4["OutputArray~4~"] {
+        <<concrete class>>
+        +new() // inherited
+        +set_level_at_index(index, level) // inh.
+    }
+
+    class OutputArray8["OutputArray~8~"] {
+        <<concrete class>>
+        +new() // inherited
+        +set_level_at_index(index, level) // inh.
+        +set_from_bits(u8)
+    }
+
+
+    OutputArrayN <|-- OutputArray4 : is-a
+    OutputArrayN <|-- OutputArray8 : is-a
+```
+
+Rust allows methods to be conditionally attached to a type by placing them in separate `impl` blocks with additional constraints. These constraints can take many forms, including const generic values, trait bounds, lifetimes, or combinations of them.
+
+As a result, a type's API can vary depending on the compile-time properties it satisfies. Rather than exposing every method to every instance of a type, Rust allows certain methods to exist only when specific requirements are met.
+
+::: {.callout-tip collapse="true"}
+## Constraint-Gated Methods — Code
+```rust
+#[derive(Debug, Clone, Copy)]
+struct OutputArray<const N: usize> {
+    levels: [bool; N],
+}
+
+impl<const N: usize> OutputArray<N> {
+    fn new() -> Self {
+        Self { levels: [false; N] }
+    }
+
+    fn set_level_at_index(&mut self, index: usize, level: bool) {
+        self.levels[index] = level;
+    }
+}
+
+// Hardcoded 8, matching the bit width expected by a u8 mask.
+impl OutputArray<8> {
+    fn set_from_bits(&mut self, mut bits: u8) {
+        for slot in &mut self.levels {
+            *slot = (bits & 1) == 1;
+            bits >>= 1;
+        }
+    }
+}
+
+// TECHNIQUE NAME: constraint-gated methods.
+// - Put methods in a separate impl block.
+// - The methods exist only when the impl's constraints are met.
+// - Constraints can be const values, trait bounds, lifetimes, or combinations
+
+fn main() {
+    let mut any = OutputArray::<4>::new();
+    any.set_level_at_index(2, true);
+
+    let mut eight = OutputArray::<8>::new();
+    eight.set_from_bits(0b1011_0001);
+
+    assert_eq!(any.levels, [false, false, true, false]);
+    assert_eq!(eight.levels, [true, false, false, false, true, true, false, true]);
+}
+```
+:::
+
+> The key idea is that method availability can depend on compile-time constraints. In this example, only `OutputArray<8>` gains the `set_from_bits()` method, because only an 8-element output array can be represented directly by a `u8` bitmask. The restriction is enforced entirely at compile time, making invalid usages impossible to compile.
+
+
 ## Conclusion
 Here is the conclusion table from Carl Kadie:
 
