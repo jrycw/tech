@@ -811,7 +811,6 @@ fn main() {
 > The key idea is that macros let us scale a single abstraction (`Integer`) across many unrelated types by generating repetitive `impl` blocks automatically, while still allowing special-case logic (like `char` and IP addresses) where needed.
 
 
-
 ## Puzzle 8: Constraint-Gated Methods
 
 We have abstract class `OutputArray<N>` with two methods. For `N = 8`, however, we want one extra method because it maps cleanly to a `u8` bitmask.
@@ -894,7 +893,148 @@ fn main() {
 ```
 :::
 
+::: {.callout-note collapse="true"}
+## Not a blanket implementation
+At first glance, `impl<const N: usize> OutputArray<N>` may look similar to a blanket implementation. However, there is an important distinction: constraint-gated methods apply to a specific generic type, while blanket implementations apply a trait across a family of types.
+:::
+
 > The key idea is that method availability can depend on compile-time constraints. In this example, only `OutputArray<8>` gains the `set_from_bits()` method, because only an 8-element output array can be represented directly by a `u8` bitmask. The restriction is enforced entirely at compile time, making invalid usages impossible to compile.
+
+
+## Puzzle 9: Method-Level Constraints
+
+We want two levels of `FlashBlock`: a top level with `new` and `clear`, and a constrained level that adds `save` and `load` only when `T` satisfies both serialization and deserialization capabilities.
+
+```{mermaid}
+classDiagram
+    direction TB
+
+    class Serialize {
+        <<abstract class>>
+        +serialize()
+    }
+
+    class Deserialize {
+        <<abstract class>>
+        +deserialize()
+    }
+
+    class TConstrained["T: Serialize + Deserialize"] {
+        <<abstract class>>
+        +serialize() // inherited
+        +deserialize() // inherited
+    }
+
+    class WifiCredentials {
+        <<concrete class>>
+        +serialize() // inherited
+        +deserialize() // inherited
+    }
+
+    class FlashBlock {
+        <<concrete class>>
+        +new()
+        +clear()
+    }
+
+    class FlashBlockForTSerializeDeserialize {
+        <<concrete class>>
+        +new() // inherited
+        +clear() // inherited
+        +save(value, key)
+        +load(key) T
+    }
+
+    Serialize <|-- TConstrained : is-a
+    Deserialize <|-- TConstrained : is-a
+    TConstrained <|-- WifiCredentials : is-a
+    FlashBlock <|-- FlashBlockForTSerializeDeserialize : is-a
+```
+
+Unlike constraint-gated methods, which apply bounds to an entire `impl` block, Rust allows constraints to be placed directly on individual methods via a `where` clause. This enables a type to remain generally usable while selectively enabling certain operations only when additional requirements are met.
+
+::: {.callout-tip collapse="true"}
+## Method-Level Constraints — Code
+```rust
+use std::collections::HashMap;
+
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+struct WifiCredentials {
+    ssid: String,
+    password: String,
+}
+
+/// Key point: method-level gating.
+/// - The type exists for all use-cases.
+/// - Only `save/load<T>` require extra capabilities on `T`.
+#[derive(Default)]
+struct FlashBlock {
+    store: HashMap<String, Vec<u8>>,
+}
+
+impl FlashBlock {
+    fn new() -> Self {
+        Self::default()
+    }
+
+    fn clear(&mut self) {
+        self.store.clear();
+    }
+
+    fn save<T>(&mut self, key: &str, value: &T) -> Result<(), postcard::Error>
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        let bytes = postcard::to_stdvec(value)?;
+        self.store.insert(key.to_string(), bytes);
+        Ok(())
+    }
+
+    fn load<T>(&self, key: &str) -> Option<T>
+    where
+        T: Serialize + DeserializeOwned,
+    {
+        let bytes = self.store.get(key)?;
+        postcard::from_bytes(bytes).ok()
+    }
+}
+
+// TECHNIQUE NAME: method-level gating.
+
+fn main() -> Result<(), postcard::Error> {
+    let mut flash = FlashBlock::new();
+
+    let credentials = WifiCredentials {
+        ssid: "HomeWiFi".to_string(),
+        password: "secret".to_string(),
+    };
+
+    // Works: WifiCredentials satisfies Serialize + Deserialize.
+    flash.save("wifi", &credentials)?;
+    let loaded: Option<WifiCredentials> = flash.load("wifi");
+    let loaded = loaded.unwrap();
+    assert_eq!(&loaded.ssid, "HomeWiFi");
+    assert_eq!(&loaded.password, "secret");
+
+    flash.clear();
+    assert!(flash.load::<WifiCredentials>("wifi").is_none());
+
+    // This compiles, but it asks for the wrong type.
+// device-envoy stores type-identifying metadata with each value,
+// so this kind of mismatch is likely to be caught at load time.
+    flash.save("number", &42u8)?;
+    let loaded: Option<String> = flash.load("number");
+    assert!(loaded.is_none());
+
+    Ok(())
+}
+```
+:::
+
+> The key idea is that constraints can be attached to individual methods instead of the entire type. In this example, basic operations are always available on `FlashBlock`, while storage-related operations are only enabled when the value type satisfies the required serialization and deserialization bounds. This keeps the core type simple while making advanced functionality conditional on capability.
 
 
 ## Conclusion
