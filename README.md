@@ -24,3 +24,4 @@ Jerry Wu's Tech'n'take
 * [Rust Notes #1: Loop Scope vs Python](https://tech.ycwu.space/posts/rust-notes-1/20260311.html)
 * [Rust Notes #2: Trait-Based Conversions in Iterators](https://tech.ycwu.space/posts/rust-notes-2/20260509.html)
 * [Rust Notes #3: Iterator collect and Result short-circuiting](https://tech.ycwu.space/posts/rust-notes-3/20260510.html)
+* [Rust Notes #4: Inherit-ish](https://tech.ycwu.space/posts/rust-notes-4/20260531.html)
