@@ -37,26 +37,22 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 enum AppError {
-    // #[from]:
-    // - Generates From<ParseIntError> for AppError
-    // - Automatically treats ParseIntError as the source
+    // #[from] provides From<ParseIntError> and establishes the source relationship.
     #[error("invalid port number")]
     NotNumber(#[from] ParseIntError),
 
     #[error("port {0} is not allowed")]
     InvalidPort(u16),
 
-    // #[source]:
-    // Explicitly marks io::Error as the underlying cause.
+    // #[source] explicitly defines io::Error as the source.
     #[error("failed to load configuration")]
     Config {
         #[source]
         source: io::Error,
     },
 
-    // #[error(transparent)]:
-    // - Delegates Display formatting to io::Error
-    // - Makes the wrapper behave like the inner error
+    // #[error(transparent)] delegates representation to io::Error.
+    // #[from] provides From<io::Error> and establishes the source relationship.
     #[error(transparent)]
     Io(#[from] io::Error),
 }
@@ -118,7 +114,7 @@ impl Error for AppError {
             // Explicit #[source]
             Self::Config { source } => Some(source),
 
-            // #[from] implies #[source].
+            // #[from] implies #[source]
             // #[error(transparent)] delegates representation to the inner error.
             Self::Io(err) => Some(err),
 
