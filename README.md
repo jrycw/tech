@@ -27,3 +27,4 @@ Jerry Wu's Tech'n'take
 * [Rust Notes #4: Inherit-ish](https://tech.ycwu.space/posts/rust-notes-4/20260531.html)
 * [Rust Notes #5: Using Constructors as Iterator Adapters](https://tech.ycwu.space/posts/rust-notes-5/20260706.html)
 * [Rust Notes #6: Understanding FromStr and TryFrom](https://tech.ycwu.space/posts/rust-notes-6/20260718.html)
+* [Rust Notes #7: Understanding thiserror Attributes](https://tech.ycwu.space/posts/rust-notes-7/20260718.html)
