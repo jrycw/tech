@@ -9,7 +9,7 @@
 <meta name="author" content="Jerry Wu">
 <meta name="dcterms.date" content="2026-07-21">
 
-<title>Rust Notes #8: Building a Custom Enumerate Iterator Adaptor – Tech’n’Take</title>
+<title>Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip() – Tech’n’Take</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -322,7 +322,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Rust Notes #8: Building a Custom Enumerate Iterator Adaptor</h1>
+      <h1 class="title">Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip()</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">rust</div>
               </div>
@@ -369,9 +369,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="rust_notes_8.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 8"></p>
 </figure>
 </div>
-<p>Today, while reading the documentation for the <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html"><code>Iterator</code></a> trait, I learned how to create a functionally equivalent version of <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.enumerate"><code>enumerate()</code></a> with a more flexible starting point.</p>
-<p>The standard <code>enumerate()</code> adaptor always starts counting from <code>0</code>. However, by combining iterator adaptors, we can easily create similar behavior with a custom starting value.</p>
-<p>Here’s an example where we iterate over a range of numbers with a given start, end, and step, then zip the result with another iterator:</p>
+<p>Today, while reading the documentation for the <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html"><code>Iterator</code></a> trait, I learned more about how iterator adaptors can be combined to create custom iteration patterns.</p>
+<p>The standard <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.enumerate"><code>enumerate()</code></a> adaptor is a convenient way to add an index to each item in an iterator. However, Rust’s iterator ecosystem provides many other adaptors that can be combined together to build more flexible iteration behaviors.</p>
+<p>For example, by combining adaptors such as <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.step_by">step_by()</a> and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.zip">zip()</a>, we can create an iteration pattern that generates values with a specific start value, end value, and step size, then combines them with another iterator.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> zipper<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> (<span class="dv">1</span><span class="op">..</span><span class="dv">10</span>)<span class="op">.</span>step_by(<span class="dv">3</span>)<span class="op">.</span>zip(<span class="st">"foobar"</span><span class="op">.</span>chars())<span class="op">.</span>collect()<span class="op">;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
