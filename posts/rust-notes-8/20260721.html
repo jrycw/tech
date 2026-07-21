@@ -374,15 +374,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>For example, by combining adaptors such as <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.step_by">step_by()</a> and <a href="https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.zip">zip()</a>, we can create an iteration pattern that generates values with a specific start value, end value, and step size, then combines them with another iterator.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> zipper<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> (<span class="dv">1</span><span class="op">..</span><span class="dv">10</span>)<span class="op">.</span>step_by(<span class="dv">3</span>)<span class="op">.</span>zip(<span class="st">"foobar"</span><span class="op">.</span>chars())<span class="op">.</span>collect()<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">"{zipper:?}"</span>)<span class="op">;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// [(1, 'f'), (4, 'o'), (7, 'o')]</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">"{zipper:?}"</span>)<span class="op">;</span> <span class="co">// [(1, 'f'), (4, 'o'), (7, 'o')]</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The iterator chain works as follows:</p>
 <ul>
 <li><code>(1..10)</code> creates a range: <code>1, 2, 3, 4, ... 9</code></li>
 <li><code>.step_by(3)</code> keeps every third value: <code>1, 4, 7</code></li>
 <li><code>.zip("foobar".chars())</code> combines the numbers with the characters</li>
+<li><code>collect()</code> consumes the iterator and collects the final result: <code>[(1, 'f'), (4, 'o'), (7, 'o')]</code></li>
 </ul>
 <p>For learning purposes, the same code can be expanded into smaller steps:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> expanded_version() <span class="op">{</span></span>
@@ -392,11 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> letters <span class="op">=</span> <span class="st">"foobar"</span><span class="op">.</span>chars()<span class="op">;</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> zipper<span class="op">:</span> <span class="dt">Vec</span><span class="op">&lt;</span>_<span class="op">&gt;</span> <span class="op">=</span> numbers<span class="op">.</span>zip(letters)<span class="op">.</span>collect()<span class="op">;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="pp">println!</span>(<span class="st">"{zipper:?}"</span>)<span class="op">;</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// [(1, 'f'), (4, 'o'), (7, 'o')]</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The expanded version makes each iterator easier to understand. Each iterator adaptor creates a new iterator, and the actual iteration only happens when <code>collect()</code> consumes the final <code>zip()</code> iterator.</p>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
