@@ -1,0 +1,51 @@
+---
+title: "Rust Notes #8: Building a Custom Enumerate Iterator Adaptor"
+html-table-processing: none
+date: "2026-07-21"
+categories: [rust]
+image: "rust_notes_8.png"
+---
+
+![](rust_notes_8.png){fig-align="left" fig-alt="Rust Notes 8"}
+
+Today, while reading the documentation for the [`Iterator`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html) trait, I learned how to create a functionally equivalent version of [`enumerate()`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.enumerate) with a more flexible starting point.
+
+The standard `enumerate()` adaptor always starts counting from `0`. However, by combining iterator adaptors, we can easily create similar behavior with a custom starting value.
+
+Here's an example where we iterate over a range of numbers with a given start, end, and step, then zip the result with another iterator:
+```rust
+fn main() {
+    let zipper: Vec<_> = (1..10).step_by(3).zip("foobar".chars()).collect();
+
+    println!("{zipper:?}");
+    // [(1, 'f'), (4, 'o'), (7, 'o')]
+}
+```
+
+The iterator chain works as follows:
+
+* `(1..10)` creates a range: `1, 2, 3, 4, ... 9`
+* `.step_by(3)` keeps every third value: `1, 4, 7`
+* `.zip("foobar".chars())` combines the numbers with the characters
+
+For learning purposes, the same code can be expanded into smaller steps:
+```rust
+fn expanded_version() {
+    let (start, end, step) = (1, 10, 3);
+
+    let numbers = (start..end).step_by(step);
+    let letters = "foobar".chars();
+
+    let zipper: Vec<_> = numbers.zip(letters).collect();
+
+    println!("{zipper:?}");
+    // [(1, 'f'), (4, 'o'), (7, 'o')]
+}
+```
+
+The expanded version makes each iterator easier to understand. Each iterator adaptor creates a new iterator, and the actual iteration only happens when `collect()` consumes the final `zip()` iterator.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
