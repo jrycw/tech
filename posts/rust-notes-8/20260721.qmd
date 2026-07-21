@@ -1,5 +1,5 @@
 ---
-title: "Rust Notes #8: Building a Custom Enumerate Iterator Adaptor"
+title: "Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip()"
 html-table-processing: none
 date: "2026-07-21"
 categories: [rust]
@@ -8,11 +8,11 @@ image: "rust_notes_8.png"
 
 ![](rust_notes_8.png){fig-align="left" fig-alt="Rust Notes 8"}
 
-Today, while reading the documentation for the [`Iterator`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html) trait, I learned how to create a functionally equivalent version of [`enumerate()`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.enumerate) with a more flexible starting point.
+Today, while reading the documentation for the [`Iterator`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html) trait, I learned more about how iterator adaptors can be combined to create custom iteration patterns.
 
-The standard `enumerate()` adaptor always starts counting from `0`. However, by combining iterator adaptors, we can easily create similar behavior with a custom starting value.
+The standard [`enumerate()`](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.enumerate) adaptor is a convenient way to add an index to each item in an iterator. However, Rust's iterator ecosystem provides many other adaptors that can be combined together to build more flexible iteration behaviors.
 
-Here's an example where we iterate over a range of numbers with a given start, end, and step, then zip the result with another iterator:
+For example, by combining adaptors such as [step_by()](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.step_by) and [zip()](https://doc.rust-lang.org/stable/std/iter/trait.Iterator.html#method.zip), we can create an iteration pattern that generates values with a specific start value, end value, and step size, then combines them with another iterator.
 ```rust
 fn main() {
     let zipper: Vec<_> = (1..10).step_by(3).zip("foobar".chars()).collect();
