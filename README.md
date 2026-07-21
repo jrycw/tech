@@ -28,4 +28,4 @@ Jerry Wu's Tech'n'take
 * [Rust Notes #5: Using Constructors as Iterator Adapters](https://tech.ycwu.space/posts/rust-notes-5/20260706.html)
 * [Rust Notes #6: Understanding FromStr and TryFrom](https://tech.ycwu.space/posts/rust-notes-6/20260718.html)
 * [Rust Notes #7: Understanding thiserror Attributes](https://tech.ycwu.space/posts/rust-notes-7/20260718.html)
-* [Rust Notes #8: Building a Custom Enumerate Iterator Adaptor](https://tech.ycwu.space/posts/rust-notes-8/20260721.html)
+* [Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip()](https://tech.ycwu.space/posts/rust-notes-8/20260721.html)
