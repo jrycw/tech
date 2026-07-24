@@ -10,7 +10,207 @@
 <atom:link href="https://tech.ycwu.space/index.xml" rel="self" type="application/rss+xml"/>
 <description>This is Jerry Wu&#39;s Tech&#39;n&#39;take.</description>
 <generator>quarto-1.9.38</generator>
-<lastBuildDate>Tue, 21 Jul 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 24 Jul 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Rust Notes #9: An Interesting Finding While Exploring iter::repeat_n()</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/rust-notes-9/20260724.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/rust-notes-9/rust_notes_9.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 9"></p>
+</figure>
+</div>
+<p>I found an interesting detail while reading the documentation of <a href="https://doc.rust-lang.org/stable/std/iter/fn.repeat_n.html">iter::repeat_n()</a>.</p>
+<p>Here’s a simplified example from the docs:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">use</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">std::</span>iter<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">fn</span> main() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-4">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> v<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Vec</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">i32</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Vec</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">::</span>with_capacity(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">123</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-5">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">mut</span> it <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">iter::</span>repeat_n(v<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-6"></span>
+<span id="cb1-7">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// The first item is produced by cloning the stored value.</span></span>
+<span id="cb1-8">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Note that Vec::clone() copies elements, not the spare capacity.</span></span>
+<span id="cb1-9">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> cloned <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> it<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>next()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>unwrap()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-10">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">assert_eq!</span>(cloned<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>len()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-11">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">assert_eq!</span>(cloned<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>capacity()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-12"></span>
+<span id="cb1-13">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// The final item is the original value moved out of the iterator.</span></span>
+<span id="cb1-14">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// This avoids an unnecessary clone.</span></span>
+<span id="cb1-15">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> last <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> it<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>next()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>unwrap()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-16">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">assert_eq!</span>(last<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>len()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-17">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">assert_eq!</span>(last<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>capacity()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">123</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-18"></span>
+<span id="cb1-19">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// No more items remain.</span></span>
+<span id="cb1-20">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">assert_eq!</span>(<span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">None</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> it<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>next())<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-21"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div></div>
+<p><code>iter::repeat_n(v, 2)</code> takes ownership of <code>v</code>. In other words, <code>v</code> is moved into the iterator, and the iterator becomes responsible for producing the repeated values.</p>
+<p>For the first <code>next()</code> call, <code>repeat_n()</code> clones the stored value using <code>Vec::clone()</code>. However, the cloned vector does not preserve the original vector’s spare capacity. Since the original vector has a capacity of <code>123</code> but contains no elements, the cloned vector has a capacity of <code>0</code>.</p>
+<p>The interesting part happens on the final <code>next()</code> call. Instead of cloning the value one more time, <code>repeat_n()</code> moves the original vector out of the iterator and returns it directly.</p>
+<p>This means <code>repeat_n()</code> only needs to perform <code>n - 1</code> clones and can use the original value for the last item. It is a small but elegant optimization made possible by Rust’s ownership system.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>rust</category>
+  <guid>https://tech.ycwu.space/posts/rust-notes-9/20260724.html</guid>
+  <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/rust-notes-9/rust_notes_9.png" medium="image" type="image/png" height="87" width="144"/>
+</item>
 <item>
   <title>Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip()</title>
   <dc:creator>Jerry Wu</dc:creator>
@@ -6422,7 +6622,7 @@ font-style: inherit;"># 2, 3</span></span></code></pre></div></div>
 <li><strong><code>make_tooltip()</code></strong> – Creates HTML tooltips from <code>label</code> and <code>tooltip</code> columns for hoverable text display.</li>
 </ul>
 <p>Here’s a quick example that uses <code>ti.is_every_nth_row()</code> to build a Polars expression suitable for styling tables interactively with Great Tables:</p>
-<div id="f8c3979f" class="cell" data-execution_count="1">
+<div id="90bfead4" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -9123,61 +9323,61 @@ font-style: inherit;">"__main__"</span>:</span>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="lEQa" data-reactive="true">
             <marimo-cell-output>
-            <div id="yvakaeboek" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+            <div id="gxfuikissu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#yvakaeboek table {
+#gxfuikissu table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-#yvakaeboek thead, tbody, tfoot, tr, td, th { border-style: none; }
+#gxfuikissu thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#yvakaeboek p { margin: 0; padding: 0; }
- #yvakaeboek .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 3px; border-top-color: #D5D5D5; border-right-style: solid; border-right-width: 3px; border-right-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 3px; border-bottom-color: #D5D5D5; border-left-style: solid; border-left-width: 3px; border-left-color: #D5D5D5; }
- #yvakaeboek .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #yvakaeboek .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #yvakaeboek .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #yvakaeboek .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yvakaeboek .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
- #yvakaeboek .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #yvakaeboek .gt_col_heading { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #yvakaeboek .gt_column_spanner_outer { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #yvakaeboek .gt_column_spanner_outer:first-child { padding-left: 0; }
- #yvakaeboek .gt_column_spanner_outer:last-child { padding-right: 0; }
- #yvakaeboek .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #yvakaeboek .gt_spanner_row { border-bottom-style: hidden; }
- #yvakaeboek .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #yvakaeboek .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: middle; }
- #yvakaeboek .gt_from_md> :first-child { margin-top: 0; }
- #yvakaeboek .gt_from_md> :last-child { margin-bottom: 0; }
- #yvakaeboek .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: dashed; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: dashed; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: dashed; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #yvakaeboek .gt_stub { color: #333333; background-color: #929292; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: dashed; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #yvakaeboek .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #yvakaeboek .gt_row_group_first td { border-top-width: 2px; }
- #yvakaeboek .gt_row_group_first th { border-top-width: 2px; }
- #yvakaeboek .gt_striped { color: #333333; background-color: #F4F4F4; }
- #yvakaeboek .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
- #yvakaeboek .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #yvakaeboek .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #yvakaeboek .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #yvakaeboek .gt_grand_summary_row { color: #FFFFFF; background-color: #01837B; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #yvakaeboek .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #yvakaeboek .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #yvakaeboek .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #yvakaeboek .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #yvakaeboek .gt_left { text-align: left; }
- #yvakaeboek .gt_center { text-align: center; }
- #yvakaeboek .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #yvakaeboek .gt_font_normal { font-weight: normal; }
- #yvakaeboek .gt_font_bold { font-weight: bold; }
- #yvakaeboek .gt_font_italic { font-style: italic; }
- #yvakaeboek .gt_super { font-size: 65%; }
- #yvakaeboek .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #yvakaeboek .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #yvakaeboek .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #yvakaeboek .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #yvakaeboek .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #yvakaeboek .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#gxfuikissu p { margin: 0; padding: 0; }
+ #gxfuikissu .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 3px; border-top-color: #D5D5D5; border-right-style: solid; border-right-width: 3px; border-right-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 3px; border-bottom-color: #D5D5D5; border-left-style: solid; border-left-width: 3px; border-left-color: #D5D5D5; }
+ #gxfuikissu .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #gxfuikissu .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #gxfuikissu .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #gxfuikissu .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #gxfuikissu .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
+ #gxfuikissu .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #gxfuikissu .gt_col_heading { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #gxfuikissu .gt_column_spanner_outer { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #gxfuikissu .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #gxfuikissu .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #gxfuikissu .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #gxfuikissu .gt_spanner_row { border-bottom-style: hidden; }
+ #gxfuikissu .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #gxfuikissu .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: middle; }
+ #gxfuikissu .gt_from_md> :first-child { margin-top: 0; }
+ #gxfuikissu .gt_from_md> :last-child { margin-bottom: 0; }
+ #gxfuikissu .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: dashed; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: dashed; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: dashed; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #gxfuikissu .gt_stub { color: #333333; background-color: #929292; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: dashed; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
+ #gxfuikissu .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #gxfuikissu .gt_row_group_first td { border-top-width: 2px; }
+ #gxfuikissu .gt_row_group_first th { border-top-width: 2px; }
+ #gxfuikissu .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #gxfuikissu .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
+ #gxfuikissu .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #gxfuikissu .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #gxfuikissu .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #gxfuikissu .gt_grand_summary_row { color: #FFFFFF; background-color: #01837B; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #gxfuikissu .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #gxfuikissu .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #gxfuikissu .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #gxfuikissu .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #gxfuikissu .gt_left { text-align: left; }
+ #gxfuikissu .gt_center { text-align: center; }
+ #gxfuikissu .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #gxfuikissu .gt_font_normal { font-weight: normal; }
+ #gxfuikissu .gt_font_bold { font-weight: bold; }
+ #gxfuikissu .gt_font_italic { font-style: italic; }
+ #gxfuikissu .gt_super { font-size: 65%; }
+ #gxfuikissu .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #gxfuikissu .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #gxfuikissu .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #gxfuikissu .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #gxfuikissu .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #gxfuikissu .gt_asterisk { font-size: 100%; vertical-align: 0; }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
@@ -9192,52 +9392,52 @@ font-style: inherit;">"__main__"</span>:</span>
 </thead>
 <tbody class="gt_table_body">
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-1" random-id="7d1d6127-f647-b9bf-9a19-2f551c31ad67"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-1" random-id="81be1734-f831-207e-14ba-7aaa19d00f28"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set DEBUG = False</td>
     <td class="gt_row gt_left">Never deploy with DEBUG = True ⚠️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-2" random-id="b5aeb63e-217e-6c62-de87-f5d886e420b0"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-2" random-id="5a1d7825-5b81-6bf8-9269-757d4de4dcc2"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Configure ALLOWED_HOSTS</td>
     <td class="gt_row gt_left gt_striped">Include your domain(s) or IP address 🌐</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-3" random-id="9edf07e9-8457-c0d6-8e64-d6be13f47f68"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-3" random-id="19a3f256-0111-9534-9291-1a7c4cb69be4"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set up a secret key</td>
     <td class="gt_row gt_left">Use a strong, secure key from an environment variable 🔐</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-4" random-id="48f10671-850f-a454-f18c-55507c5c0e36"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-4" random-id="25882daa-95c4-e4b7-bb37-3aabbce6b135"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Collect static files</td>
     <td class="gt_row gt_left gt_striped">Run `python manage.py collectstatic` 📦</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-5" random-id="f8800ee8-927a-a8a0-07ae-50143533d1bc"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-5" random-id="36cf66e7-36ed-e07a-ceef-669d26b2ae91"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Apply database migrations</td>
     <td class="gt_row gt_left">Run `python manage.py migrate` 🗃️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-6" random-id="7022f54a-5fb1-fa89-8818-47bce0592afc"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-6" random-id="005e1c60-a57b-e799-caab-7edd77bee89a"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Set up gunicorn or uWSGI</td>
     <td class="gt_row gt_left gt_striped">Use as a WSGI server in production 🔄</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-7" random-id="3994ebf7-b34f-4e86-11e8-5aa70b708b15"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-7" random-id="84e9bce0-861f-c8bb-d3df-0f882d9b5cb0"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Configure reverse proxy (e.g., Nginx)</td>
     <td class="gt_row gt_left">Serve static/media files and forward to WSGI server 🧭</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-8" random-id="e5fd0810-f0cd-4e04-94b7-03ee09992860"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-8" random-id="ae112863-6d4d-defd-fc15-85839cc1a714"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Secure the database</td>
     <td class="gt_row gt_left gt_striped">Use strong credentials, disable remote root login 🛡️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-9" random-id="72b54e78-e135-b7b3-0e4d-d293c1149147"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-9" random-id="2ccffccd-d1ec-f6a6-c181-2b340066a59f"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set up HTTPS (SSL)</td>
     <td class="gt_row gt_left">Use Let's Encrypt or your own certificate 🔒</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-10" random-id="f398b341-d683-d7b7-87bc-16cfe9314df1"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-10" random-id="48488ae0-6113-8fe2-e6d3-0a2b6267bd77"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Configure logging &amp; monitoring</td>
     <td class="gt_row gt_left gt_striped">Track errors and app performance 📊</td>
   </tr>
@@ -9704,7 +9904,7 @@ font-style: inherit;">"__main__"</span>:</span>
 </div>
 <p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
 <p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB/app">molab</a>.</p>
-<div id="3c81a545" class="cell" data-execution_count="1">
+<div id="e12e002e" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Show full code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -10389,67 +10589,67 @@ font-style: inherit;">"__main__"</span>:</span>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="vblA" data-reactive="true">
     <marimo-cell-output>
-    <div style="display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem"><marimo-ui-element object-id="vblA-0" random-id="b0874e6b-17c5-b42a-2dee-a1b7f824a897"><marimo-slider data-initial-value="1" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Number\u003c/span\u003e\u003c/span\u003e&quot;" data-start="1" data-stop="6" data-steps="[]" data-debounce="false" data-disabled="false" data-orientation="&quot;horizontal&quot;" data-show-value="false" data-include-input="false" data-full-width="false"></marimo-slider></marimo-ui-element><marimo-ui-element object-id="vblA-1" random-id="435af7ac-9e76-086d-86fa-4c9ca6ccace5"><marimo-radio data-initial-value="&quot;blue&quot;" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Color\u003c/span\u003e\u003c/span\u003e&quot;" data-options="[&quot;blue&quot;,&quot;cyan&quot;,&quot;pink&quot;,&quot;green&quot;,&quot;red&quot;,&quot;gray&quot;]" data-inline="false" data-disabled="false"></marimo-radio></marimo-ui-element><marimo-ui-element object-id="vblA-2" random-id="c562c367-03ca-8ed2-5c65-459d3a9f4b6a"><marimo-switch data-initial-value="true" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eAdd Row Striping?\u003c/span\u003e\u003c/span\u003e&quot;" data-disabled="false"></marimo-switch></marimo-ui-element></div>
+    <div style="display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem"><marimo-ui-element object-id="vblA-0" random-id="d1e0221e-84c6-5e63-b674-011d6306ab06"><marimo-slider data-initial-value="1" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Number\u003c/span\u003e\u003c/span\u003e&quot;" data-start="1" data-stop="6" data-steps="[]" data-debounce="false" data-disabled="false" data-orientation="&quot;horizontal&quot;" data-show-value="false" data-include-input="false" data-full-width="false"></marimo-slider></marimo-ui-element><marimo-ui-element object-id="vblA-1" random-id="c0f0244b-afd9-b6ed-e95f-41724bbe1e94"><marimo-radio data-initial-value="&quot;blue&quot;" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Color\u003c/span\u003e\u003c/span\u003e&quot;" data-options="[&quot;blue&quot;,&quot;cyan&quot;,&quot;pink&quot;,&quot;green&quot;,&quot;red&quot;,&quot;gray&quot;]" data-inline="false" data-disabled="false"></marimo-radio></marimo-ui-element><marimo-ui-element object-id="vblA-2" random-id="9c31537d-16f2-de03-7b69-d5f5df00ae01"><marimo-switch data-initial-value="true" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eAdd Row Striping?\u003c/span\u003e\u003c/span\u003e&quot;" data-disabled="false"></marimo-switch></marimo-ui-element></div>
     </marimo-cell-output>
     <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Select%20Style%20Number%22)%0Amo.output.append(style_widget)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Select%20Style%20Color%22%0A)%0Amo.output.append(color_widget)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Add%20Row%20Striping%3F%22)%0Amo.output.append(row_striping_widget)</marimo-cell-code>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="bkHC" data-reactive="true">
             <marimo-cell-output>
-            <div id="fwlkswvnzo" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+            <div id="fcljqmxglh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#fwlkswvnzo table {
+#fcljqmxglh table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-#fwlkswvnzo thead, tbody, tfoot, tr, td, th { border-style: none; }
+#fcljqmxglh thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#fwlkswvnzo p { margin: 0; padding: 0; }
- #fwlkswvnzo .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #fwlkswvnzo .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #fwlkswvnzo .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #fwlkswvnzo .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #fwlkswvnzo .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #fwlkswvnzo .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #fwlkswvnzo .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #fwlkswvnzo .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #fwlkswvnzo .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #fwlkswvnzo .gt_column_spanner_outer:first-child { padding-left: 0; }
- #fwlkswvnzo .gt_column_spanner_outer:last-child { padding-right: 0; }
- #fwlkswvnzo .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #fwlkswvnzo .gt_spanner_row { border-bottom-style: hidden; }
- #fwlkswvnzo .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #fwlkswvnzo .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #fwlkswvnzo .gt_from_md> :first-child { margin-top: 0; }
- #fwlkswvnzo .gt_from_md> :last-child { margin-bottom: 0; }
- #fwlkswvnzo .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #fwlkswvnzo .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #fwlkswvnzo .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #fwlkswvnzo .gt_row_group_first td { border-top-width: 2px; }
- #fwlkswvnzo .gt_row_group_first th { border-top-width: 2px; }
- #fwlkswvnzo .gt_striped { color: #333333; background-color: #F4F4F4; }
- #fwlkswvnzo .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #fwlkswvnzo .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #fwlkswvnzo .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #fwlkswvnzo .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #fwlkswvnzo .gt_grand_summary_row { color: #333333; background-color: #89D3FE; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #fwlkswvnzo .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #fwlkswvnzo .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #fwlkswvnzo .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #fwlkswvnzo .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #fwlkswvnzo .gt_left { text-align: left; }
- #fwlkswvnzo .gt_center { text-align: center; }
- #fwlkswvnzo .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #fwlkswvnzo .gt_font_normal { font-weight: normal; }
- #fwlkswvnzo .gt_font_bold { font-weight: bold; }
- #fwlkswvnzo .gt_font_italic { font-style: italic; }
- #fwlkswvnzo .gt_super { font-size: 65%; }
- #fwlkswvnzo .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #fwlkswvnzo .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #fwlkswvnzo .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #fwlkswvnzo .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #fwlkswvnzo .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #fwlkswvnzo .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#fcljqmxglh p { margin: 0; padding: 0; }
+ #fcljqmxglh .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #fcljqmxglh .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #fcljqmxglh .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #fcljqmxglh .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #fcljqmxglh .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #fcljqmxglh .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #fcljqmxglh .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #fcljqmxglh .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #fcljqmxglh .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #fcljqmxglh .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #fcljqmxglh .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #fcljqmxglh .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #fcljqmxglh .gt_spanner_row { border-bottom-style: hidden; }
+ #fcljqmxglh .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #fcljqmxglh .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #fcljqmxglh .gt_from_md> :first-child { margin-top: 0; }
+ #fcljqmxglh .gt_from_md> :last-child { margin-bottom: 0; }
+ #fcljqmxglh .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #fcljqmxglh .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #fcljqmxglh .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #fcljqmxglh .gt_row_group_first td { border-top-width: 2px; }
+ #fcljqmxglh .gt_row_group_first th { border-top-width: 2px; }
+ #fcljqmxglh .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #fcljqmxglh .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #fcljqmxglh .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #fcljqmxglh .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #fcljqmxglh .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #fcljqmxglh .gt_grand_summary_row { color: #333333; background-color: #89D3FE; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #fcljqmxglh .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #fcljqmxglh .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #fcljqmxglh .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #fcljqmxglh .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #fcljqmxglh .gt_left { text-align: left; }
+ #fcljqmxglh .gt_center { text-align: center; }
+ #fcljqmxglh .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #fcljqmxglh .gt_font_normal { font-weight: normal; }
+ #fcljqmxglh .gt_font_bold { font-weight: bold; }
+ #fcljqmxglh .gt_font_italic { font-style: italic; }
+ #fcljqmxglh .gt_super { font-size: 65%; }
+ #fcljqmxglh .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #fcljqmxglh .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #fcljqmxglh .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #fcljqmxglh .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #fcljqmxglh .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #fcljqmxglh .gt_asterisk { font-size: 100%; vertical-align: 0; }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
@@ -10740,7 +10940,7 @@ font-style: inherit;">"__main__"</span>:</span>
 
 <p>This post highlights a powerful yet underused feature in Great Tables: using existing columns to style the table body via <a href="https://posit-dev.github.io/great-tables/reference/from_column.html">from_column()</a>.</p>
 <p>Let’s say you have the following Polars DataFrame <code>df</code>:</p>
-<div id="a5bcfe3d" class="cell" data-execution_count="1">
+<div id="0cef7bd6" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -10844,7 +11044,7 @@ font-style: inherit;">print</span>(df)</span></code></pre></div></div>
 </div>
 </div>
 <p>The <code>color</code>, <code>size</code>, <code>weight</code>, and <code>align</code> columns contain style-related metadata. We can use <code>from_column()</code> to map this metadata to four styling options provided by Great Tables—<a href="https://posit-dev.github.io/great-tables/reference/style.fill.html">style.fill()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.text.html">style.text()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.borders.html">style.borders()</a>, and <a href="https://posit-dev.github.io/great-tables/reference/style.css.html">style.css()</a>—all of which are built on the internal <code>CellStyle</code> class.</p>
-<div id="fee1497d" class="cell" data-execution_count="2">
+<div id="e960d0b2" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    GT(df)</span>
 <span id="cb3-3">    .tab_style(</span>
@@ -10890,62 +11090,62 @@ background-color: null;
 font-style: inherit;">"gray"</span>)</span>
 <span id="cb3-16">)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="oglokskqsz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="hhuthtcjbb" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#oglokskqsz table {
+#hhuthtcjbb table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#oglokskqsz thead, tbody, tfoot, tr, td, th { border-style: none; }
+#hhuthtcjbb thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#oglokskqsz p { margin: 0; padding: 0; }
- #oglokskqsz .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #oglokskqsz .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #oglokskqsz .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #oglokskqsz .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #oglokskqsz .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #oglokskqsz .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #oglokskqsz .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #oglokskqsz .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #oglokskqsz .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #oglokskqsz .gt_column_spanner_outer:first-child { padding-left: 0; }
- #oglokskqsz .gt_column_spanner_outer:last-child { padding-right: 0; }
- #oglokskqsz .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #oglokskqsz .gt_spanner_row { border-bottom-style: hidden; }
- #oglokskqsz .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #oglokskqsz .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
- #oglokskqsz .gt_from_md> :first-child { margin-top: 0; }
- #oglokskqsz .gt_from_md> :last-child { margin-bottom: 0; }
- #oglokskqsz .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #oglokskqsz .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #oglokskqsz .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #oglokskqsz .gt_row_group_first td { border-top-width: 2px; }
- #oglokskqsz .gt_row_group_first th { border-top-width: 2px; }
- #oglokskqsz .gt_striped { color: #333333; background-color: #F4F4F4; }
- #oglokskqsz .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #oglokskqsz .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #oglokskqsz .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #oglokskqsz .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #oglokskqsz .gt_grand_summary_row { color: #333333; background-color: #D5D5D5; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #oglokskqsz .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #oglokskqsz .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #oglokskqsz .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #oglokskqsz .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #oglokskqsz .gt_left { text-align: left; }
- #oglokskqsz .gt_center { text-align: center; }
- #oglokskqsz .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #oglokskqsz .gt_font_normal { font-weight: normal; }
- #oglokskqsz .gt_font_bold { font-weight: bold; }
- #oglokskqsz .gt_font_italic { font-style: italic; }
- #oglokskqsz .gt_super { font-size: 65%; }
- #oglokskqsz .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #oglokskqsz .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #oglokskqsz .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #oglokskqsz .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #oglokskqsz .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #oglokskqsz .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#hhuthtcjbb p { margin: 0; padding: 0; }
+ #hhuthtcjbb .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #hhuthtcjbb .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #hhuthtcjbb .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #hhuthtcjbb .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #hhuthtcjbb .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #hhuthtcjbb .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #hhuthtcjbb .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #hhuthtcjbb .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #hhuthtcjbb .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #hhuthtcjbb .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #hhuthtcjbb .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #hhuthtcjbb .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #hhuthtcjbb .gt_spanner_row { border-bottom-style: hidden; }
+ #hhuthtcjbb .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #hhuthtcjbb .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
+ #hhuthtcjbb .gt_from_md> :first-child { margin-top: 0; }
+ #hhuthtcjbb .gt_from_md> :last-child { margin-bottom: 0; }
+ #hhuthtcjbb .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #hhuthtcjbb .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
+ #hhuthtcjbb .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #hhuthtcjbb .gt_row_group_first td { border-top-width: 2px; }
+ #hhuthtcjbb .gt_row_group_first th { border-top-width: 2px; }
+ #hhuthtcjbb .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #hhuthtcjbb .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #hhuthtcjbb .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #hhuthtcjbb .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #hhuthtcjbb .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #hhuthtcjbb .gt_grand_summary_row { color: #333333; background-color: #D5D5D5; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #hhuthtcjbb .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #hhuthtcjbb .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #hhuthtcjbb .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #hhuthtcjbb .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #hhuthtcjbb .gt_left { text-align: left; }
+ #hhuthtcjbb .gt_center { text-align: center; }
+ #hhuthtcjbb .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #hhuthtcjbb .gt_font_normal { font-weight: normal; }
+ #hhuthtcjbb .gt_font_bold { font-weight: bold; }
+ #hhuthtcjbb .gt_font_italic { font-style: italic; }
+ #hhuthtcjbb .gt_super { font-size: 65%; }
+ #hhuthtcjbb .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #hhuthtcjbb .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #hhuthtcjbb .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #hhuthtcjbb .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #hhuthtcjbb .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #hhuthtcjbb .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -10981,7 +11181,7 @@ font-style: inherit;">"gray"</span>)</span>
 </div>
 </div>
 <p><strong>One last note:</strong> <code>from_column()</code> works with both Pandas and Polars DataFrames. For Polars users, you can also pass expressions directly without wrapping them in <code>from_column()</code>. The following code produces the same styled table as shown above:</p>
-<div id="2917890b" class="cell" data-execution_count="3">
+<div id="faf12444" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df)</span>
 <span id="cb4-3">    .tab_style(</span>
@@ -11073,7 +11273,7 @@ font-style: inherit;">"gray"</span>)</span>
 <li><code>otherwise</code>: A fallback expression used in <code>.otherwise()</code> if no conditions match.</li>
 </ul>
 <p>The given example demonstrates how <code>case_when()</code> can simplify conditional logic compared to the more verbose <code>pl.when().then().otherwise()</code> chain.</p>
-<div id="c2db5c9f" class="cell" data-execution_count="1">
+<div id="fa4024c7" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -11303,7 +11503,7 @@ font-style: inherit;">return</span> expr</span></code></pre></div></div>
 <section id="custom-expression-namespace" class="level2">
 <h2 class="anchored" data-anchor-id="custom-expression-namespace">Custom Expression Namespace</h2>
 <p>With <code>case_when()</code> in place, we can refactor the <code>DiscreteSplitter</code> expression namespace like this:</p>
-<div id="61d15e45" class="cell" data-execution_count="2">
+<div id="9be20474" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@cache</span></span>
@@ -11562,7 +11762,7 @@ font-style: inherit;">4</span>]),</span>
 <h2 class="anchored" data-anchor-id="custom-dataframe-namespace">Custom DataFrame Namespace</h2>
 <p>Instead of relying on <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>, we can also use <code>_mod_expr()</code> directly to enable similar categorization.</p>
 <p>Here’s how the <code>DiscreteSplitter</code> can be implemented as a custom DataFrame namespace:</p>
-<div id="1dbc78b9" class="cell" data-execution_count="3">
+<div id="a7a08cb6" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@pl.api.register_dataframe_namespace</span>(<span class="st" style="color: #20794D;
@@ -11843,7 +12043,7 @@ font-style: inherit;">1</span>)</span>
 
 <p>This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While <a href="https://github.com/posit-dev/great-tables/issues/678">it</a> may or may not be adopted by the team, I thought it would be fun to document it here on the blog.</p>
 <p>I recently created a utility called <a href="https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row">every_n_row()</a>, designed to work with both Pandas and Polars DataFrames (support for <code>pyarrow</code> is still under investigation). With <code>every_n_row()</code>, we can easily target alternating rows—for example, select odd rows using <code>every_n_row(2)</code> and even rows using either <code>every_n_row(2, 1)</code> or <code>~every_n_row(2)</code>.</p>
-<div id="1d098330" class="cell" data-execution_count="1">
+<div id="1f65a072" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -11977,1202 +12177,6 @@ font-style: inherit;">"pink"</span>)</span>
   <guid>https://tech.ycwu.space/posts/gt-row-selector/20250511.html</guid>
   <pubDate>Sun, 11 May 2025 00:00:00 GMT</pubDate>
   <media:content url="https://tech.ycwu.space/posts/gt-row-selector/every_n_row.png" medium="image" type="image/png" height="112" width="144"/>
-</item>
-<item>
-  <title>Polars Custom Expression Namespace</title>
-  <dc:creator>Jerry Wu</dc:creator>
-  <link>https://tech.ycwu.space/posts/polars-custom-expr-namespace/20250417.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-
-<p>Today I explored how to register a <strong>custom expression namespace</strong> in Polars. This feature turned out to be super helpful for solving a common problem I run into when building tables or plots—<strong>colorizing rows based on their row index</strong>.</p>
-<p>Here is the code snippet: <img src="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" class="img-fluid quarto-figure quarto-figure-center" alt="Code Snippet"></p>
-<div id="ddfc3aef" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Show full code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> typing <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Any</span>
-<span id="cb1-2"></span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pl</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> great_tables <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> GT, loc, style</span>
-<span id="cb1-5"></span>
-<span id="cb1-6"></span>
-<span id="cb1-7"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb1-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb1-9">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, expr: pl.Expr) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>:</span>
-<span id="cb1-10">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr</span>
-<span id="cb1-11"></span>
-<span id="cb1-12">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _mod_expr(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb1-13">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> pl.int_range(pl.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(), dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.UInt32).mod(n)</span>
-<span id="cb1-14"></span>
-<span id="cb1-15">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> binarize(</span>
-<span id="cb1-16">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span></span>
-<span id="cb1-17">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb1-18">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb1-19">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (</span>
-<span id="cb1-20">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb1-21">            .then(pl.lit(lit1))</span>
-<span id="cb1-22">            .otherwise(pl.lit(lit2))</span>
-<span id="cb1-23">            .alias(name)</span>
-<span id="cb1-24">        )</span>
-<span id="cb1-25"></span>
-<span id="cb1-26">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> trinarize(</span>
-<span id="cb1-27">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit3: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"trinarized"</span></span>
-<span id="cb1-28">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb1-29">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span>
-<span id="cb1-30">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (</span>
-<span id="cb1-31">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb1-32">            .then(pl.lit(lit1))</span>
-<span id="cb1-33">            .when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))</span>
-<span id="cb1-34">            .then(pl.lit(lit2))</span>
-<span id="cb1-35">            .otherwise(pl.lit(lit3))</span>
-<span id="cb1-36">            .alias(name)</span>
-<span id="cb1-37">        )</span>
-<span id="cb1-38"></span>
-<span id="cb1-39">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> bucketize(</span>
-<span id="cb1-40">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lits: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>[Any], name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bucketized"</span></span>
-<span id="cb1-41">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb1-42">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(lits))</span>
-<span id="cb1-43"></span>
-<span id="cb1-44">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># first</span></span>
-<span id="cb1-45">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)).then(pl.lit(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]))</span>
-<span id="cb1-46"></span>
-<span id="cb1-47">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># middles</span></span>
-<span id="cb1-48">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, one_lit <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], start<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>):</span>
-<span id="cb1-49">            expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
-<span id="cb1-50"></span>
-<span id="cb1-51">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># last</span></span>
-<span id="cb1-52">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.otherwise(pl.lit(lits[<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]))</span>
-<span id="cb1-53">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> expr.alias(name)</span>
-<span id="cb1-54"></span>
-<span id="cb1-55"></span>
-<span id="cb1-56">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb1-57">    pl.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>: [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">72</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">83</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">97</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">77</span>]})</span>
-<span id="cb1-58">    .with_row_index(offset<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb1-59">    .with_columns(</span>
-<span id="cb1-60">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.binarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"papayawhip"</span>),</span>
-<span id="cb1-61">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.trinarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"one"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"two"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"three"</span>),</span>
-<span id="cb1-62">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.bucketize([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>]),</span>
-<span id="cb1-63">    )</span>
-<span id="cb1-64">)</span>
-<span id="cb1-65"></span>
-<span id="cb1-66">(</span>
-<span id="cb1-67">    GT(df)</span>
-<span id="cb1-68">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span>)), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body())</span>
-<span id="cb1-69">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>)</span>
-<span id="cb1-70">)</span></code></pre></div></div>
-</details>
-</div>
-<section id="step-by-step-breakdown" class="level2">
-<h2 class="anchored" data-anchor-id="step-by-step-breakdown">Step-by-Step Breakdown</h2>
-<section id="registering-the-namespace" class="level3">
-<h3 class="anchored" data-anchor-id="registering-the-namespace">Registering the Namespace</h3>
-<p>We use <a href="https://docs.pola.rs/api/python/stable/reference/api/polars.api.register_expr_namespace.html">pl.api.register_expr_namespace()</a> to attach our class to the <code>spt</code> namespace. Once registered, we can call our methods like this: <code>pl.col("any").spt.binarize(...)</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb2-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb2-3">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, expr: pl.Expr) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>:</span>
-<span id="cb2-4">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr</span></code></pre></div></div>
-</section>
-<section id="helper-row-index-based-modulo-expression" class="level3">
-<h3 class="anchored" data-anchor-id="helper-row-index-based-modulo-expression">Helper: Row-Index Based Modulo Expression</h3>
-<p>To assign values based on row position, we need a way to refer to the row index inside an expression. Polars provides a trick using <code>pl.int_range(pl.len())</code>, as shown in <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb3-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb3-3">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _mod_expr(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb3-4">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> pl.int_range(pl.<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(), dtype<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>pl.UInt32).mod(n)</span></code></pre></div></div>
-</section>
-<section id="binarize-two-groups" class="level3">
-<h3 class="anchored" data-anchor-id="binarize-two-groups"><code>binarize</code>: Two Groups</h3>
-<p>This method maps alternating rows into two categories using <a href="https://docs.pola.rs/api/python/stable/reference/expressions/api/polars.when.html#polars.when">pl.when().then().otherwise()</a>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb4-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb4-3">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> binarize(</span>
-<span id="cb4-4">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span></span>
-<span id="cb4-5">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb4-6">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb4-7">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (</span>
-<span id="cb4-8">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb4-9">            .then(pl.lit(lit1))</span>
-<span id="cb4-10">            .otherwise(pl.lit(lit2))</span>
-<span id="cb4-11">            .alias(name)</span>
-<span id="cb4-12">        )</span></code></pre></div></div>
-</section>
-<section id="trinarize-three-groups" class="level3">
-<h3 class="anchored" data-anchor-id="trinarize-three-groups"><code>trinarize</code>: Three Groups</h3>
-<p>Similar to <code>binarize</code>, but splits the rows into three groups using two <code>when().then()</code> branches before the final <code>otherwise()</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb5-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb5-3">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> trinarize(</span>
-<span id="cb5-4">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit3: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"trinarized"</span></span>
-<span id="cb5-5">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb5-6">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>)</span>
-<span id="cb5-7">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (</span>
-<span id="cb5-8">            pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb5-9">            .then(pl.lit(lit1))</span>
-<span id="cb5-10">            .when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))</span>
-<span id="cb5-11">            .then(pl.lit(lit2))</span>
-<span id="cb5-12">            .otherwise(pl.lit(lit3))</span>
-<span id="cb5-13">            .alias(name)</span>
-<span id="cb5-14">        )</span></code></pre></div></div>
-</section>
-<section id="bucketize-n-groups" class="level3">
-<h3 class="anchored" data-anchor-id="bucketize-n-groups"><code>bucketize</code>: N Groups</h3>
-<p>A generalized version of the above, which dynamically assigns values from a list across <code>n</code> groups:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_expr_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb6-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb6-3">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> bucketize(</span>
-<span id="cb6-4">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lits: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>[Any], name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bucketized"</span></span>
-<span id="cb6-5">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.Expr:</span>
-<span id="cb6-6">        mod_expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_expr(<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(lits))</span>
-<span id="cb6-7"></span>
-<span id="cb6-8">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># first</span></span>
-<span id="cb6-9">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.when(mod_expr.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)).then(pl.lit(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]))</span>
-<span id="cb6-10"></span>
-<span id="cb6-11">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># middles</span></span>
-<span id="cb6-12">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, one_lit <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], start<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>):</span>
-<span id="cb6-13">            expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.when(mod_expr.eq(i)).then(pl.lit(one_lit))</span>
-<span id="cb6-14"></span>
-<span id="cb6-15">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># last</span></span>
-<span id="cb6-16">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.otherwise(pl.lit(lits[<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]))</span>
-<span id="cb6-17">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> expr.alias(name)</span></code></pre></div></div>
-</section>
-<section id="example-usage" class="level3">
-<h3 class="anchored" data-anchor-id="example-usage">Example Usage</h3>
-<p>Here’s a simple example that demonstrates how the custom namespace works in practice:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb7-2">    pl.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>: [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">72</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">83</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">97</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">77</span>]})</span>
-<span id="cb7-3">    .with_row_index(offset<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb7-4">    .with_columns(</span>
-<span id="cb7-5">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.binarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"papayawhip"</span>),</span>
-<span id="cb7-6">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.trinarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"one"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"two"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"three"</span>),</span>
-<span id="cb7-7">        pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">""</span>).spt.bucketize([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>]),</span>
-<span id="cb7-8">    )</span>
-<span id="cb7-9">)</span></code></pre></div></div>
-<p>This produces the following DataFrame:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">shape: (<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">9</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb8-2">┌───────┬─────┬────────────┬────────────┬────────────┐</span>
-<span id="cb8-3">│ index ┆ n   ┆ binarized  ┆ trinarized ┆ bucketized │</span>
-<span id="cb8-4">│ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">---</span>   ┆ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">---</span> ┆ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">---</span>        ┆ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">---</span>        ┆ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">---</span>        │</span>
-<span id="cb8-5">│ u32   ┆ i64 ┆ <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>        ┆ <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>        ┆ i32        │</span>
-<span id="cb8-6">╞═══════╪═════╪════════════╪════════════╪════════════╡</span>
-<span id="cb8-7">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span> ┆ lightblue  ┆ one        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>          │</span>
-<span id="cb8-8">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>  ┆ papayawhip ┆ two        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>          │</span>
-<span id="cb8-9">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">72</span>  ┆ lightblue  ┆ three      ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>          │</span>
-<span id="cb8-10">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">83</span>  ┆ papayawhip ┆ one        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>          │</span>
-<span id="cb8-11">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">97</span>  ┆ lightblue  ┆ two        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>          │</span>
-<span id="cb8-12">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>  ┆ papayawhip ┆ three      ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>          │</span>
-<span id="cb8-13">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">7</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>  ┆ lightblue  ┆ one        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>          │</span>
-<span id="cb8-14">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">51</span>  ┆ papayawhip ┆ two        ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>          │</span>
-<span id="cb8-15">│ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">9</span>     ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">77</span>  ┆ lightblue  ┆ three      ┆ <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>          │</span>
-<span id="cb8-16">└───────┴─────┴────────────┴────────────┴────────────┘</span></code></pre></div></div>
-<p>Note: Since the custom logic is based on the row index rather than actual column values, you can safely use <code>pl.col("")</code> as a placeholder when calling the namespace methods.</p>
-<p>Each new column shows how rows are grouped using the row index modulo 2, 3, or 4—useful for highlighting patterns or applying styling.</p>
-<p>For instance, you can use the <code>binarized</code> column with Great Tables like this:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">(</span>
-<span id="cb9-2">    GT(df)</span>
-<span id="cb9-3">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span>)), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body())</span>
-<span id="cb9-4">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>)</span>
-<span id="cb9-5">)</span></code></pre></div></div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://tech.ycwu.space/posts/polars-custom-expr-namespace/gt.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Table with alternating row colors"></p>
-</figure>
-</div>
-</section>
-<section id="conclusion" class="level3">
-<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
-<p>Registering a custom expression namespace in Polars is a powerful way to encapsulate and reuse logic across your codebase. In this post, we created a <code>DiscreteSplitter</code> class to simplify index-based grouping, enabling operations like <code>binarize</code>, <code>trinarize</code>, and <code>bucketize</code>. This approach keeps your expressions clean and composable, especially when generating tables or plots that require styling based on row position.</p>
-<p>It’s also worth noting that Polars supports similar registration for Series, LazyFrame, and DataFrame objects—check out the <a href="https://docs.pola.rs/api/python/stable/reference/api.html">official documentation</a> for more details.</p>
-</section>
-<section id="remark" class="level3">
-<h3 class="anchored" data-anchor-id="remark">Remark</h3>
-<p>Here’s a rough draft showing how to achieve a similar effect using the DataFrame namespace. I might revisit and refine this approach in the future.</p>
-<div id="cde19be2" class="cell" data-execution_count="2">
-<details class="code-fold">
-<summary>Show full code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> typing <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> Any</span>
-<span id="cb10-2"></span>
-<span id="cb10-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pl</span>
-<span id="cb10-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> great_tables <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> GT, loc, style</span>
-<span id="cb10-5"></span>
-<span id="cb10-6"></span>
-<span id="cb10-7"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@pl.api.register_dataframe_namespace</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"spt"</span>)</span>
-<span id="cb10-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">class</span> DiscreteSplitter:</span>
-<span id="cb10-9">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, df: pl.DataFrame) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>:</span>
-<span id="cb10-10">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> df</span>
-<span id="cb10-11">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_colname <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"mod"</span></span>
-<span id="cb10-12">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.col(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_colname)</span>
-<span id="cb10-13">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_colname <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"index"</span></span>
-<span id="cb10-14">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_col <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.col(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_colname)</span>
-<span id="cb10-15"></span>
-<span id="cb10-16">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _get_df(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.DataFrame:</span>
-<span id="cb10-17">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df.with_row_index(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_colname).with_columns(</span>
-<span id="cb10-18">            <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_col.mod(n).alias(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_colname)</span>
-<span id="cb10-19">        )</span>
-<span id="cb10-20"></span>
-<span id="cb10-21">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _get_final_df(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, n: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">int</span>, expr: pl.Expr) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.DataFrame:</span>
-<span id="cb10-22">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (</span>
-<span id="cb10-23">            <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._get_df(n)</span>
-<span id="cb10-24">            .with_columns(expr)</span>
-<span id="cb10-25">            .drop([<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._idx_colname, <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_colname])</span>
-<span id="cb10-26">        )</span>
-<span id="cb10-27"></span>
-<span id="cb10-28">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> binarize(</span>
-<span id="cb10-29">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span></span>
-<span id="cb10-30">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.DataFrame:</span>
-<span id="cb10-31">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span></span>
-<span id="cb10-32"></span>
-<span id="cb10-33">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb10-34">            pl.when(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb10-35">            .then(pl.lit(lit1))</span>
-<span id="cb10-36">            .otherwise(pl.lit(lit2))</span>
-<span id="cb10-37">            .alias(name)</span>
-<span id="cb10-38">        )</span>
-<span id="cb10-39"></span>
-<span id="cb10-40">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._get_final_df(n, expr)</span>
-<span id="cb10-41">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df</span>
-<span id="cb10-42"></span>
-<span id="cb10-43">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> trinarize(</span>
-<span id="cb10-44">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lit1: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit2: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, lit3: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"trinarized"</span></span>
-<span id="cb10-45">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.DataFrame:</span>
-<span id="cb10-46">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span>
-<span id="cb10-47"></span>
-<span id="cb10-48">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb10-49">            pl.when(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>))</span>
-<span id="cb10-50">            .then(pl.lit(lit1))</span>
-<span id="cb10-51">            .when(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>))</span>
-<span id="cb10-52">            .then(pl.lit(lit2))</span>
-<span id="cb10-53">            .otherwise(pl.lit(lit3))</span>
-<span id="cb10-54">            .alias(name)</span>
-<span id="cb10-55">        )</span>
-<span id="cb10-56"></span>
-<span id="cb10-57">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._get_final_df(n, expr)</span>
-<span id="cb10-58">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df</span>
-<span id="cb10-59"></span>
-<span id="cb10-60">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> bucketize(</span>
-<span id="cb10-61">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>, lits: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">list</span>[Any], name: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"bucketized"</span></span>
-<span id="cb10-62">    ) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> pl.DataFrame:</span>
-<span id="cb10-63">        n <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">len</span>(lits)</span>
-<span id="cb10-64"></span>
-<span id="cb10-65">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># first</span></span>
-<span id="cb10-66">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.when(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col.eq(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>)).then(pl.lit(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>]))</span>
-<span id="cb10-67"></span>
-<span id="cb10-68">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># middles</span></span>
-<span id="cb10-69">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i, one_lit <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">enumerate</span>(lits[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>:<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>], start<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>):</span>
-<span id="cb10-70">            expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.when(<span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._mod_col.eq(i)).then(pl.lit(one_lit))</span>
-<span id="cb10-71"></span>
-<span id="cb10-72">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># last</span></span>
-<span id="cb10-73">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.otherwise(pl.lit(lits[<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>]))</span>
-<span id="cb10-74"></span>
-<span id="cb10-75">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># alias</span></span>
-<span id="cb10-76">        expr <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> expr.alias(name)</span>
-<span id="cb10-77"></span>
-<span id="cb10-78">        <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._get_final_df(n, expr)</span>
-<span id="cb10-79">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">self</span>._df</span>
-<span id="cb10-80"></span>
-<span id="cb10-81"></span>
-<span id="cb10-82">df <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb10-83">    pl.DataFrame({<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"n"</span>: [<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">72</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">83</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">97</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">42</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">51</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">77</span>]})</span>
-<span id="cb10-84">    .spt.binarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"papayawhip"</span>)</span>
-<span id="cb10-85">    .spt.trinarize(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"one"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"two"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"three"</span>)</span>
-<span id="cb10-86">    .spt.bucketize([<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4</span>])</span>
-<span id="cb10-87">    .with_row_index(offset<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb10-88">)</span>
-<span id="cb10-89"></span>
-<span id="cb10-90">(</span>
-<span id="cb10-91">    GT(df)</span>
-<span id="cb10-92">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(pl.col(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"binarized"</span>)), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body())</span>
-<span id="cb10-93">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">6</span>)</span>
-<span id="cb10-94">)</span></code></pre></div></div>
-</details>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Disclaimer
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This post was drafted by me, with AI assistance to refine the content.</p>
-</div>
-</div>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>python</category>
-  <category>polars</category>
-  <guid>https://tech.ycwu.space/posts/polars-custom-expr-namespace/20250417.html</guid>
-  <pubDate>Thu, 17 Apr 2025 00:00:00 GMT</pubDate>
-  <media:content url="https://tech.ycwu.space/posts/polars-custom-expr-namespace/code.png" medium="image" type="image/png" height="205" width="144"/>
 </item>
 </channel>
 </rss>
