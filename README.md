@@ -29,3 +29,4 @@ Jerry Wu's Tech'n'take
 * [Rust Notes #6: Understanding FromStr and TryFrom](https://tech.ycwu.space/posts/rust-notes-6/20260718.html)
 * [Rust Notes #7: Understanding thiserror Attributes](https://tech.ycwu.space/posts/rust-notes-7/20260718.html)
 * [Rust Notes #8: Exploring Iterator Adaptors with step_by() and zip()](https://tech.ycwu.space/posts/rust-notes-8/20260721.html)
+* [Rust Notes #9: An Interesting Finding While Exploring iter::repeat_n()](https://tech.ycwu.space/posts/rust-notes-9/20260724.html)
