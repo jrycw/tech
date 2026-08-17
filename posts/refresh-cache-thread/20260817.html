@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jerry Wu">
-<meta name="dcterms.date" content="2025-06-07">
+<meta name="dcterms.date" content="2026-08-17">
 
-<title>marimo in Quarto – Tech’n’Take</title>
+<title>Refreshing a Cache with a Python Background Thread – Tech’n’Take</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -114,16 +114,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script data-marimo="true">
-    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
-        value: Object.freeze({
-            trusted: true,
-            notebookCode: "# /// script\n# requires-python = \"\u003E=3.12\"\n# dependencies = [\n#   \"polars\u003E=1.31.0\",\n#   \"pyarrow\u003E=20.0.0\",\n#   \"great_tables\",\n# ]\n# ///\nimport marimo\n\n__generated_with = \"0.23.16\"\napp = marimo.App()\n\n\n@app.cell\ndef _():\n    import marimo as mo\n    import polars as pl\n    from great_tables import GT, loc, style\n\n    return GT, mo, pl\n\n\n@app.cell\ndef _(pl):\n    data = {\n        \"col1\": [2, 5, 7, 10, 15],\n        \"col2\": [\"x\", \"y\", \"y\", \"z\", \"z\"],\n        \"color\": [\"lightgrey\", \"lightblue\", \"lightblue\", \"papayawhip\", \"papayawhip\"],\n    }\n    df = pl.DataFrame(data)\n    print(df)\n    return (df,)\n\n\n@app.cell\ndef _(mo):\n    style_widget = mo.ui.slider(1, 6, label=\"Select Style Number\")\n    mo.output.append(style_widget)\n\n    _colors = [\"blue\", \"cyan\", \"pink\", \"green\", \"red\", \"gray\"]\n    color_widget = mo.ui.radio(\n        options=_colors, value=_colors[0], label=\"Select Style Color\"\n    )\n    mo.output.append(color_widget)\n\n    row_striping_widget = mo.ui.switch(value=True, label=\"Add Row Striping?\")\n    mo.output.append(row_striping_widget)\n    return color_widget, row_striping_widget, style_widget\n\n\n@app.cell\ndef _(GT, color_widget, df, row_striping_widget, style_widget):\n    GT(df).opt_stylize(\n        style=style_widget.value,\n        color=color_widget.value,\n        add_row_striping=row_striping_widget.value,\n    )\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
-        }),
-        writable: false,
-        configurable: false,
-    });
-</script></head><body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -285,19 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     } else {
       toggleColorMode(false);
     }
-  </script><marimo-code hidden="">%23%20%2F%2F%2F%20script%0A%23%20requires-python%20%3D%20%22%3E%3D3.12%22%0A%23%20dependencies%20%3D%20%5B%0A%23%20%20%20%22polars%3E%3D1.31.0%22%2C%0A%23%20%20%20%22pyarrow%3E%3D20.0.0%22%2C%0A%23%20%20%20%22great_tables%22%2C%0A%23%20%5D%0A%23%20%2F%2F%2F%0Aimport%20marimo%0A%0A__generated_with%20%3D%20%220.23.16%22%0Aapp%20%3D%20marimo.App%28%29%0A%0A%0A%40app.cell%0Adef%20_%28%29%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20polars%20as%20pl%0A%20%20%20%20from%20great_tables%20import%20GT%2C%20loc%2C%20style%0A%0A%20%20%20%20return%20GT%2C%20mo%2C%20pl%0A%0A%0A%40app.cell%0Adef%20_%28pl%29%3A%0A%20%20%20%20data%20%3D%20%7B%0A%20%20%20%20%20%20%20%20%22col1%22%3A%20%5B2%2C%205%2C%207%2C%2010%2C%2015%5D%2C%0A%20%20%20%20%20%20%20%20%22col2%22%3A%20%5B%22x%22%2C%20%22y%22%2C%20%22y%22%2C%20%22z%22%2C%20%22z%22%5D%2C%0A%20%20%20%20%20%20%20%20%22color%22%3A%20%5B%22lightgrey%22%2C%20%22lightblue%22%2C%20%22lightblue%22%2C%20%22papayawhip%22%2C%20%22papayawhip%22%5D%2C%0A%20%20%20%20%7D%0A%20%20%20%20df%20%3D%20pl.DataFrame%28data%29%0A%20%20%20%20print%28df%29%0A%20%20%20%20return%20%28df%2C%29%0A%0A%0A%40app.cell%0Adef%20_%28mo%29%3A%0A%20%20%20%20style_widget%20%3D%20mo.ui.slider%281%2C%206%2C%20label%3D%22Select%20Style%20Number%22%29%0A%20%20%20%20mo.output.append%28style_widget%29%0A%0A%20%20%20%20_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0A%20%20%20%20color_widget%20%3D%20mo.ui.radio%28%0A%20%20%20%20%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Select%20Style%20Color%22%0A%20%20%20%20%29%0A%20%20%20%20mo.output.append%28color_widget%29%0A%0A%20%20%20%20row_striping_widget%20%3D%20mo.ui.switch%28value%3DTrue%2C%20label%3D%22Add%20Row%20Striping%3F%22%29%0A%20%20%20%20mo.output.append%28row_striping_widget%29%0A%20%20%20%20return%20color_widget%2C%20row_striping_widget%2C%20style_widget%0A%0A%0A%40app.cell%0Adef%20_%28GT%2C%20color_widget%2C%20df%2C%20row_striping_widget%2C%20style_widget%29%3A%0A%20%20%20%20GT%28df%29.opt_stylize%28%0A%20%20%20%20%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A%20%20%20%20%29%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run%28%29%0A</marimo-code><script type="module" src="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.23.16/dist/main.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/@marimo-team/islands@0.23.16/dist/style.css" rel="stylesheet" title="marimo-islands" crossorigin="anonymous">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;500;700&amp;family=Lora&amp;family=PT+Sans:wght@400;700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" integrity="sha384-wcIxkf4k558AjM3Yz3BBFQUbk/zgIYC2R0QpeeYb+TwlBVMrlgLqwRjRtGZiK7ww" crossorigin="anonymous">
-<marimo-filename hidden=""></marimo-filename>
-
-
-<link rel="stylesheet" href="../../styles.css">
-
-
-
+  </script>
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top quarto-banner">
@@ -341,10 +325,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">marimo in Quarto</h1>
+      <h1 class="title">Refreshing a Cache with a Python Background Thread</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">python</div>
-                <div class="quarto-category">marimo</div>
               </div>
                   </div>
   </div>
@@ -362,7 +345,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">June 7, 2025</p>
+        <p class="date">August 17, 2026</p>
       </div>
     </div>
     
@@ -373,14 +356,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#marimo" id="toc-marimo" class="nav-link active" data-scroll-target="#marimo">marimo</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -390,203 +367,87 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>This post demonstrates that Polars, Great Tables, and marimo can successfully run within a Quarto environment (as shown in this post). The example uses a table styler selector from Great Tables—and I’m honestly surprised it works!</p>
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><img src="marimo_in_quarto.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="marimo in Quarto"></p>
+<p><img src="refresh_cache_thread.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Python cache refresh and image selection logs."></p>
 </figure>
 </div>
-<section id="marimo" class="level2">
-<h2 class="anchored" data-anchor-id="marimo">marimo</h2>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Note</span>Give It a Sec – WASM Magic Happening
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>The widgets may take a few moments to load, as they rely on WebAssembly under the hood.</p>
-</div>
-</div>
-<marimo-island data-app-id="main" data-cell-id="Hbol" data-reactive="true">
-    <marimo-cell-output>
-    <span></span>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">import%20marimo%20as%20mo%0Aimport%20polars%20as%20pl%0Afrom%20great_tables%20import%20GT%2C%20loc%2C%20style</marimo-cell-code>
-</marimo-island>
-<marimo-island data-app-id="main" data-cell-id="MJUe" data-reactive="true">
-    <marimo-cell-output>
-    <span></span>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">data%20%3D%20%7B%0A%20%20%20%20%22col1%22%3A%20%5B2%2C%205%2C%207%2C%2010%2C%2015%5D%2C%0A%20%20%20%20%22col2%22%3A%20%5B%22x%22%2C%20%22y%22%2C%20%22y%22%2C%20%22z%22%2C%20%22z%22%5D%2C%0A%20%20%20%20%22color%22%3A%20%5B%22lightgrey%22%2C%20%22lightblue%22%2C%20%22lightblue%22%2C%20%22papayawhip%22%2C%20%22papayawhip%22%5D%2C%0A%7D%0Adf%20%3D%20pl.DataFrame(data)%0Aprint(df)</marimo-cell-code>
-</marimo-island>
-<marimo-island data-app-id="main" data-cell-id="vblA" data-reactive="true">
-    <marimo-cell-output>
-    <div style="display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem"><marimo-ui-element object-id="vblA-0" random-id="7df89ba3-4b58-96b1-1b02-bc691de45c5f"><marimo-slider data-initial-value="1" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Number\u003c/span\u003e\u003c/span\u003e&quot;" data-start="1" data-stop="6" data-steps="[]" data-debounce="false" data-disabled="false" data-orientation="&quot;horizontal&quot;" data-show-value="false" data-include-input="false" data-full-width="false"></marimo-slider></marimo-ui-element><marimo-ui-element object-id="vblA-1" random-id="1aeb4a70-192e-f5f4-3496-cbb560d37566"><marimo-radio data-initial-value="&quot;blue&quot;" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Color\u003c/span\u003e\u003c/span\u003e&quot;" data-options="[&quot;blue&quot;,&quot;cyan&quot;,&quot;pink&quot;,&quot;green&quot;,&quot;red&quot;,&quot;gray&quot;]" data-inline="false" data-disabled="false"></marimo-radio></marimo-ui-element><marimo-ui-element object-id="vblA-2" random-id="0cea0ade-8a67-6f91-5c49-cf3c69d96b07"><marimo-switch data-initial-value="true" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eAdd Row Striping?\u003c/span\u003e\u003c/span\u003e&quot;" data-disabled="false"></marimo-switch></marimo-ui-element></div>
-    </marimo-cell-output>
-    <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Select%20Style%20Number%22)%0Amo.output.append(style_widget)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Select%20Style%20Color%22%0A)%0Amo.output.append(color_widget)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Add%20Row%20Striping%3F%22)%0Amo.output.append(row_striping_widget)</marimo-cell-code>
-</marimo-island>
-<marimo-island data-app-id="main" data-cell-id="bkHC" data-reactive="true">
-            <marimo-cell-output>
-            <div id="wczkolmrci" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>
-#wczkolmrci table {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-#wczkolmrci thead, tbody, tfoot, tr, td, th { border-style: none; }
- tr { background-color: transparent; }
-#wczkolmrci p { margin: 0; padding: 0; }
- #wczkolmrci .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #wczkolmrci .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #wczkolmrci .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #wczkolmrci .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #wczkolmrci .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #wczkolmrci .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #wczkolmrci .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #wczkolmrci .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #wczkolmrci .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #wczkolmrci .gt_column_spanner_outer:first-child { padding-left: 0; }
- #wczkolmrci .gt_column_spanner_outer:last-child { padding-right: 0; }
- #wczkolmrci .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #wczkolmrci .gt_spanner_row { border-bottom-style: hidden; }
- #wczkolmrci .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #wczkolmrci .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #wczkolmrci .gt_from_md> :first-child { margin-top: 0; }
- #wczkolmrci .gt_from_md> :last-child { margin-bottom: 0; }
- #wczkolmrci .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #wczkolmrci .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #wczkolmrci .gt_indent_1 { text-indent: 5px; }
- #wczkolmrci .gt_indent_2 { text-indent: calc(5px * 2); }
- #wczkolmrci .gt_indent_3 { text-indent: calc(5px * 3); }
- #wczkolmrci .gt_indent_4 { text-indent: calc(5px * 4); }
- #wczkolmrci .gt_indent_5 { text-indent: calc(5px * 5); }
- #wczkolmrci .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #wczkolmrci .gt_row_group_first td { border-top-width: 2px; }
- #wczkolmrci .gt_row_group_first th { border-top-width: 2px; }
- #wczkolmrci .gt_striped { color: #333333; background-color: #F4F4F4; }
- #wczkolmrci .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #wczkolmrci .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #wczkolmrci .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #wczkolmrci .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #wczkolmrci .gt_grand_summary_row { color: #333333; background-color: #89D3FE; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #wczkolmrci .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #wczkolmrci .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #wczkolmrci .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #wczkolmrci .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #wczkolmrci .gt_left { text-align: left; }
- #wczkolmrci .gt_center { text-align: center; }
- #wczkolmrci .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #wczkolmrci .gt_font_normal { font-weight: normal; }
- #wczkolmrci .gt_font_bold { font-weight: bold; }
- #wczkolmrci .gt_font_italic { font-style: italic; }
- #wczkolmrci .gt_super { font-size: 65%; }
- #wczkolmrci .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #wczkolmrci .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #wczkolmrci .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #wczkolmrci .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #wczkolmrci .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #wczkolmrci .gt_asterisk { font-size: 100%; vertical-align: 0; }
-</style>
-<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
-<thead>
-<tr class="gt_col_headings">
-  <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1" scope="col" id="col1">col1</th>
-  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="col2">col2</th>
-  <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="color">color</th>
-</tr>
-</thead>
-<tbody class="gt_table_body">
-  <tr>
-    <td class="gt_row gt_right">2</td>
-    <td class="gt_row gt_left">x</td>
-    <td class="gt_row gt_left">lightgrey</td>
-  </tr>
-  <tr>
-    <td class="gt_row gt_right gt_striped">5</td>
-    <td class="gt_row gt_left gt_striped">y</td>
-    <td class="gt_row gt_left gt_striped">lightblue</td>
-  </tr>
-  <tr>
-    <td class="gt_row gt_right">7</td>
-    <td class="gt_row gt_left">y</td>
-    <td class="gt_row gt_left">lightblue</td>
-  </tr>
-  <tr>
-    <td class="gt_row gt_right gt_striped">10</td>
-    <td class="gt_row gt_left gt_striped">z</td>
-    <td class="gt_row gt_left gt_striped">papayawhip</td>
-  </tr>
-  <tr>
-    <td class="gt_row gt_right">15</td>
-    <td class="gt_row gt_left">z</td>
-    <td class="gt_row gt_left">papayawhip</td>
-  </tr>
-</tbody>
-</table>
-</div>
-            </marimo-cell-output>
-            <marimo-cell-code hidden="">GT(df).opt_stylize(%0A%20%20%20%20style%3Dstyle_widget.value%2C%0A%20%20%20%20color%3Dcolor_widget.value%2C%0A%20%20%20%20add_row_striping%3Drow_striping_widget.value%2C%0A)</marimo-cell-code>
-        </marimo-island>
-<p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_uHQvXDXF3UsvFQD9xZkaiu/app">molab</a>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> marimo</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>__generated_with <span class="op">=</span> <span class="st">"0.13.15"</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>app <span class="op">=</span> marimo.App(width<span class="op">=</span><span class="st">"medium"</span>)</span>
+<p>Today I learned that a Python thread can be used to periodically refresh a cache in a long-running worker.</p>
+<p>For example, imagine a worker that needs to select an image every second from a source that isn’t updated frequently. Instead of querying the source every time, the main thread can use a local cache for fast access, while a background thread periodically refreshes that cache.</p>
+<p>Here’s a self-contained example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> threading</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _():</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> marimo <span class="im">as</span> mo</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> great_tables <span class="im">import</span> GT, loc, style</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> GT, mo, pl</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>IMAGE_REFRESH_INTERVAL <span class="op">=</span> <span class="dv">2</span>  <span class="co"># 2 seconds</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger(<span class="va">__name__</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> refresh_cache(images):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Periodically refresh the shared image cache."""</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        time.sleep(IMAGE_REFRESH_INTERVAL)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(pl):</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> {</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="st">"col1"</span>: [<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">10</span>, <span class="dv">15</span>],</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"col2"</span>: [<span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>, <span class="st">"z"</span>],</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="st">"color"</span>: [<span class="st">"lightgrey"</span>, <span class="st">"lightblue"</span>, <span class="st">"lightblue"</span>, <span class="st">"papayawhip"</span>, <span class="st">"papayawhip"</span>],</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pl.DataFrame(data)</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (df,)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(mo):</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    style_widget <span class="op">=</span> mo.ui.slider(<span class="dv">1</span>, <span class="dv">6</span>, label<span class="op">=</span><span class="st">"Select Style Number"</span>)</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    mo.output.append(style_widget)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        new_images <span class="op">=</span> load_images()</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Update the existing list instead of rebinding `images`.</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># This keeps the same list object shared with `worker()`.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        images[:] <span class="op">=</span> new_images</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        logger.info(<span class="st">"Cache refreshed: </span><span class="sc">%d</span><span class="st"> images"</span>, <span class="bu">len</span>(images))</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_images():</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simulate loading images from an external source."""</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> random.choice((<span class="va">True</span>, <span class="va">False</span>)):</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> [<span class="st">"image1"</span>, <span class="st">"image2"</span>]</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        images <span class="op">=</span> [<span class="st">"image1"</span>, <span class="st">"image3"</span>, <span class="st">"image4"</span>]</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    _colors <span class="op">=</span> [<span class="st">"blue"</span>, <span class="st">"cyan"</span>, <span class="st">"pink"</span>, <span class="st">"green"</span>, <span class="st">"red"</span>, <span class="st">"gray"</span>]</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    color_widget <span class="op">=</span> mo.ui.radio(</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        options<span class="op">=</span>_colors, value<span class="op">=</span>_colors[<span class="dv">0</span>], label<span class="op">=</span><span class="st">"Select Style Color"</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    mo.output.append(color_widget)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    row_striping_widget <span class="op">=</span> mo.ui.switch(value<span class="op">=</span><span class="va">True</span>, label<span class="op">=</span><span class="st">"Add Row Striping?"</span>)</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    mo.output.append(row_striping_widget)</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> color_widget, row_striping_widget, style_widget</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="st">"Loaded images: </span><span class="sc">%s</span><span class="st">"</span>, images)</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> images</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> draw(images):</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Simulate selecting an image from the current cache."""</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    image <span class="op">=</span> random.choice(images)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    logger.info(<span class="st">"Selected image: </span><span class="sc">%s</span><span class="st">"</span>, image)</span>
 <span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="at">@app.cell</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _(GT, color_widget, df, row_striping_widget, style_widget):</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    GT(df).opt_stylize(</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        style<span class="op">=</span>style_widget.value,</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span>color_widget.value,</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        add_row_striping<span class="op">=</span>row_striping_widget.value,</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span></span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    app.run()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> worker():</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load the initial cache before starting the refresh thread.</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    images <span class="op">=</span> load_images()</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The background thread periodically updates the same list object.</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    threading.Thread(</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        target<span class="op">=</span>refresh_cache,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        args<span class="op">=</span>(images,),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        daemon<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    ).start()</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Continue using the shared cache while it is refreshed in the background.</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>        draw(images)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        time.sleep(<span class="dv">1</span>)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    logging.basicConfig(</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>        level<span class="op">=</span>logging.INFO,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>        <span class="bu">format</span><span class="op">=</span><span class="st">"</span><span class="sc">%(asctime)s</span><span class="st"> [</span><span class="sc">%(levelname)s</span><span class="st">] </span><span class="sc">%(message)s</span><span class="st">"</span>,</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    worker()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The key part is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>images[:] <span class="op">=</span> new_images</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This replaces the contents of the existing list rather than assigning a new list to the local <code>images</code> variable. Therefore, the main thread and the background thread continue to reference the same list object.</p>
+<p>The <code>daemon=True</code> setting also makes the refresh thread a background thread that won’t prevent the Python process from exiting when the main thread finishes.</p>
+<p>One thing to keep in mind is thread safety. If the operations performed by multiple threads become more complex—for example, if multiple threads need to modify the cache or several pieces of shared state must be updated together—a <code>threading.Lock</code> may be necessary.</p>
+<p>In this example, the main thread only reads the cache to select a random image, while the refresh thread replaces its contents periodically, so the simple approach is sufficient for this demonstration.</p>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -602,7 +463,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

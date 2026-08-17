@@ -10,7 +10,273 @@
 <atom:link href="https://tech.ycwu.space/index.xml" rel="self" type="application/rss+xml"/>
 <description>This is Jerry Wu&#39;s Tech&#39;n&#39;take.</description>
 <generator>quarto-1.10.18</generator>
-<lastBuildDate>Fri, 24 Jul 2026 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 17 Aug 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Refreshing a Cache with a Python Background Thread</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/refresh-cache-thread/20260817.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/refresh-cache-thread/refresh_cache_thread.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Python cache refresh and image selection logs."></p>
+</figure>
+</div>
+<p>Today I learned that a Python thread can be used to periodically refresh a cache in a long-running worker.</p>
+<p>For example, imagine a worker that needs to select an image every second from a source that isn’t updated frequently. Instead of querying the source every time, the main thread can use a local cache for fast access, while a background thread periodically refreshes that cache.</p>
+<p>Here’s a self-contained example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> logging</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> random</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> threading</span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> time</span>
+<span id="cb1-5"></span>
+<span id="cb1-6">IMAGE_REFRESH_INTERVAL <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 2 seconds</span></span>
+<span id="cb1-7"></span>
+<span id="cb1-8">logger <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logging.getLogger(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span>)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> refresh_cache(images):</span>
+<span id="cb1-12">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Periodically refresh the shared image cache."""</span></span>
+<span id="cb1-13">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">while</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>:</span>
+<span id="cb1-14">        time.sleep(IMAGE_REFRESH_INTERVAL)</span>
+<span id="cb1-15"></span>
+<span id="cb1-16">        new_images <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_images()</span>
+<span id="cb1-17"></span>
+<span id="cb1-18">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Update the existing list instead of rebinding `images`.</span></span>
+<span id="cb1-19">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This keeps the same list object shared with `worker()`.</span></span>
+<span id="cb1-20">        images[:] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> new_images</span>
+<span id="cb1-21"></span>
+<span id="cb1-22">        logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Cache refreshed: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%d</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> images"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(images))</span>
+<span id="cb1-23"></span>
+<span id="cb1-24"></span>
+<span id="cb1-25"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> load_images():</span>
+<span id="cb1-26">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Simulate loading images from an external source."""</span></span>
+<span id="cb1-27">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> random.choice((<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)):</span>
+<span id="cb1-28">        images <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"image1"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"image2"</span>]</span>
+<span id="cb1-29">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span>:</span>
+<span id="cb1-30">        images <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"image1"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"image3"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"image4"</span>]</span>
+<span id="cb1-31"></span>
+<span id="cb1-32">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Loaded images: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, images)</span>
+<span id="cb1-33"></span>
+<span id="cb1-34">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> images</span>
+<span id="cb1-35"></span>
+<span id="cb1-36"></span>
+<span id="cb1-37"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> draw(images):</span>
+<span id="cb1-38">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""Simulate selecting an image from the current cache."""</span></span>
+<span id="cb1-39">    image <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> random.choice(images)</span>
+<span id="cb1-40"></span>
+<span id="cb1-41">    logger.info(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Selected image: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, image)</span>
+<span id="cb1-42"></span>
+<span id="cb1-43"></span>
+<span id="cb1-44"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> worker():</span>
+<span id="cb1-45">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Load the initial cache before starting the refresh thread.</span></span>
+<span id="cb1-46">    images <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_images()</span>
+<span id="cb1-47"></span>
+<span id="cb1-48">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The background thread periodically updates the same list object.</span></span>
+<span id="cb1-49">    threading.Thread(</span>
+<span id="cb1-50">        target<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>refresh_cache,</span>
+<span id="cb1-51">        args<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(images,),</span>
+<span id="cb1-52">        daemon<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>,</span>
+<span id="cb1-53">    ).start()</span>
+<span id="cb1-54"></span>
+<span id="cb1-55">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Continue using the shared cache while it is refreshed in the background.</span></span>
+<span id="cb1-56">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">while</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>:</span>
+<span id="cb1-57">        draw(images)</span>
+<span id="cb1-58">        time.sleep(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb1-59"></span>
+<span id="cb1-60"></span>
+<span id="cb1-61"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb1-62">    logging.basicConfig(</span>
+<span id="cb1-63">        level<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>logging.INFO,</span>
+<span id="cb1-64">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">format</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(asctime)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> [</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(levelname)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">] </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%(message)s</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>,</span>
+<span id="cb1-65">    )</span>
+<span id="cb1-66"></span>
+<span id="cb1-67">    worker()</span></code></pre></div></div>
+<p>The key part is:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">images[:] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> new_images</span></code></pre></div></div>
+<p>This replaces the contents of the existing list rather than assigning a new list to the local <code>images</code> variable. Therefore, the main thread and the background thread continue to reference the same list object.</p>
+<p>The <code>daemon=True</code> setting also makes the refresh thread a background thread that won’t prevent the Python process from exiting when the main thread finishes.</p>
+<p>One thing to keep in mind is thread safety. If the operations performed by multiple threads become more complex—for example, if multiple threads need to modify the cache or several pieces of shared state must be updated together—a <code>threading.Lock</code> may be necessary.</p>
+<p>In this example, the main thread only reads the cache to select a random image, while the refresh thread replaces its contents periodically, so the simple approach is sufficient for this demonstration.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>python</category>
+  <guid>https://tech.ycwu.space/posts/refresh-cache-thread/20260817.html</guid>
+  <pubDate>Mon, 17 Aug 2026 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/refresh-cache-thread/refresh_cache_thread.png" medium="image" type="image/png" height="86" width="144"/>
+</item>
 <item>
   <title>Rust Notes #9: An Interesting Finding While Exploring iter::repeat_n()</title>
   <dc:creator>Jerry Wu</dc:creator>
@@ -388,6 +654,378 @@ font-style: inherit;">}</span></span></code></pre></div></div>
   <guid>https://tech.ycwu.space/posts/rust-notes-8/20260721.html</guid>
   <pubDate>Tue, 21 Jul 2026 00:00:00 GMT</pubDate>
   <media:content url="https://tech.ycwu.space/posts/rust-notes-8/rust_notes_8.png" medium="image" type="image/png" height="49" width="144"/>
+</item>
+<item>
+  <title>Rust Notes #6: Understanding FromStr and TryFrom</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/rust-notes-6/20260718.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/rust-notes-6/rust_notes_6.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 6"></p>
+</figure>
+</div>
+<p>Today I learned about the <code>FromStr</code> and <code>TryFrom</code> traits. At first glance, they seem very similar, but they represent different kinds of conversions.</p>
+<p>According to the standard library documentation, <a href="https://doc.rust-lang.org/std/str/trait.FromStr.html"><code>FromStr</code></a> is used to <strong>parse a value from a string</strong>, while <a href="https://doc.rust-lang.org/std/convert/trait.TryFrom.html"><code>TryFrom</code></a> is for <strong>fallible type conversions</strong>—converting one type into another where the conversion may fail in a controlled way.</p>
+<p>Another interesting point is that the convenient <a href="https://doc.rust-lang.org/std/primitive.str.html#method.parse">str::parse()</a> method is implemented through the <code>FromStr</code> trait.</p>
+<p>Here’s a simple example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">use</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">std::convert::</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">TryFrom</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">use</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">std::</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">str</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">::</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">FromStr</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">#[</span>derive<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">(</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">Debug</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">)]</span></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// A validated port number instead of a raw u16.</span></span>
+<span id="cb1-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">struct</span> Port(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">u16</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-7"></span>
+<span id="cb1-8"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">#[</span>derive<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">(</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">Debug</span><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">)]</span></span>
+<span id="cb1-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">enum</span> PortError <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-10">    NotNumber<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-11">    InvalidPort<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-12"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-13"></span>
+<span id="cb1-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">impl</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">TryFrom</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">u16</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> Port <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-15">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> Error <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> PortError<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-16"></span>
+<span id="cb1-17">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">fn</span> try_from(value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">u16</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">::</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">Error</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-18">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Validate domain-specific rules for a valid port.</span></span>
+<span id="cb1-19">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// For example, port 0 is reserved and not accepted here.</span></span>
+<span id="cb1-20">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> value <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-21">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">Err</span>(<span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">PortError::</span>InvalidPort)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-22">        <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-23"></span>
+<span id="cb1-24">        <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">Ok</span>(<span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span>(value))</span>
+<span id="cb1-25">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-26"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-27"></span>
+<span id="cb1-28"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">impl</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">FromStr</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> Port <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-29">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">type</span> Err <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> PortError<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span>
+<span id="cb1-30"></span>
+<span id="cb1-31">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">fn</span> from_str(s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">str</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">::</span><span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">Err</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-32">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// First parse the string representation into a numeric value.</span></span>
+<span id="cb1-33">        <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> value<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">u16</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>parse()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>map_err(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|</span>_<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">PortError::</span>NotNumber)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">?;</span></span>
+<span id="cb1-34"></span>
+<span id="cb1-35">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Delegate domain validation and construction to `TryFrom`.</span></span>
+<span id="cb1-36">        <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">::</span>try_from(value)</span>
+<span id="cb1-37">    <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-38"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span>
+<span id="cb1-39"></span>
+<span id="cb1-40"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">fn</span> main() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;</span>()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> PortError<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-41">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Parse a text representation into a validated `Port`.</span></span>
+<span id="cb1-42">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> port1<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span> Port <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"8000"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>parse()<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">?;</span></span>
+<span id="cb1-43"></span>
+<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Convert an existing numeric value into a validated `Port`.</span></span>
+<span id="cb1-45">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">let</span> port2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Port::</span>try_from(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8000u16</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">?;</span></span>
+<span id="cb1-46"></span>
+<span id="cb1-47">    <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">println!</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"{:?}, {:?}"</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> port1<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">,</span> port2)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// Port(8000), Port(8000)</span></span>
+<span id="cb1-48"></span>
+<span id="cb1-49">    <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">Ok</span>(())</span>
+<span id="cb1-50"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div></div>
+<p>In this example, the call to <code>parse()</code> in <code>main()</code> automatically uses the <code>FromStr</code> implementation for <code>Port</code>. Rather than implementing all the conversion logic itself, <code>from_str()</code> acts as a composition layer: it first parses the text representation into an intermediate value (<code>u16</code>), then delegates domain validation and construction to <code>TryFrom&lt;u16&gt;</code>.</p>
+<p>This allows users to construct a validated <code>Port</code> from either text input (<code>"8000".parse()</code>) or an existing numeric value (<code>Port::try_from(8000u16)</code>), while keeping the validation logic centralized in one place.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>rust</category>
+  <guid>https://tech.ycwu.space/posts/rust-notes-6/20260718.html</guid>
+  <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/rust-notes-6/rust_notes_6.png" medium="image" type="image/png" height="41" width="144"/>
 </item>
 <item>
   <title>Rust Notes #7: Understanding thiserror Attributes</title>
@@ -1072,378 +1710,6 @@ font-style: inherit;">}</span></span></code></pre></div></div>
   <guid>https://tech.ycwu.space/posts/rust-notes-7/20260718.html</guid>
   <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
   <media:content url="https://tech.ycwu.space/posts/rust-notes-7/rust_notes_7.png" medium="image" type="image/png" height="127" width="144"/>
-</item>
-<item>
-  <title>Rust Notes #6: Understanding FromStr and TryFrom</title>
-  <dc:creator>Jerry Wu</dc:creator>
-  <link>https://tech.ycwu.space/posts/rust-notes-6/20260718.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-
-<div class="quarto-figure quarto-figure-left">
-<figure class="figure">
-<p><img src="https://tech.ycwu.space/posts/rust-notes-6/rust_notes_6.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="Rust Notes 6"></p>
-</figure>
-</div>
-<p>Today I learned about the <code>FromStr</code> and <code>TryFrom</code> traits. At first glance, they seem very similar, but they represent different kinds of conversions.</p>
-<p>According to the standard library documentation, <a href="https://doc.rust-lang.org/std/str/trait.FromStr.html"><code>FromStr</code></a> is used to <strong>parse a value from a string</strong>, while <a href="https://doc.rust-lang.org/std/convert/trait.TryFrom.html"><code>TryFrom</code></a> is for <strong>fallible type conversions</strong>—converting one type into another where the conversion may fail in a controlled way.</p>
-<p>Another interesting point is that the convenient <a href="https://doc.rust-lang.org/std/primitive.str.html#method.parse">str::parse()</a> method is implemented through the <code>FromStr</code> trait.</p>
-<p>Here’s a simple example:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode rust code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">use</span> <span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">std::convert::</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">TryFrom</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">use</span> <span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">std::</span><span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">str</span><span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">::</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">FromStr</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-3"></span>
-<span id="cb1-4"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">#[</span>derive<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">(</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">Debug</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">)]</span></span>
-<span id="cb1-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// A validated port number instead of a raw u16.</span></span>
-<span id="cb1-6"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">struct</span> Port(<span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">u16</span>)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-7"></span>
-<span id="cb1-8"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">#[</span>derive<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">(</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">Debug</span><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">)]</span></span>
-<span id="cb1-9"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">enum</span> PortError <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-10">    NotNumber<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb1-11">    InvalidPort<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb1-12"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-13"></span>
-<span id="cb1-14"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">impl</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">TryFrom</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">u16</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> Port <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-15">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">type</span> Error <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> PortError<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-16"></span>
-<span id="cb1-17">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">fn</span> try_from(value<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">u16</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">::</span><span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">Error</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-18">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// Validate domain-specific rules for a valid port.</span></span>
-<span id="cb1-19">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// For example, port 0 is reserved and not accepted here.</span></span>
-<span id="cb1-20">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> value <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-21">            <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">Err</span>(<span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">PortError::</span>InvalidPort)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-22">        <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-23"></span>
-<span id="cb1-24">        <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">Ok</span>(<span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span>(value))</span>
-<span id="cb1-25">    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-26"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-27"></span>
-<span id="cb1-28"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">impl</span> <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">FromStr</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> Port <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-29">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">type</span> Err <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> PortError<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span></span>
-<span id="cb1-30"></span>
-<span id="cb1-31">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">fn</span> from_str(s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&amp;</span><span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">str</span>) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span><span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">::</span><span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">Err</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-32">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// First parse the string representation into a numeric value.</span></span>
-<span id="cb1-33">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">let</span> value<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">u16</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> s<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>parse()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>map_err(<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|</span>_<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|</span> <span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">PortError::</span>NotNumber)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">?;</span></span>
-<span id="cb1-34"></span>
-<span id="cb1-35">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// Delegate domain validation and construction to `TryFrom`.</span></span>
-<span id="cb1-36">        <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Self</span><span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">::</span>try_from(value)</span>
-<span id="cb1-37">    <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-38"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span>
-<span id="cb1-39"></span>
-<span id="cb1-40"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">fn</span> main() <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Result</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&lt;</span>()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> PortError<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">&gt;</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{</span></span>
-<span id="cb1-41">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// Parse a text representation into a validated `Port`.</span></span>
-<span id="cb1-42">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">let</span> port1<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span> Port <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"8000"</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">.</span>parse()<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">?;</span></span>
-<span id="cb1-43"></span>
-<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// Convert an existing numeric value into a validated `Port`.</span></span>
-<span id="cb1-45">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">let</span> port2 <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Port::</span>try_from(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8000u16</span>)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">?;</span></span>
-<span id="cb1-46"></span>
-<span id="cb1-47">    <span class="pp" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">println!</span>(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"{:?}, {:?}"</span><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> port1<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">,</span> port2)<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">;</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">// Port(8000), Port(8000)</span></span>
-<span id="cb1-48"></span>
-<span id="cb1-49">    <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">Ok</span>(())</span>
-<span id="cb1-50"><span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">}</span></span></code></pre></div></div>
-<p>In this example, the call to <code>parse()</code> in <code>main()</code> automatically uses the <code>FromStr</code> implementation for <code>Port</code>. Rather than implementing all the conversion logic itself, <code>from_str()</code> acts as a composition layer: it first parses the text representation into an intermediate value (<code>u16</code>), then delegates domain validation and construction to <code>TryFrom&lt;u16&gt;</code>.</p>
-<p>This allows users to construct a validated <code>Port</code> from either text input (<code>"8000".parse()</code>) or an existing numeric value (<code>Port::try_from(8000u16)</code>), while keeping the validation logic centralized in one place.</p>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Disclaimer
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This post was drafted by me, with AI assistance to refine the content.</p>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>rust</category>
-  <guid>https://tech.ycwu.space/posts/rust-notes-6/20260718.html</guid>
-  <pubDate>Sat, 18 Jul 2026 00:00:00 GMT</pubDate>
-  <media:content url="https://tech.ycwu.space/posts/rust-notes-6/rust_notes_6.png" medium="image" type="image/png" height="41" width="144"/>
 </item>
 <item>
   <title>Rust Notes #5: Using Constructors as Iterator Adapters</title>
@@ -6622,7 +6888,7 @@ font-style: inherit;"># 2, 3</span></span></code></pre></div></div>
 <li><strong><code>make_tooltip()</code></strong> – Creates HTML tooltips from <code>label</code> and <code>tooltip</code> columns for hoverable text display.</li>
 </ul>
 <p>Here’s a quick example that uses <code>ti.is_every_nth_row()</code> to build a Polars expression suitable for styling tables interactively with Great Tables:</p>
-<div id="64a3b9d8" class="cell" data-execution_count="1">
+<div id="1817245a" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -9258,6 +9524,352 @@ font-style: inherit;">"__main__"</span>:</span>
   <media:content url="https://tech.ycwu.space/posts/marimo-gt-time-machine/marimo_gt_time_machine.png" medium="image" type="image/png" height="213" width="144"/>
 </item>
 <item>
+  <title>Send Email via marimo</title>
+  <dc:creator>Jerry Wu</dc:creator>
+  <link>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<p>This post demonstrates how to send emails using <a href="https://resend.com/">Resend</a> from within a marimo app.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Resend via marimo"></p>
+</figure>
+</div>
+<p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
+<p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB/app">molab</a>.</p>
+<div id="34d071fe" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show full code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> marimo</span>
+<span id="cb1-2"></span>
+<span id="cb1-3">__generated_with <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"0.14.7"</span></span>
+<span id="cb1-4">app <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> marimo.App(width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"medium"</span>)</span>
+<span id="cb1-5"></span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-8"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _():</span>
+<span id="cb1-9">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> marimo <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> mo</span>
+<span id="cb1-10">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> os</span>
+<span id="cb1-11">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> html <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> escape</span>
+<span id="cb1-12">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pl</span>
+<span id="cb1-13">    <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> resend</span>
+<span id="cb1-14"></span>
+<span id="cb1-15">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> escape, mo, resend</span>
+<span id="cb1-16"></span>
+<span id="cb1-17"></span>
+<span id="cb1-18"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-19"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _(escape, resend):</span>
+<span id="cb1-20">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> send_email(d: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>[<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>]) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="cb1-21">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        https://resend.com/docs/send-with-python</span></span>
+<span id="cb1-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        """</span></span>
+<span id="cb1-24">        resend.api_key <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_API_KEY"</span>]</span>
+<span id="cb1-25">        from_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"from_"</span>]</span>
+<span id="cb1-26">        to <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [mail.strip() <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> mail <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"to"</span>].split(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">","</span>)]</span>
+<span id="cb1-27">        subject <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"subject"</span>]</span>
+<span id="cb1-28">        html_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> escape(d[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"content"</span>]).replace(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span><span class="ch" style="color: #20794D;
+background-color: null;
+font-style: inherit;">\n</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"&lt;br&gt;"</span>)</span>
+<span id="cb1-29"></span>
+<span id="cb1-30">        params: resend.Emails.SendParams <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> {</span>
+<span id="cb1-31">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"from"</span>: from_,</span>
+<span id="cb1-32">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"to"</span>: to,</span>
+<span id="cb1-33">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"subject"</span>: subject,</span>
+<span id="cb1-34">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"html"</span>: html_,</span>
+<span id="cb1-35">        }</span>
+<span id="cb1-36"></span>
+<span id="cb1-37">        email <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> resend.Emails.send(params)</span>
+<span id="cb1-38"></span>
+<span id="cb1-39">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> (send_email,)</span>
+<span id="cb1-40"></span>
+<span id="cb1-41"></span>
+<span id="cb1-42"><span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">@app.cell</span></span>
+<span id="cb1-43"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> _(mo, send_email):</span>
+<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create a form with multiple eleme</span></span>
+<span id="cb1-45">    form <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (</span>
+<span id="cb1-46">        mo.md(</span>
+<span id="cb1-47">            <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb1-48"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        **marimo mail**</span></span>
+<span id="cb1-49"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{RESEND_API_KEY}</span></span>
+<span id="cb1-50"></span>
+<span id="cb1-51"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{from_}</span></span>
+<span id="cb1-52"></span>
+<span id="cb1-53"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{to}</span></span>
+<span id="cb1-54"></span>
+<span id="cb1-55"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{subject}</span></span>
+<span id="cb1-56"></span>
+<span id="cb1-57"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{content}</span></span>
+<span id="cb1-58"><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb1-59">        )</span>
+<span id="cb1-60">        .batch(</span>
+<span id="cb1-61">            RESEND_API_KEY<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(</span>
+<span id="cb1-62">                label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"RESEND_API_KEY"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"password"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span>
+<span id="cb1-63">            ),</span>
+<span id="cb1-64">            from_<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"From"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-65">            to<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"To"</span>, kind<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-66">            subject<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Subject"</span>, full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-67">            content<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>mo.ui.text_area(full_width<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>),</span>
+<span id="cb1-68">        )</span>
+<span id="cb1-69">        .form(show_clear_button<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, on_change<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>send_email)</span>
+<span id="cb1-70">    )</span>
+<span id="cb1-71">    form</span>
+<span id="cb1-72">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span></span>
+<span id="cb1-73"></span>
+<span id="cb1-74"></span>
+<span id="cb1-75"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb1-76">    app.run()</span></code></pre></div></div>
+</details>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Disclaimer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This post was drafted by me, with AI assistance to refine the content.</p>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>python</category>
+  <category>marimo</category>
+  <category>resend</category>
+  <guid>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</guid>
+  <pubDate>Wed, 25 Jun 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" medium="image" type="image/png" height="64" width="144"/>
+</item>
+<item>
   <title>Interactive Django Deployment Checklist with marimo</title>
   <dc:creator>Jerry Wu</dc:creator>
   <link>https://tech.ycwu.space/posts/marimo-django-deployment-checklist/20250625.html</link>
@@ -9323,61 +9935,66 @@ font-style: inherit;">"__main__"</span>:</span>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="lEQa" data-reactive="true">
             <marimo-cell-output>
-            <div id="ycbiveewsm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+            <div id="bdsafffhaa" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#ycbiveewsm table {
+#bdsafffhaa table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-#ycbiveewsm thead, tbody, tfoot, tr, td, th { border-style: none; }
+#bdsafffhaa thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#ycbiveewsm p { margin: 0; padding: 0; }
- #ycbiveewsm .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 3px; border-top-color: #D5D5D5; border-right-style: solid; border-right-width: 3px; border-right-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 3px; border-bottom-color: #D5D5D5; border-left-style: solid; border-left-width: 3px; border-left-color: #D5D5D5; }
- #ycbiveewsm .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #ycbiveewsm .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #ycbiveewsm .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #ycbiveewsm .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #ycbiveewsm .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
- #ycbiveewsm .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #ycbiveewsm .gt_col_heading { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #ycbiveewsm .gt_column_spanner_outer { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #ycbiveewsm .gt_column_spanner_outer:first-child { padding-left: 0; }
- #ycbiveewsm .gt_column_spanner_outer:last-child { padding-right: 0; }
- #ycbiveewsm .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #ycbiveewsm .gt_spanner_row { border-bottom-style: hidden; }
- #ycbiveewsm .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #ycbiveewsm .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: middle; }
- #ycbiveewsm .gt_from_md> :first-child { margin-top: 0; }
- #ycbiveewsm .gt_from_md> :last-child { margin-bottom: 0; }
- #ycbiveewsm .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: dashed; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: dashed; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: dashed; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #ycbiveewsm .gt_stub { color: #333333; background-color: #929292; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: dashed; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #ycbiveewsm .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #ycbiveewsm .gt_row_group_first td { border-top-width: 2px; }
- #ycbiveewsm .gt_row_group_first th { border-top-width: 2px; }
- #ycbiveewsm .gt_striped { color: #333333; background-color: #F4F4F4; }
- #ycbiveewsm .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
- #ycbiveewsm .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #ycbiveewsm .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #ycbiveewsm .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #ycbiveewsm .gt_grand_summary_row { color: #FFFFFF; background-color: #01837B; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #ycbiveewsm .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #ycbiveewsm .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #ycbiveewsm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #ycbiveewsm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #ycbiveewsm .gt_left { text-align: left; }
- #ycbiveewsm .gt_center { text-align: center; }
- #ycbiveewsm .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #ycbiveewsm .gt_font_normal { font-weight: normal; }
- #ycbiveewsm .gt_font_bold { font-weight: bold; }
- #ycbiveewsm .gt_font_italic { font-style: italic; }
- #ycbiveewsm .gt_super { font-size: 65%; }
- #ycbiveewsm .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #ycbiveewsm .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #ycbiveewsm .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #ycbiveewsm .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #ycbiveewsm .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #ycbiveewsm .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#bdsafffhaa p { margin: 0; padding: 0; }
+ #bdsafffhaa .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 3px; border-top-color: #D5D5D5; border-right-style: solid; border-right-width: 3px; border-right-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 3px; border-bottom-color: #D5D5D5; border-left-style: solid; border-left-width: 3px; border-left-color: #D5D5D5; }
+ #bdsafffhaa .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #bdsafffhaa .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #bdsafffhaa .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #bdsafffhaa .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bdsafffhaa .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
+ #bdsafffhaa .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #bdsafffhaa .gt_col_heading { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #bdsafffhaa .gt_column_spanner_outer { color: #FFFFFF; background-color: #01837B; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #bdsafffhaa .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #bdsafffhaa .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #bdsafffhaa .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #bdsafffhaa .gt_spanner_row { border-bottom-style: hidden; }
+ #bdsafffhaa .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #bdsafffhaa .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; vertical-align: middle; }
+ #bdsafffhaa .gt_from_md> :first-child { margin-top: 0; }
+ #bdsafffhaa .gt_from_md> :last-child { margin-bottom: 0; }
+ #bdsafffhaa .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: dashed; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: dashed; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: dashed; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #bdsafffhaa .gt_stub { color: #333333; background-color: #929292; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: dashed; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
+ #bdsafffhaa .gt_indent_1 { text-indent: 5px; }
+ #bdsafffhaa .gt_indent_2 { text-indent: calc(5px * 2); }
+ #bdsafffhaa .gt_indent_3 { text-indent: calc(5px * 3); }
+ #bdsafffhaa .gt_indent_4 { text-indent: calc(5px * 4); }
+ #bdsafffhaa .gt_indent_5 { text-indent: calc(5px * 5); }
+ #bdsafffhaa .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #bdsafffhaa .gt_row_group_first td { border-top-width: 2px; }
+ #bdsafffhaa .gt_row_group_first th { border-top-width: 2px; }
+ #bdsafffhaa .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #bdsafffhaa .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #D5D5D5; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D5D5D5; }
+ #bdsafffhaa .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #bdsafffhaa .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #bdsafffhaa .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #bdsafffhaa .gt_grand_summary_row { color: #FFFFFF; background-color: #01837B; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #bdsafffhaa .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #bdsafffhaa .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #bdsafffhaa .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #bdsafffhaa .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #bdsafffhaa .gt_left { text-align: left; }
+ #bdsafffhaa .gt_center { text-align: center; }
+ #bdsafffhaa .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #bdsafffhaa .gt_font_normal { font-weight: normal; }
+ #bdsafffhaa .gt_font_bold { font-weight: bold; }
+ #bdsafffhaa .gt_font_italic { font-style: italic; }
+ #bdsafffhaa .gt_super { font-size: 65%; }
+ #bdsafffhaa .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #bdsafffhaa .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #bdsafffhaa .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #bdsafffhaa .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #bdsafffhaa .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #bdsafffhaa .gt_asterisk { font-size: 100%; vertical-align: 0; }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
@@ -9392,52 +10009,52 @@ font-style: inherit;">"__main__"</span>:</span>
 </thead>
 <tbody class="gt_table_body">
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-1" random-id="1669aced-ab4f-84dd-de4f-3ea7fd7e8160"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-1" random-id="44a0d811-cb56-c705-3e3c-f768f8c9ff45"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set DEBUG = False</td>
     <td class="gt_row gt_left">Never deploy with DEBUG = True ⚠️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-2" random-id="8e5bbd32-b399-9e7d-af91-4b11be5990b1"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-2" random-id="7a004197-fca0-8cf6-5f98-d3cf892cfaf4"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Configure ALLOWED_HOSTS</td>
     <td class="gt_row gt_left gt_striped">Include your domain(s) or IP address 🌐</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-3" random-id="49defbe7-a78b-f26d-14ff-c4ad96c2c7c5"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-3" random-id="d91882fe-6c49-4e0f-43f7-1f0de7e46edf"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set up a secret key</td>
     <td class="gt_row gt_left">Use a strong, secure key from an environment variable 🔐</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-4" random-id="197b6548-87fa-a69f-3bdf-bf977100cf65"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-4" random-id="2f0e2729-a8be-234c-6178-a85464e6be7a"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Collect static files</td>
     <td class="gt_row gt_left gt_striped">Run `python manage.py collectstatic` 📦</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-5" random-id="84f9a4b1-8ff4-e852-1f39-6244a2875500"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-5" random-id="e66d3687-e69c-87a2-4642-fdaa44ee98d7"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Apply database migrations</td>
     <td class="gt_row gt_left">Run `python manage.py migrate` 🗃️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-6" random-id="3ad814b6-16ad-1ef4-6e17-a8b5c92e24b0"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-6" random-id="d26348d7-fc4f-292b-88a3-bcb9727abeb5"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Set up gunicorn or uWSGI</td>
     <td class="gt_row gt_left gt_striped">Use as a WSGI server in production 🔄</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-7" random-id="39e64b04-a86a-ce01-c74d-f3cd9bf6c27a"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-7" random-id="47d66586-65f9-129e-543b-5089cade5f04"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Configure reverse proxy (e.g., Nginx)</td>
     <td class="gt_row gt_left">Serve static/media files and forward to WSGI server 🧭</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-8" random-id="5fbaace0-9db3-0edc-0b30-9a60b3f33c04"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-8" random-id="55e777a0-520e-01b3-3856-339cfdb9543f"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Secure the database</td>
     <td class="gt_row gt_left gt_striped">Use strong credentials, disable remote root login 🛡️</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-9" random-id="eb771d93-b23e-d7fd-7372-6da30daaa67f"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left"><marimo-ui-element object-id="vblA-9" random-id="daa650c0-08be-551e-acbb-976aeffd5b2e"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left">Set up HTTPS (SSL)</td>
     <td class="gt_row gt_left">Use Let's Encrypt or your own certificate 🔒</td>
   </tr>
   <tr>
-    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-10" random-id="09064a03-bd88-e91b-5e14-9c4562ec2a23"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
+    <td class="gt_row gt_left gt_striped"><marimo-ui-element object-id="vblA-10" random-id="168024f8-01f3-6a59-b533-db0749d579e3"><marimo-switch data-initial-value="false" data-label="null" data-disabled="false"></marimo-switch></marimo-ui-element></td>
     <td class="gt_row gt_left gt_striped">Configure logging &amp; monitoring</td>
     <td class="gt_row gt_left gt_striped">Track errors and app performance 📊</td>
   </tr>
@@ -9886,352 +10503,6 @@ font-style: inherit;">"__main__"</span>:</span>
   <media:content url="https://tech.ycwu.space/posts/marimo-django-deployment-checklist/marimo_django_deployment_checklist.png" medium="image" type="image/png" height="95" width="144"/>
 </item>
 <item>
-  <title>Send Email via marimo</title>
-  <dc:creator>Jerry Wu</dc:creator>
-  <link>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-
-<p>This post demonstrates how to send emails using <a href="https://resend.com/">Resend</a> from within a marimo app.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Resend via marimo"></p>
-</figure>
-</div>
-<p>It seems the app runs fine locally but doesn’t work in a WASM environment. It’ll be interesting to explore where the boundaries of WASM lie.</p>
-<p>Check out the full marimo code below or view it on <a href="https://molab.marimo.io/notebooks/nb_9b9N9Lh1payY9HvowyzvSB/app">molab</a>.</p>
-<div id="66e670cb" class="cell" data-execution_count="1">
-<details class="code-fold">
-<summary>Show full code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> marimo</span>
-<span id="cb1-2"></span>
-<span id="cb1-3">__generated_with <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"0.14.7"</span></span>
-<span id="cb1-4">app <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> marimo.App(width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"medium"</span>)</span>
-<span id="cb1-5"></span>
-<span id="cb1-6"></span>
-<span id="cb1-7"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-8"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _():</span>
-<span id="cb1-9">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> marimo <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> mo</span>
-<span id="cb1-10">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> os</span>
-<span id="cb1-11">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> html <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> escape</span>
-<span id="cb1-12">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pl</span>
-<span id="cb1-13">    <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> resend</span>
-<span id="cb1-14"></span>
-<span id="cb1-15">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> escape, mo, resend</span>
-<span id="cb1-16"></span>
-<span id="cb1-17"></span>
-<span id="cb1-18"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-19"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _(escape, resend):</span>
-<span id="cb1-20">    <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> send_email(d: <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">dict</span>[<span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>, <span class="bu" style="color: null;
-background-color: null;
-font-style: inherit;">str</span>]) <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">None</span>:</span>
-<span id="cb1-21">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">"""</span></span>
-<span id="cb1-22"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">        https://resend.com/docs/send-with-python</span></span>
-<span id="cb1-23"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">        """</span></span>
-<span id="cb1-24">        resend.api_key <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"RESEND_API_KEY"</span>]</span>
-<span id="cb1-25">        from_ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"from_"</span>]</span>
-<span id="cb1-26">        to <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> [mail.strip() <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> mail <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"to"</span>].split(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">","</span>)]</span>
-<span id="cb1-27">        subject <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"subject"</span>]</span>
-<span id="cb1-28">        html_ <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> escape(d[<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"content"</span>]).replace(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span><span class="ch" style="color: #20794D;
-background-color: null;
-font-style: inherit;">\n</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"&lt;br&gt;"</span>)</span>
-<span id="cb1-29"></span>
-<span id="cb1-30">        params: resend.Emails.SendParams <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> {</span>
-<span id="cb1-31">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"from"</span>: from_,</span>
-<span id="cb1-32">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"to"</span>: to,</span>
-<span id="cb1-33">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"subject"</span>: subject,</span>
-<span id="cb1-34">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"html"</span>: html_,</span>
-<span id="cb1-35">        }</span>
-<span id="cb1-36"></span>
-<span id="cb1-37">        email <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> resend.Emails.send(params)</span>
-<span id="cb1-38"></span>
-<span id="cb1-39">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span> (send_email,)</span>
-<span id="cb1-40"></span>
-<span id="cb1-41"></span>
-<span id="cb1-42"><span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">@app.cell</span></span>
-<span id="cb1-43"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">def</span> _(mo, send_email):</span>
-<span id="cb1-44">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Create a form with multiple eleme</span></span>
-<span id="cb1-45">    form <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> (</span>
-<span id="cb1-46">        mo.md(</span>
-<span id="cb1-47">            <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"""</span></span>
-<span id="cb1-48"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        **marimo mail**</span></span>
-<span id="cb1-49"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{RESEND_API_KEY}</span></span>
-<span id="cb1-50"></span>
-<span id="cb1-51"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{from_}</span></span>
-<span id="cb1-52"></span>
-<span id="cb1-53"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{to}</span></span>
-<span id="cb1-54"></span>
-<span id="cb1-55"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{subject}</span></span>
-<span id="cb1-56"></span>
-<span id="cb1-57"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">        </span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">{content}</span></span>
-<span id="cb1-58"><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">    """</span></span>
-<span id="cb1-59">        )</span>
-<span id="cb1-60">        .batch(</span>
-<span id="cb1-61">            RESEND_API_KEY<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(</span>
-<span id="cb1-62">                label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"RESEND_API_KEY"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"password"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span></span>
-<span id="cb1-63">            ),</span>
-<span id="cb1-64">            from_<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"From"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-65">            to<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"To"</span>, kind<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"email"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-66">            subject<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text(label<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"Subject"</span>, full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-67">            content<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>mo.ui.text_area(full_width<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>),</span>
-<span id="cb1-68">        )</span>
-<span id="cb1-69">        .form(show_clear_button<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">True</span>, on_change<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>send_email)</span>
-<span id="cb1-70">    )</span>
-<span id="cb1-71">    form</span>
-<span id="cb1-72">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">return</span></span>
-<span id="cb1-73"></span>
-<span id="cb1-74"></span>
-<span id="cb1-75"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">if</span> <span class="va" style="color: #111111;
-background-color: null;
-font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">==</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"__main__"</span>:</span>
-<span id="cb1-76">    app.run()</span></code></pre></div></div>
-</details>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Disclaimer
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This post was drafted by me, with AI assistance to refine the content.</p>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>python</category>
-  <category>marimo</category>
-  <category>resend</category>
-  <guid>https://tech.ycwu.space/posts/resend-via-marimo/20250625.html</guid>
-  <pubDate>Wed, 25 Jun 2025 00:00:00 GMT</pubDate>
-  <media:content url="https://tech.ycwu.space/posts/resend-via-marimo/resend_via_marimo.png" medium="image" type="image/png" height="64" width="144"/>
-</item>
-<item>
   <title>Great Tables with marimo in Quarto</title>
   <dc:creator>Jerry Wu</dc:creator>
   <link>https://tech.ycwu.space/posts/gt-marimo-in-quarto/20250612.html</link>
@@ -10589,67 +10860,72 @@ font-style: inherit;">"__main__"</span>:</span>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="vblA" data-reactive="true">
     <marimo-cell-output>
-    <div style="display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem"><marimo-ui-element object-id="vblA-0" random-id="a66b9f3e-850d-61dd-15f8-078f8666694b"><marimo-slider data-initial-value="1" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Number\u003c/span\u003e\u003c/span\u003e&quot;" data-start="1" data-stop="6" data-steps="[]" data-debounce="false" data-disabled="false" data-orientation="&quot;horizontal&quot;" data-show-value="false" data-include-input="false" data-full-width="false"></marimo-slider></marimo-ui-element><marimo-ui-element object-id="vblA-1" random-id="89b9173f-22b2-53a5-4055-5460a63ed056"><marimo-radio data-initial-value="&quot;blue&quot;" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Color\u003c/span\u003e\u003c/span\u003e&quot;" data-options="[&quot;blue&quot;,&quot;cyan&quot;,&quot;pink&quot;,&quot;green&quot;,&quot;red&quot;,&quot;gray&quot;]" data-inline="false" data-disabled="false"></marimo-radio></marimo-ui-element><marimo-ui-element object-id="vblA-2" random-id="e1506d90-2b90-33dd-1d08-609915427c0c"><marimo-switch data-initial-value="true" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eAdd Row Striping?\u003c/span\u003e\u003c/span\u003e&quot;" data-disabled="false"></marimo-switch></marimo-ui-element></div>
+    <div style="display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem"><marimo-ui-element object-id="vblA-0" random-id="7df89ba3-4b58-96b1-1b02-bc691de45c5f"><marimo-slider data-initial-value="1" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Number\u003c/span\u003e\u003c/span\u003e&quot;" data-start="1" data-stop="6" data-steps="[]" data-debounce="false" data-disabled="false" data-orientation="&quot;horizontal&quot;" data-show-value="false" data-include-input="false" data-full-width="false"></marimo-slider></marimo-ui-element><marimo-ui-element object-id="vblA-1" random-id="1aeb4a70-192e-f5f4-3496-cbb560d37566"><marimo-radio data-initial-value="&quot;blue&quot;" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eSelect Style Color\u003c/span\u003e\u003c/span\u003e&quot;" data-options="[&quot;blue&quot;,&quot;cyan&quot;,&quot;pink&quot;,&quot;green&quot;,&quot;red&quot;,&quot;gray&quot;]" data-inline="false" data-disabled="false"></marimo-radio></marimo-ui-element><marimo-ui-element object-id="vblA-2" random-id="0cea0ade-8a67-6f91-5c49-cf3c69d96b07"><marimo-switch data-initial-value="true" data-label="&quot;\u003cspan class=\&quot;markdown prose dark:prose-invert contents\&quot;\u003e\u003cspan class=\&quot;paragraph\&quot;\u003eAdd Row Striping?\u003c/span\u003e\u003c/span\u003e&quot;" data-disabled="false"></marimo-switch></marimo-ui-element></div>
     </marimo-cell-output>
     <marimo-cell-code hidden="">style_widget%20%3D%20mo.ui.slider(1%2C%206%2C%20label%3D%22Select%20Style%20Number%22)%0Amo.output.append(style_widget)%0A%0A_colors%20%3D%20%5B%22blue%22%2C%20%22cyan%22%2C%20%22pink%22%2C%20%22green%22%2C%20%22red%22%2C%20%22gray%22%5D%0Acolor_widget%20%3D%20mo.ui.radio(%0A%20%20%20%20options%3D_colors%2C%20value%3D_colors%5B0%5D%2C%20label%3D%22Select%20Style%20Color%22%0A)%0Amo.output.append(color_widget)%0A%0Arow_striping_widget%20%3D%20mo.ui.switch(value%3DTrue%2C%20label%3D%22Add%20Row%20Striping%3F%22)%0Amo.output.append(row_striping_widget)</marimo-cell-code>
 </marimo-island>
 <marimo-island data-app-id="main" data-cell-id="bkHC" data-reactive="true">
             <marimo-cell-output>
-            <div id="aapomwuwer" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+            <div id="wczkolmrci" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#aapomwuwer table {
+#wczkolmrci table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
-#aapomwuwer thead, tbody, tfoot, tr, td, th { border-style: none; }
+#wczkolmrci thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#aapomwuwer p { margin: 0; padding: 0; }
- #aapomwuwer .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #aapomwuwer .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #aapomwuwer .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #aapomwuwer .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #aapomwuwer .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #aapomwuwer .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #aapomwuwer .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #aapomwuwer .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #aapomwuwer .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #aapomwuwer .gt_column_spanner_outer:first-child { padding-left: 0; }
- #aapomwuwer .gt_column_spanner_outer:last-child { padding-right: 0; }
- #aapomwuwer .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #aapomwuwer .gt_spanner_row { border-bottom-style: hidden; }
- #aapomwuwer .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #aapomwuwer .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
- #aapomwuwer .gt_from_md> :first-child { margin-top: 0; }
- #aapomwuwer .gt_from_md> :last-child { margin-bottom: 0; }
- #aapomwuwer .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
- #aapomwuwer .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
- #aapomwuwer .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #aapomwuwer .gt_row_group_first td { border-top-width: 2px; }
- #aapomwuwer .gt_row_group_first th { border-top-width: 2px; }
- #aapomwuwer .gt_striped { color: #333333; background-color: #F4F4F4; }
- #aapomwuwer .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
- #aapomwuwer .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #aapomwuwer .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #aapomwuwer .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #aapomwuwer .gt_grand_summary_row { color: #333333; background-color: #89D3FE; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #aapomwuwer .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #aapomwuwer .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #aapomwuwer .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #aapomwuwer .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #aapomwuwer .gt_left { text-align: left; }
- #aapomwuwer .gt_center { text-align: center; }
- #aapomwuwer .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #aapomwuwer .gt_font_normal { font-weight: normal; }
- #aapomwuwer .gt_font_bold { font-weight: bold; }
- #aapomwuwer .gt_font_italic { font-style: italic; }
- #aapomwuwer .gt_super { font-size: 65%; }
- #aapomwuwer .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #aapomwuwer .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #aapomwuwer .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #aapomwuwer .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #aapomwuwer .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #aapomwuwer .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#wczkolmrci p { margin: 0; padding: 0; }
+ #wczkolmrci .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #004D80; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #004D80; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #wczkolmrci .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #wczkolmrci .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #wczkolmrci .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #wczkolmrci .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #wczkolmrci .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #wczkolmrci .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #wczkolmrci .gt_col_heading { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #wczkolmrci .gt_column_spanner_outer { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #wczkolmrci .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #wczkolmrci .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #wczkolmrci .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #wczkolmrci .gt_spanner_row { border-bottom-style: hidden; }
+ #wczkolmrci .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #wczkolmrci .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; vertical-align: middle; }
+ #wczkolmrci .gt_from_md> :first-child { margin-top: 0; }
+ #wczkolmrci .gt_from_md> :last-child { margin-bottom: 0; }
+ #wczkolmrci .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #89D3FE; border-left-style: none; border-left-width: 1px; border-left-color: #89D3FE; border-right-style: none; border-right-width: 1px; border-right-color: #89D3FE; vertical-align: middle; overflow-x: hidden; }
+ #wczkolmrci .gt_stub { color: #FFFFFF; background-color: #0076BA; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #0076BA; padding-left: 5px; padding-right: 5px; }
+ #wczkolmrci .gt_indent_1 { text-indent: 5px; }
+ #wczkolmrci .gt_indent_2 { text-indent: calc(5px * 2); }
+ #wczkolmrci .gt_indent_3 { text-indent: calc(5px * 3); }
+ #wczkolmrci .gt_indent_4 { text-indent: calc(5px * 4); }
+ #wczkolmrci .gt_indent_5 { text-indent: calc(5px * 5); }
+ #wczkolmrci .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #wczkolmrci .gt_row_group_first td { border-top-width: 2px; }
+ #wczkolmrci .gt_row_group_first th { border-top-width: 2px; }
+ #wczkolmrci .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #wczkolmrci .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #0076BA; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #0076BA; }
+ #wczkolmrci .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #wczkolmrci .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #wczkolmrci .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #wczkolmrci .gt_grand_summary_row { color: #333333; background-color: #89D3FE; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #wczkolmrci .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #wczkolmrci .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #wczkolmrci .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #wczkolmrci .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #wczkolmrci .gt_left { text-align: left; }
+ #wczkolmrci .gt_center { text-align: center; }
+ #wczkolmrci .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #wczkolmrci .gt_font_normal { font-weight: normal; }
+ #wczkolmrci .gt_font_bold { font-weight: bold; }
+ #wczkolmrci .gt_font_italic { font-style: italic; }
+ #wczkolmrci .gt_super { font-size: 65%; }
+ #wczkolmrci .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #wczkolmrci .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #wczkolmrci .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #wczkolmrci .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #wczkolmrci .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #wczkolmrci .gt_asterisk { font-size: 100%; vertical-align: 0; }
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
 <thead>
@@ -10940,7 +11216,7 @@ font-style: inherit;">"__main__"</span>:</span>
 
 <p>This post highlights a powerful yet underused feature in Great Tables: using existing columns to style the table body via <a href="https://posit-dev.github.io/great-tables/reference/from_column.html">from_column()</a>.</p>
 <p>Let’s say you have the following Polars DataFrame <code>df</code>:</p>
-<div id="ad25a48d" class="cell" data-execution_count="1">
+<div id="cfe425cb" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
@@ -11044,7 +11320,7 @@ font-style: inherit;">print</span>(df)</span></code></pre></div></div>
 </div>
 </div>
 <p>The <code>color</code>, <code>size</code>, <code>weight</code>, and <code>align</code> columns contain style-related metadata. We can use <code>from_column()</code> to map this metadata to four styling options provided by Great Tables—<a href="https://posit-dev.github.io/great-tables/reference/style.fill.html">style.fill()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.text.html">style.text()</a>, <a href="https://posit-dev.github.io/great-tables/reference/style.borders.html">style.borders()</a>, and <a href="https://posit-dev.github.io/great-tables/reference/style.css.html">style.css()</a>—all of which are built on the internal <code>CellStyle</code> class.</p>
-<div id="c8e832e7" class="cell" data-execution_count="2">
+<div id="11c69e7e" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">(</span>
 <span id="cb3-2">    GT(df)</span>
 <span id="cb3-3">    .tab_style(</span>
@@ -11090,62 +11366,67 @@ background-color: null;
 font-style: inherit;">"gray"</span>)</span>
 <span id="cb3-16">)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<div id="tojqrciffq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<div id="jqzrwvfmuj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>
-#tojqrciffq table {
+#jqzrwvfmuj table {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
         }
 
-#tojqrciffq thead, tbody, tfoot, tr, td, th { border-style: none; }
+#jqzrwvfmuj thead, tbody, tfoot, tr, td, th { border-style: none; }
  tr { background-color: transparent; }
-#tojqrciffq p { margin: 0; padding: 0; }
- #tojqrciffq .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
- #tojqrciffq .gt_caption { padding-top: 4px; padding-bottom: 4px; }
- #tojqrciffq .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
- #tojqrciffq .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
- #tojqrciffq .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #tojqrciffq .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #tojqrciffq .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
- #tojqrciffq .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
- #tojqrciffq .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
- #tojqrciffq .gt_column_spanner_outer:first-child { padding-left: 0; }
- #tojqrciffq .gt_column_spanner_outer:last-child { padding-right: 0; }
- #tojqrciffq .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
- #tojqrciffq .gt_spanner_row { border-bottom-style: hidden; }
- #tojqrciffq .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
- #tojqrciffq .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
- #tojqrciffq .gt_from_md> :first-child { margin-top: 0; }
- #tojqrciffq .gt_from_md> :last-child { margin-bottom: 0; }
- #tojqrciffq .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
- #tojqrciffq .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
- #tojqrciffq .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
- #tojqrciffq .gt_row_group_first td { border-top-width: 2px; }
- #tojqrciffq .gt_row_group_first th { border-top-width: 2px; }
- #tojqrciffq .gt_striped { color: #333333; background-color: #F4F4F4; }
- #tojqrciffq .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
- #tojqrciffq .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #tojqrciffq .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
- #tojqrciffq .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
- #tojqrciffq .gt_grand_summary_row { color: #333333; background-color: #D5D5D5; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
- #tojqrciffq .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
- #tojqrciffq .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
- #tojqrciffq .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #tojqrciffq .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #tojqrciffq .gt_left { text-align: left; }
- #tojqrciffq .gt_center { text-align: center; }
- #tojqrciffq .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
- #tojqrciffq .gt_font_normal { font-weight: normal; }
- #tojqrciffq .gt_font_bold { font-weight: bold; }
- #tojqrciffq .gt_font_italic { font-style: italic; }
- #tojqrciffq .gt_super { font-size: 65%; }
- #tojqrciffq .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #tojqrciffq .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
- #tojqrciffq .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
- #tojqrciffq .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
- #tojqrciffq .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
- #tojqrciffq .gt_asterisk { font-size: 100%; vertical-align: 0; }
+#jqzrwvfmuj p { margin: 0; padding: 0; }
+ #jqzrwvfmuj .gt_table { display: table; border-collapse: collapse; line-height: normal; margin-left: auto; margin-right: auto; color: #333333; font-size: 16px; font-weight: normal; font-style: normal; background-color: #FFFFFF; width: auto; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_caption { padding-top: 4px; padding-bottom: 4px; }
+ #jqzrwvfmuj .gt_title { color: #333333; font-size: 125%; font-weight: initial; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; border-bottom-color: #FFFFFF; border-bottom-width: 0; }
+ #jqzrwvfmuj .gt_subtitle { color: #333333; font-size: 85%; font-weight: initial; padding-top: 3px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; border-top-color: #FFFFFF; border-top-width: 0; }
+ #jqzrwvfmuj .gt_heading { background-color: #FFFFFF; text-align: center; border-bottom-color: #FFFFFF; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_bottom_border { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #jqzrwvfmuj .gt_col_headings { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_col_heading { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 5px; overflow-x: hidden; }
+ #jqzrwvfmuj .gt_column_spanner_outer { color: #FFFFFF; background-color: #5F5F5F; font-size: 100%; font-weight: normal; text-transform: inherit; padding-top: 0; padding-bottom: 0; padding-left: 4px; padding-right: 4px; }
+ #jqzrwvfmuj .gt_column_spanner_outer:first-child { padding-left: 0; }
+ #jqzrwvfmuj .gt_column_spanner_outer:last-child { padding-right: 0; }
+ #jqzrwvfmuj .gt_column_spanner { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: bottom; padding-top: 5px; padding-bottom: 5px; overflow-x: hidden; display: inline-block; width: 100%; }
+ #jqzrwvfmuj .gt_spanner_row { border-bottom-style: hidden; }
+ #jqzrwvfmuj .gt_group_heading { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; border-left-style: none; border-left-width: 1px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 1px; border-right-color: #D3D3D3; vertical-align: middle; text-align: left; }
+ #jqzrwvfmuj .gt_empty_group_heading { padding: 0.5px; color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; vertical-align: middle; }
+ #jqzrwvfmuj .gt_from_md> :first-child { margin-top: 0; }
+ #jqzrwvfmuj .gt_from_md> :last-child { margin-bottom: 0; }
+ #jqzrwvfmuj .gt_row { padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; margin: 10px; border-top-style: none; border-top-width: 1px; border-top-color: #D5D5D5; border-left-style: none; border-left-width: 1px; border-left-color: #D5D5D5; border-right-style: none; border-right-width: 1px; border-right-color: #D5D5D5; vertical-align: middle; overflow-x: hidden; }
+ #jqzrwvfmuj .gt_stub { color: #333333; background-color: #D5D5D5; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D5D5D5; padding-left: 5px; padding-right: 5px; }
+ #jqzrwvfmuj .gt_indent_1 { text-indent: 5px; }
+ #jqzrwvfmuj .gt_indent_2 { text-indent: calc(5px * 2); }
+ #jqzrwvfmuj .gt_indent_3 { text-indent: calc(5px * 3); }
+ #jqzrwvfmuj .gt_indent_4 { text-indent: calc(5px * 4); }
+ #jqzrwvfmuj .gt_indent_5 { text-indent: calc(5px * 5); }
+ #jqzrwvfmuj .gt_stub_row_group { color: #333333; background-color: #FFFFFF; font-size: 100%; font-weight: initial; text-transform: inherit; border-right-style: solid; border-right-width: 2px; border-right-color: #D3D3D3; padding-left: 5px; padding-right: 5px; vertical-align: top; }
+ #jqzrwvfmuj .gt_row_group_first td { border-top-width: 2px; }
+ #jqzrwvfmuj .gt_row_group_first th { border-top-width: 2px; }
+ #jqzrwvfmuj .gt_striped { color: #333333; background-color: #F4F4F4; }
+ #jqzrwvfmuj .gt_table_body { border-top-style: solid; border-top-width: 2px; border-top-color: #5F5F5F; border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #5F5F5F; }
+ #jqzrwvfmuj .gt_summary_row { color: #333333; background-color: #FFFFFF; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #jqzrwvfmuj .gt_first_summary_row { border-top-style: solid; border-top-width: 2px; border-top-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_last_summary_row_top { border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_grand_summary_row { color: #333333; background-color: #D5D5D5; text-transform: inherit; padding-top: 8px; padding-bottom: 8px; padding-left: 5px; padding-right: 5px; }
+ #jqzrwvfmuj .gt_first_grand_summary_row_bottom { border-top-style: double; border-top-width: 6px; border-top-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_last_grand_summary_row_top { border-bottom-style: double; border-bottom-width: 6px; border-bottom-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #jqzrwvfmuj .gt_left { text-align: left; }
+ #jqzrwvfmuj .gt_center { text-align: center; }
+ #jqzrwvfmuj .gt_right { text-align: right; font-variant-numeric: tabular-nums; }
+ #jqzrwvfmuj .gt_font_normal { font-weight: normal; }
+ #jqzrwvfmuj .gt_font_bold { font-weight: bold; }
+ #jqzrwvfmuj .gt_font_italic { font-style: italic; }
+ #jqzrwvfmuj .gt_super { font-size: 65%; }
+ #jqzrwvfmuj .gt_footnotes { color: font-color(#FFFFFF); background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_footnote { margin: 0px; font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; }
+ #jqzrwvfmuj .gt_sourcenotes { color: #333333; background-color: #FFFFFF; border-bottom-style: none; border-bottom-width: 2px; border-bottom-color: #D3D3D3; border-left-style: none; border-left-width: 2px; border-left-color: #D3D3D3; border-right-style: none; border-right-width: 2px; border-right-color: #D3D3D3; }
+ #jqzrwvfmuj .gt_sourcenote { font-size: 90%; padding-top: 4px; padding-bottom: 4px; padding-left: 5px; padding-right: 5px; text-align: left; }
+ #jqzrwvfmuj .gt_footnote_marks { font-size: 75%; vertical-align: 0.4em; position: initial; }
+ #jqzrwvfmuj .gt_asterisk { font-size: 100%; vertical-align: 0; }
  
 </style>
 <table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
@@ -11181,7 +11462,7 @@ font-style: inherit;">"gray"</span>)</span>
 </div>
 </div>
 <p><strong>One last note:</strong> <code>from_column()</code> works with both Pandas and Polars DataFrames. For Polars users, you can also pass expressions directly without wrapping them in <code>from_column()</code>. The following code produces the same styled table as shown above:</p>
-<div id="f6da93fd" class="cell" data-execution_count="3">
+<div id="bd465a69" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">(</span>
 <span id="cb4-2">    GT(df)</span>
 <span id="cb4-3">    .tab_style(</span>
@@ -11273,7 +11554,7 @@ font-style: inherit;">"gray"</span>)</span>
 <li><code>otherwise</code>: A fallback expression used in <code>.otherwise()</code> if no conditions match.</li>
 </ul>
 <p>The given example demonstrates how <code>case_when()</code> can simplify conditional logic compared to the more verbose <code>pl.when().then().otherwise()</code> chain.</p>
-<div id="ff98ebcb" class="cell" data-execution_count="1">
+<div id="4a1308f5" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> functools <span class="im" style="color: #00769E;
@@ -11503,7 +11784,7 @@ font-style: inherit;">return</span> expr</span></code></pre></div></div>
 <section id="custom-expression-namespace" class="level2">
 <h2 class="anchored" data-anchor-id="custom-expression-namespace">Custom Expression Namespace</h2>
 <p>With <code>case_when()</code> in place, we can refactor the <code>DiscreteSplitter</code> expression namespace like this:</p>
-<div id="89ecea64" class="cell" data-execution_count="2">
+<div id="5b3d46f3" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@cache</span></span>
@@ -11762,7 +12043,7 @@ font-style: inherit;">4</span>]),</span>
 <h2 class="anchored" data-anchor-id="custom-dataframe-namespace">Custom DataFrame Namespace</h2>
 <p>Instead of relying on <a href="https://docs.pola.rs/api/python/stable/reference/dataframe/api/polars.DataFrame.with_row_index.html">pl.DataFrame.with_row_index()</a>, we can also use <code>_mod_expr()</code> directly to enable similar categorization.</p>
 <p>Here’s how the <code>DiscreteSplitter</code> can be implemented as a custom DataFrame namespace:</p>
-<div id="bdb5a4eb" class="cell" data-execution_count="3">
+<div id="3ad381e0" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">@pl.api.register_dataframe_namespace</span>(<span class="st" style="color: #20794D;
@@ -12029,154 +12310,6 @@ font-style: inherit;">1</span>)</span>
   <guid>https://tech.ycwu.space/posts/casewhen-in-polars/20250525.html</guid>
   <pubDate>Sun, 25 May 2025 00:00:00 GMT</pubDate>
   <media:content url="https://tech.ycwu.space/posts/casewhen-in-polars/code.png" medium="image" type="image/png" height="90" width="144"/>
-</item>
-<item>
-  <title>Custom Row Selector in Great Tables</title>
-  <dc:creator>Jerry Wu</dc:creator>
-  <link>https://tech.ycwu.space/posts/gt-row-selector/20250511.html</link>
-  <description><![CDATA[ 
-
-
-
-
-
-
-<p>This short post shows how we can create custom row selectors in Great Tables by leveraging the row index. While <a href="https://github.com/posit-dev/great-tables/issues/678">it</a> may or may not be adopted by the team, I thought it would be fun to document it here on the blog.</p>
-<p>I recently created a utility called <a href="https://github.com/posit-dev/great-tables/compare/main...jrycw:great-tables:feat-every_n_row">every_n_row()</a>, designed to work with both Pandas and Polars DataFrames (support for <code>pyarrow</code> is still under investigation). With <code>every_n_row()</code>, we can easily target alternating rows—for example, select odd rows using <code>every_n_row(2)</code> and even rows using either <code>every_n_row(2, 1)</code> or <code>~every_n_row(2)</code>.</p>
-<div id="fefdfbb1" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> polars <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">as</span> pl</span>
-<span id="cb1-2"></span>
-<span id="cb1-3"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> great_tables <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> GT, every_n_row, loc, style</span>
-<span id="cb1-4"><span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">from</span> great_tables.data <span class="im" style="color: #00769E;
-background-color: null;
-font-style: inherit;">import</span> countrypops</span>
-<span id="cb1-5"></span>
-<span id="cb1-6">df_pd <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> countrypops.sample(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>).loc[:, [<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"country_name"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"year"</span>, <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"population"</span>]]</span>
-<span id="cb1-7">df_pl <span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span> pl.from_pandas(df_pd)</span>
-<span id="cb1-8"></span>
-<span id="cb1-9">(</span>
-<span id="cb1-10">    GT(df_pd)</span>
-<span id="cb1-11">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)))</span>
-<span id="cb1-12">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"papayawhip"</span>), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)))</span>
-<span id="cb1-13">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pink"</span>)</span>
-<span id="cb1-14">)</span>
-<span id="cb1-15"></span>
-<span id="cb1-16">(</span>
-<span id="cb1-17">    GT(df_pl)</span>
-<span id="cb1-18">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"lightblue"</span>), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>every_n_row(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)))</span>
-<span id="cb1-19">    .tab_style(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>style.fill(<span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"papayawhip"</span>), locations<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span>loc.body(rows<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=~</span>every_n_row(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)))</span>
-<span id="cb1-20">    .opt_stylize(style<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, color<span class="op" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">=</span><span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"pink"</span>)</span>
-<span id="cb1-21">)</span></code></pre></div></div>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://tech.ycwu.space/posts/gt-row-selector/every_n_row.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Selector: every_n_row"></p>
-</figure>
-</div>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Warning</span>Disclaimer
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This post was drafted by me, with AI assistance to refine the content.</p>
-</div>
-</div>
-
-
-
- ]]></description>
-  <category>python</category>
-  <category>pandas</category>
-  <category>polars</category>
-  <category>gt</category>
-  <guid>https://tech.ycwu.space/posts/gt-row-selector/20250511.html</guid>
-  <pubDate>Sun, 11 May 2025 00:00:00 GMT</pubDate>
-  <media:content url="https://tech.ycwu.space/posts/gt-row-selector/every_n_row.png" medium="image" type="image/png" height="112" width="144"/>
 </item>
 </channel>
 </rss>
