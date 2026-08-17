@@ -1,0 +1,101 @@
+---
+title: "Refreshing a Cache with a Python Background Thread"
+html-table-processing: none
+date: "2026-08-17"
+categories: [python]
+image: "refresh_cache_thread.png"
+---
+
+![](refresh_cache_thread.png){fig-align="left" fig-alt="Python cache refresh and image selection logs."}
+
+Today I learned that a Python thread can be used to periodically refresh a cache in a long-running worker.
+
+For example, imagine a worker that needs to select an image every second from a source that isn't updated frequently. Instead of querying the source every time, the main thread can use a local cache for fast access, while a background thread periodically refreshes that cache.
+
+Here's a self-contained example:
+```python
+import logging
+import random
+import threading
+import time
+
+IMAGE_REFRESH_INTERVAL = 2  # 2 seconds
+
+logger = logging.getLogger(__name__)
+
+
+def refresh_cache(images):
+    """Periodically refresh the shared image cache."""
+    while True:
+        time.sleep(IMAGE_REFRESH_INTERVAL)
+
+        new_images = load_images()
+
+        # Update the existing list instead of rebinding `images`.
+        # This keeps the same list object shared with `worker()`.
+        images[:] = new_images
+
+        logger.info("Cache refreshed: %d images", len(images))
+
+
+def load_images():
+    """Simulate loading images from an external source."""
+    if random.choice((True, False)):
+        images = ["image1", "image2"]
+    else:
+        images = ["image1", "image3", "image4"]
+
+    logger.info("Loaded images: %s", images)
+
+    return images
+
+
+def draw(images):
+    """Simulate selecting an image from the current cache."""
+    image = random.choice(images)
+
+    logger.info("Selected image: %s", image)
+
+
+def worker():
+    # Load the initial cache before starting the refresh thread.
+    images = load_images()
+
+    # The background thread periodically updates the same list object.
+    threading.Thread(
+        target=refresh_cache,
+        args=(images,),
+        daemon=True,
+    ).start()
+
+    # Continue using the shared cache while it is refreshed in the background.
+    while True:
+        draw(images)
+        time.sleep(1)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
+
+    worker()
+```
+
+The key part is:
+```python
+images[:] = new_images
+```
+This replaces the contents of the existing list rather than assigning a new list to the local `images` variable. Therefore, the main thread and the background thread continue to reference the same list object.
+
+The `daemon=True` setting also makes the refresh thread a background thread that won't prevent the Python process from exiting when the main thread finishes.
+
+One thing to keep in mind is thread safety. If the operations performed by multiple threads become more complex—for example, if multiple threads need to modify the cache or several pieces of shared state must be updated together—a `threading.Lock` may be necessary.
+
+In this example, the main thread only reads the cache to select a random image, while the refresh thread replaces its contents periodically, so the simple approach is sufficient for this demonstration.
+
+::: {.callout-warning}
+# Disclaimer
+This post was drafted by me, with AI assistance to refine the content.
+::: 
